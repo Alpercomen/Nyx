@@ -2,7 +2,7 @@
 #include <Application/Core/Input/InputDispatcher.h>
 #include <Application/Constants/Constants.h>
 
-namespace SpaceSim
+namespace Nyx
 {
     void InputEventDispatcher::AddCallback(EventType eventType, EventCallback callback)
     {

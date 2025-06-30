@@ -1,6 +1,6 @@
 #pragma once
 
-namespace SpaceSim {
+namespace Nyx {
 	template <typename T>
 	class Singleton {
 	public:

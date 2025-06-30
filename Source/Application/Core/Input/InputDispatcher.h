@@ -3,7 +3,7 @@
 #include <Application/Core/Input/InputEvent.h>
 #include <Application/Resource/Camera/Camera.h>
 
-namespace SpaceSim {
+namespace Nyx {
 	// CRTP (Curiously Recursive Templated Programming)
 	class InputEventDispatcher : public Singleton<InputEventDispatcher> {
 		using EventCallback = function<void(const InputEvent&)>;

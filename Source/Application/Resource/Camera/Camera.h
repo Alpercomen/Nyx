@@ -4,9 +4,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <Application/Resource/EntityManager/EntityManager.h>
+#include <Application/Core/Managers/EntityManager/EntityManager.h>
 
-using namespace SpaceSim;
+using namespace Nyx;
 
 enum Camera_Movement {
     FORWARD,
@@ -23,23 +23,28 @@ struct CameraDesc {
     glm::vec3 Right = glm::vec3(1.0f, 0.0f, 0.0f);
     glm::vec3 WorldUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
-    float Yaw = -90.0f;
-    float Pitch = 0.0f;
+    float32 Yaw = -90.0f;
+    float32 Pitch = 0.0f;
 
-    float MovementSpeed = METERS_PER_UNIT * 100;
-    float MovementSpeedMultiplier = 3.5f;
-    float MouseSensitivity = 0.1f;
-    float Zoom = 45.0f;
+    float32 MovementSpeed = METERS_PER_UNIT * 100;
+    float32 MovementSpeedMultiplier = 3.5f;
+    float32 MouseSensitivity = 0.1f;
+    float32 Zoom = 45.0f;
+    float32 AspectRatio = 1.7777f;
+
+    float32 NearPlane = 0.1f;
+    float32 FarPlane = 100000.0f;
 };
 
-class Camera : public Entity
+class Camera
 {
 public:
 
-    Camera(const Position& position);
-    Camera(const Position& position, const String& name, const CameraDesc& cameraDesc);
+    Camera();
+    ~Camera() = default;
 
-    glm::mat4 GetViewMatrix();
+    glm::mat4 GetViewMatrix() const;
+    glm::mat4 GetProjectionMatrix() const;
 
     const glm::vec3& GetFront() const { return m_cameraDesc.Front; }
     const glm::vec3& GetUp() const { return m_cameraDesc.Up; }
@@ -53,6 +58,9 @@ public:
     const float GetMovementSpeedMultiplier() const { return m_cameraDesc.MovementSpeedMultiplier; }
     const float GetMouseSensitivity() const { return m_cameraDesc.MouseSensitivity; }
     const float GetZoom() const { return m_cameraDesc.Zoom; }
+    const float GetAspectRatio() const { return m_cameraDesc.AspectRatio; }
+    const float GetNearPlane() const { return m_cameraDesc.NearPlane; }
+    const float GetFarPlane() const { return m_cameraDesc.FarPlane; }
 
     void SetFront(const glm::vec3& Front) { m_cameraDesc.Front = Front; }
     void SetUp(const glm::vec3& Up) { m_cameraDesc.Up = Up; }
@@ -66,6 +74,9 @@ public:
     void SetMovementSpeedMultiplier(const float32& MovementSpeedMultiplier) { m_cameraDesc.MovementSpeedMultiplier = MovementSpeedMultiplier; }
     void SetMouseSensitivity(const float32& MouseSensitivity) { m_cameraDesc.MouseSensitivity = MouseSensitivity; }
     void SetZoom(const float32& Zoom) { m_cameraDesc.Zoom = Zoom; }
+    void SetAspectRatio(const float32& AspectRatio) { m_cameraDesc.AspectRatio = AspectRatio; }
+    void SetNearPlane(const float32& NearPlane) { m_cameraDesc.NearPlane = NearPlane; }
+    void SetFarPlane(const float32& FarPlane) { m_cameraDesc.FarPlane = FarPlane; }
 
     void ProcessKeyboardMovement(Camera_Movement direction, float deltaTime);
     void ProcessMouseMovement(float xoffset, float yoffset, bool constrainPitch = true);

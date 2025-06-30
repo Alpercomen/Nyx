@@ -2,7 +2,7 @@
 #include <Application/Core/Core.h>
 #include <Application/Core/Input/InputEvent.h>
 
-namespace SpaceSim {
+namespace Nyx {
 	class InputQueue {
 	public:
 		void PushEvent(const InputEvent& event) { m_inputQueue.push(event); }

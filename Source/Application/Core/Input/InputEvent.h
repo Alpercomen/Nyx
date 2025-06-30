@@ -1,7 +1,7 @@
 #pragma once
 #include <Application/Core/Core.h>
 
-namespace SpaceSim {
+namespace Nyx {
 	enum class MouseButton {
 		NONE = 0,
 		LEFT_BUTTON = 1 << 0,

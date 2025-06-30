@@ -106,3 +106,9 @@ using voidFunc = std::function<void()>;
 
 #include <typeindex>
 using TypeIndex = std::type_index;
+
+#include <fstream>
+using StringStream = std::stringstream;
+using IfStream = std::ifstream;
+using OfStream = std::ofstream;
+using FileStream = std::fstream;

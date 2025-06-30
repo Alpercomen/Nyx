@@ -5,23 +5,23 @@
 class Meter {
 public:
 	// Getters
-	double GetWorld() { return world; }
-	double GetNormal() { return normalized; }
+	const double GetWorld() const { return world; }
+	const double GetNormal() const { return normalized; }
 
 	// Setters
-	void SetWorld(double meter)
+	void SetWorld(const double& meter)
 	{
 		world = meter;
 		normalized = meter / METERS_PER_UNIT;
 	}
 
-	void SetNormal(double meter)
+	void SetNormal(const double& meter)
 	{
 		world = meter * METERS_PER_UNIT;
 		normalized = meter;
 	}
 
 private:
-	float world;
-	float normalized;
+	double world;
+	double normalized;
 };

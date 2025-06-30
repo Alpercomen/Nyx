@@ -3,7 +3,7 @@
 
 #include <Application/Core/Definitions/Definitions.h>
 
-namespace SpaceSim {
+namespace Nyx {
 	template <typename T>
 	constexpr static std::enable_if_t<std::is_enum_v<T>, T> 
 	operator|(T lhs, T rhs)

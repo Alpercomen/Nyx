@@ -8,7 +8,7 @@ file(
 )
 
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${SUBDIRECTORIES})
-add_executable("Space-Sim" ${SUBDIRECTORIES})
+add_executable("Nyx" ${SUBDIRECTORIES})
 
-target_include_directories("Space-Sim" PRIVATE "${CMAKE_SOURCE_DIR}/Source" "${glew_SOURCE_DIR}")
-target_link_libraries("Space-Sim" PUBLIC glfw glm::glm spdlog libglew_static Imgui)
+target_include_directories("Nyx" PRIVATE "${CMAKE_SOURCE_DIR}/Source" "${glew_SOURCE_DIR}")
+target_link_libraries("Nyx" PUBLIC glfw glm::glm spdlog libglew_static Imgui)
