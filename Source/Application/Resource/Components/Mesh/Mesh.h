@@ -8,12 +8,14 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include <Application/Core/Managers/EntityManager/EntityManager.h>
+#include <Application/Core/Pipeline/Immediate/Immediate.h>
+
 #include <Application/Resource/Components/Transform/Position.h>
 #include <Application/Resource/Components/Rigidbody/Velocity.h>
 #include <Application/Resource/Components/Rigidbody/Acceleration.h>
 #include <Application/Resource/Physics/Meter.h>
 #include <Application/Resource/Camera/Camera.h>
-#include <Application/Resource/EntityManager/EntityManager.h>
 #include <Application/Resource/ShaderProgram/ShaderProgram.h>
 #include <Application/Resource/Buffers/VAO.h>
 #include <Application/Resource/Buffers/VBO.h>
@@ -105,7 +107,12 @@ namespace Nyx
             glUniform3fv(botColorLoc, 1, glm::value_ptr(m_sphereDesc.botColor));
 
             glBindVertexArray(m_sphereMesh.vao.m_data);
+
+            ImmediatePipeline::Get().Begin();
+            ImmediatePipeline::Get().UseSphere();
             glDrawElements(GL_TRIANGLE_STRIP, m_sphereMesh.ebo.m_indexCount, GL_UNSIGNED_INT, 0);
+            ImmediatePipeline::Get().End();
+
         }
 
     private:

@@ -6,8 +6,8 @@
 #include <Application/Resource/Components/Components.h>
 #include <Application/Resource/Camera/Camera.h>
 #include <Application/Resource/Physics/Meter.h>
-#include <Application/Resource/EntityManager/EntityManager.h>
-#include <Application/Core/SceneManager/SceneManager.h>
+#include <Application/Core/Managers/EntityManager/EntityManager.h>
+#include <Application/Core/Managers/SceneManager/SceneManager.h>
 #include <Application/Resource/ShaderProgram/ShaderProgram.h>
 
 

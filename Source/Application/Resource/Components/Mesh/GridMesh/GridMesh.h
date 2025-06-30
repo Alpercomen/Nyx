@@ -4,6 +4,8 @@
 #include <Application/Resource/ShaderProgram/ShaderProgram.h>
 #include <Application/Resource/Components/Components.h>
 
+#include <Application/Core/Pipeline/Immediate/Immediate.h>
+
 class GridMesh {
 public:
     GridMesh();

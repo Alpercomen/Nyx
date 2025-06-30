@@ -28,7 +28,9 @@ void GridMesh::DrawGrid(const Camera& camera) const
     GLuint uFar = glGetUniformLocation(m_shader.GetID(), "uFar");
     glUniform1f(uFar, camera.GetFarPlane());
 
-    glDepthMask(GL_FALSE);
+    ImmediatePipeline::Get().Begin();
+    ImmediatePipeline::Get().UseGrid();
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    glDepthMask(GL_TRUE);
+    ImmediatePipeline::Get().End();
+
 }

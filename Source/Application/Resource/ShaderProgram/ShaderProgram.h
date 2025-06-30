@@ -4,7 +4,7 @@
 #include <GLFW/glfw3.h>
 
 #include <Application/Core/Core.h>
-#include <Application/Resource/Utils/ShaderUtils/ShaderUtils.h>
+#include <Application/Utils/ShaderUtils/ShaderUtils.h>
 
 namespace Nyx
 {

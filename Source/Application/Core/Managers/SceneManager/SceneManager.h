@@ -1,9 +1,9 @@
 #pragma once
 
 #include <Application/Core/Core.h>
-#include <Application/Resource/EntityManager/EntityManager.h>
+#include <Application/Core/Managers/EntityManager/EntityManager.h>
 #include <Application/Resource/Components/Components.h>
-#include <Application/Resource/Utils/SpaceUtils/SpaceUtils.h>
+#include <Application/Utils/SpaceUtils/SpaceUtils.h>
 #include <Application/Resource/Components/Mesh/GridMesh/GridMesh.h>
 #include <Application/Constants/Constants.h>
 

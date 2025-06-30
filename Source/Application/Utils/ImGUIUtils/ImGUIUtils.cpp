@@ -2,7 +2,7 @@
 #include <iostream>
 
 #include <spdlog/spdlog.h>
-#include <Application/Resource/Utils/ImGUIUtils/ImGUIUtils.h>
+#include <Application/Utils/ImGUIUtils/ImGUIUtils.h>
 
 void ImGUIUtils::Initialize(void* window)
 {
@@ -137,10 +137,11 @@ void ImGUIUtils::DrawSimulationInfo()
     ImGui::End();
 }
 
-void ImGUIUtils::DrawSimulationControl()
+void ImGUIUtils::DrawSimulationControl(Engine* engine)
 {
     ImGui::Begin("Simulation Control");
     ImGui::SliderFloat("Time Scale", &TIME_SCALE, 0.0f, 100000.0f, "%.8f", ImGuiSliderFlags_Logarithmic);
+    ImGui::Checkbox("Show Grid", &engine->GetRenderer().m_gridEnabled);
     ImGui::End();
 }
 
@@ -153,7 +154,7 @@ void ImGUIUtils::DrawWindow(Engine* enginePtr, Scene* scenePtr)
     ImGUIUtils::InitDockableWindow();
     ImVec2 textureSize = ImGUIUtils::DrawGameWindow(enginePtr);
     ImGUIUtils::DrawSimulationInfo();
-    ImGUIUtils::DrawSimulationControl();
+    ImGUIUtils::DrawSimulationControl(enginePtr);
 
     Math::Vec2f textureSizeVec = { (int)textureSize.x, (int)textureSize.y };
     enginePtr->ResizeFBO(textureSizeVec, scenePtr);

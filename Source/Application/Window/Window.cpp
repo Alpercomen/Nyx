@@ -6,9 +6,9 @@
 #include <spdlog/spdlog.h>
 
 #include <Application/Constants/Constants.h>
-#include <Application/Resource/Utils/ImGUIUtils/ImGUIUtils.h>
+#include <Application/Utils/ImGUIUtils/ImGUIUtils.h>
 #include <Application/Resource/Components/Components.h>
-#include <Application/Resource/EntityManager/EntityManager.h>
+#include <Application/Core/Managers/EntityManager/EntityManager.h>
 
 namespace Nyx
 {
@@ -209,10 +209,6 @@ namespace Nyx
 
         glewExperimental = GL_TRUE;
         glewInit();
-        glEnable(GL_DEPTH_TEST);
-
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         ImGUIUtils::Initialize(gWindow);
     }

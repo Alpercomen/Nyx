@@ -9,13 +9,13 @@
 #include <Application/Constants/Constants.h>
 
 #include <Application/Resource/Components/Components.h>
-#include <Application/Resource/Utils/ShaderUtils/ShaderUtils.h>
-#include <Application/Resource/Utils/SpaceUtils/SpaceUtils.h>
-#include <Application/Resource/EntityManager/EntityManager.h>
+#include <Application/Utils/ShaderUtils/ShaderUtils.h>
+#include <Application/Utils/SpaceUtils/SpaceUtils.h>
+#include <Application/Core/Managers/EntityManager/EntityManager.h>
 
 #include <Application/Core/Engine/Engine.h>
 #include <Application/Core/Input/InputDispatcher.h>
-#include <Application/Core/SceneManager/SceneManager.h>
+#include <Application/Core/Managers/SceneManager/SceneManager.h>
 
 using namespace Nyx;
 

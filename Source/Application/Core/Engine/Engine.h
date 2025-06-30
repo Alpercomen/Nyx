@@ -3,7 +3,7 @@
 
 #include <Application/Resource/Components/Components.h>
 #include <Application/Resource/Camera/Camera.h>
-#include <Application/Resource/Utils/ShaderUtils/ShaderUtils.h>
+#include <Application/Utils/ShaderUtils/ShaderUtils.h>
 
 #include <Application/Core/Renderer/Renderer.h>
 

@@ -4,7 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <Application/Resource/EntityManager/EntityManager.h>
+#include <Application/Core/Managers/EntityManager/EntityManager.h>
 
 using namespace Nyx;
 

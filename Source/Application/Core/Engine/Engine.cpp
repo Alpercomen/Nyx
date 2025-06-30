@@ -11,10 +11,10 @@
 
 #include <Application/Core/Engine/Engine.h>
 #include <Application/Core/Input/InputDispatcher.h>
-#include <Application/Core/SceneManager/SceneManager.h>
+#include <Application/Core/Managers/SceneManager/SceneManager.h>
 
-#include <Application/Resource/Utils/SpaceUtils/SpaceUtils.h>
-#include <Application/Resource/Utils/ImGUIUtils/ImGUIUtils.h>
+#include <Application/Utils/SpaceUtils/SpaceUtils.h>
+#include <Application/Utils/ImGUIUtils/ImGUIUtils.h>
 #include <Application/Resource/Physics/Physics.h>
 
 #include <Application/Constants/Constants.h>

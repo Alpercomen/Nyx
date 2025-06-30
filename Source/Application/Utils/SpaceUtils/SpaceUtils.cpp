@@ -4,7 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <Application/Resource/Utils/SpaceUtils/SpaceUtils.h>
+#include <Application/Utils/SpaceUtils/SpaceUtils.h>
 #include <Application/Resource/Components/Components.h>
 #include <Application/Constants/Constants.h>
 

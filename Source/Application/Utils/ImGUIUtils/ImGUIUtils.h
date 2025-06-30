@@ -22,7 +22,7 @@ namespace ImGUIUtils
 
 	void DrawSimulationInfo();
 
-	void DrawSimulationControl();
+	void DrawSimulationControl(Engine* engine);
 
 	void DrawWindow(Engine* enginePtr, Scene* scenePtr);
 }
