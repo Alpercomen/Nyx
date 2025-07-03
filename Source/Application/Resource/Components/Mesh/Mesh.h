@@ -8,13 +8,14 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include <Application/Core/Managers/EntityManager/EntityManager.h>
-#include <Application/Core/Pipeline/Immediate/Immediate.h>
+#include <Application/Core/Services/Managers/EntityManager/EntityManager.h>
+#include <Application/Core/Services/Pipeline/Immediate/Immediate.h>
+#include <Application/Core/Services/ResourceLocator/ResourceLocator.h>
 
 #include <Application/Resource/Components/Transform/Position.h>
 #include <Application/Resource/Components/Rigidbody/Velocity.h>
 #include <Application/Resource/Components/Rigidbody/Acceleration.h>
-#include <Application/Resource/Physics/Meter.h>
+#include <Application/Core/Physics/Meter.h>
 #include <Application/Resource/Camera/Camera.h>
 #include <Application/Resource/ShaderProgram/ShaderProgram.h>
 #include <Application/Resource/Buffers/VAO.h>
@@ -50,8 +51,8 @@ namespace Nyx
         {
             m_sphereMesh = CreateSphereMesh(m_sphereDesc);
             m_shader = Shader(
-                R"(D:\Documents\Projects\Nyx\Source\Application\Shaders\Sphere\sphere.vert)",
-                R"(D:\Documents\Projects\Nyx\Source\Application\Shaders\Sphere\sphere.frag)"
+                ResourceLocator::Get(R"(Nyx\Source\Application\Shaders\Sphere\sphere.vert)"),
+                ResourceLocator::Get(R"(Nyx\Source\Application\Shaders\Sphere\sphere.frag)")
             );
         }
 

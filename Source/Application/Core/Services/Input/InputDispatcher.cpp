@@ -1,5 +1,5 @@
 #include <GLFW/glfw3.h>
-#include <Application/Core/Input/InputDispatcher.h>
+#include <Application/Core/Services/Input/InputDispatcher.h>
 #include <Application/Constants/Constants.h>
 
 namespace Nyx

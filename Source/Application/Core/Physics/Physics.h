@@ -3,7 +3,7 @@
 
 #include <Application/Constants/Constants.h>
 #include <Application/Resource/Components/Components.h>
-#include <Application/Core/Managers/EntityManager/EntityManager.h>
+#include <Application/Core/Services/Managers/EntityManager/EntityManager.h>
 
 namespace Physics
 {

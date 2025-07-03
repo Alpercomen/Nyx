@@ -1,7 +1,7 @@
 #pragma once
 #include <Application/Core/Core.h>
-#include <Application/Core/Input/InputDispatcher.h>
-#include <Application/Core/Input/InputQueue.h>
+#include <Application/Core/Services/Input/InputDispatcher.h>
+#include <Application/Core/Services/Input/InputQueue.h>
 
 struct GLFWwindow;
 

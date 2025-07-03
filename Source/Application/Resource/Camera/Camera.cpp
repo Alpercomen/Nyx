@@ -7,9 +7,9 @@
 #include <Application/Core/Core.h>
 #include <Application/Window/Window.h>
 #include <Application/Constants/Constants.h>
-#include <Application/Core/Input/InputDispatcher.h>
-#include <Application/Core/Input/InputEvent.h>
-#include <Application/Core/Input/InputQueue.h>
+#include <Application/Core/Services/Input/InputDispatcher.h>
+#include <Application/Core/Services/Input/InputEvent.h>
+#include <Application/Core/Services/Input/InputQueue.h>
 #include <Application/Resource/Components/Components.h>
 
 Camera::Camera()

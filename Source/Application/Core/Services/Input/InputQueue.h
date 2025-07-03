@@ -1,6 +1,6 @@
 #pragma once
 #include <Application/Core/Core.h>
-#include <Application/Core/Input/InputEvent.h>
+#include <Application/Core/Services/Input/InputEvent.h>
 
 namespace Nyx {
 	class InputQueue {
