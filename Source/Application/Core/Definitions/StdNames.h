@@ -112,3 +112,5 @@ using StringStream = std::stringstream;
 using IfStream = std::ifstream;
 using OfStream = std::ofstream;
 using FileStream = std::fstream;
+
+#include <stdexcept>

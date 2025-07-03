@@ -2,9 +2,10 @@
 
 GridMesh::GridMesh() 
 {
-    m_shader = Shader(
-        ResourceLocator::Get(R"(Nyx\Source\Application\Shaders\Grid\grid.vert)"),
-        ResourceLocator::Get(R"(Nyx\Source\Application\Shaders\Grid\grid.frag)")
+    m_shader = ResourceManager::GetShader(
+        "GridShader",
+        R"(Nyx\Source\Application\Shaders\Grid\grid.vert)",
+        R"(Nyx\Source\Application\Shaders\Grid\grid.frag)"
     );
 
 }

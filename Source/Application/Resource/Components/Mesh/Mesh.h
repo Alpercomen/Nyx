@@ -9,6 +9,7 @@
 #include <GLFW/glfw3.h>
 
 #include <Application/Core/Services/Managers/EntityManager/EntityManager.h>
+#include <Application/Core/Services/Managers/ResourceManager/ResourceManager.h>
 #include <Application/Core/Services/Pipeline/Immediate/Immediate.h>
 #include <Application/Core/Services/ResourceLocator/ResourceLocator.h>
 
@@ -17,7 +18,7 @@
 #include <Application/Resource/Components/Rigidbody/Acceleration.h>
 #include <Application/Core/Physics/Meter.h>
 #include <Application/Resource/Camera/Camera.h>
-#include <Application/Resource/ShaderProgram/ShaderProgram.h>
+#include <Application/Resource/Material/ShaderProgram/ShaderProgram.h>
 #include <Application/Resource/Buffers/VAO.h>
 #include <Application/Resource/Buffers/VBO.h>
 #include <Application/Resource/Buffers/EBO.h>
@@ -50,9 +51,10 @@ namespace Nyx
         Sphere(const SphereDesc& circleDesc) : m_sphereDesc(circleDesc)
         {
             m_sphereMesh = CreateSphereMesh(m_sphereDesc);
-            m_shader = Shader(
-                ResourceLocator::Get(R"(Nyx\Source\Application\Shaders\Sphere\sphere.vert)"),
-                ResourceLocator::Get(R"(Nyx\Source\Application\Shaders\Sphere\sphere.frag)")
+            m_shader = ResourceManager::GetShader(
+                "SphereShader",
+                R"(Nyx\Source\Application\Shaders\Sphere\sphere.vert)",
+                R"(Nyx\Source\Application\Shaders\Sphere\sphere.frag)"
             );
         }
 

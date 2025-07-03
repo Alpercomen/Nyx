@@ -8,7 +8,7 @@
 #include <Application/Core/Physics/Meter.h>
 #include <Application/Core/Services/Managers/EntityManager/EntityManager.h>
 #include <Application/Core/Services/Managers/SceneManager/SceneManager.h>
-#include <Application/Resource/ShaderProgram/ShaderProgram.h>
+#include <Application/Resource/Material/ShaderProgram/ShaderProgram.h>
 
 
 namespace Nyx
