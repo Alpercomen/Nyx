@@ -195,14 +195,18 @@ namespace Nyx {
 				return;
 
 			SphereDesc earthDesc;
-			earthDesc.res = 50;
-			earthDesc.topColor = glm::vec3(0.28, 0.56, 0.93);
-			earthDesc.botColor = glm::vec3(0.11, 0.23, 0.37);
+			earthDesc.res = 250;
+			earthDesc.texture = &ResourceManager::GetMipmappedTexture(
+				"EarthTexture",
+				R"(Nyx\Source\Assets\Textures\EarthTexture.jpg)"
+			);
 
 			SphereDesc moonDesc;
-			moonDesc.res = 50;
-			moonDesc.topColor = glm::vec3(0.89, 0.96, 0.96);
-			moonDesc.botColor = glm::vec3(0.30, 0.41, 0.41);
+			moonDesc.res = 250;
+			moonDesc.texture = &ResourceManager::GetMipmappedTexture(
+				"MoonTexture",
+				R"(Nyx\Source\Assets\Textures\MoonTexture.jpg)"
+			);
 
 			EntityID earthID = scenePtr->CreatePlanet("Earth", Transform{ Position{}, Rotation{}, Scale{ 250.0 } }, Rigidbody{ 5.972e24 }, earthDesc);
 			EntityID moonID = scenePtr->CreatePlanet("Moon", Transform{ glm::vec3(3844.00, 0.0f, 0.0f), Rotation{}, Scale{ 60.0 } }, Rigidbody{ 7.342e22 }, moonDesc);

@@ -18,7 +18,7 @@
 #include <Application/Resource/Components/Rigidbody/Acceleration.h>
 #include <Application/Core/Physics/Meter.h>
 #include <Application/Resource/Camera/Camera.h>
-#include <Application/Resource/Material/ShaderProgram/ShaderProgram.h>
+#include <Application/Resource/Material/Material.h>
 #include <Application/Resource/Buffers/VAO.h>
 #include <Application/Resource/Buffers/VBO.h>
 #include <Application/Resource/Buffers/EBO.h>
@@ -36,26 +36,27 @@ namespace Nyx
     struct SphereDesc {
     public:
         int32 res = 50;
-
-        Math::Vec3f topColor;
-        Math::Vec3f botColor;
+        Texture* texture = nullptr;
+        Math::Vec3f baseColor = Math::Vec3f(1.00, 1.00, 1.00);
     };
 
     class Sphere {
     public:
-        SphereDesc m_sphereDesc;
         Mesh m_sphereMesh;
-        Shader m_shader;
+        Material m_material;
 
         Sphere() : Sphere(SphereDesc()) {}
-        Sphere(const SphereDesc& circleDesc) : m_sphereDesc(circleDesc)
+        Sphere(const SphereDesc& circleDesc)
         {
-            m_sphereMesh = CreateSphereMesh(m_sphereDesc);
-            m_shader = ResourceManager::GetShader(
+            m_sphereMesh = CreateSphereMesh(circleDesc.res);
+            
+            Shader shader = ResourceManager::GetShader(
                 "SphereShader",
                 R"(Nyx\Source\Application\Shaders\Sphere\sphere.vert)",
                 R"(Nyx\Source\Application\Shaders\Sphere\sphere.frag)"
             );
+
+            m_material = Material(shader, circleDesc.baseColor, circleDesc.texture);
         }
 
         ~Sphere()
@@ -64,13 +65,10 @@ namespace Nyx
             // glDeleteVertexArrays(1, &m_sphereMesh.circleVAO);
         }
 
-        Mesh CreateSphereMesh(const SphereDesc& circleDesc)
+        Mesh CreateSphereMesh(const uint32 res)
         {
-            const uint32 X_SEGMENTS = circleDesc.res;
-            const uint32 Y_SEGMENTS = circleDesc.res;
-
-            Vector<float32> vertices = GenerateVertices(X_SEGMENTS, Y_SEGMENTS);
-            Vector<uint32> indices = GenerateIndices(X_SEGMENTS, Y_SEGMENTS); 
+            Vector<float32> vertices = GenerateVertices(res);
+            Vector<uint32> indices = GenerateIndices(res);
 
             Mesh mesh;
 
@@ -86,8 +84,13 @@ namespace Nyx
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ebo.m_data);
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
 
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+            // Position attribute (location = 0)
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
             glEnableVertexAttribArray(0);
+
+            // UV attribute (location = 1)
+            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+            glEnableVertexAttribArray(1);
 
             glBindVertexArray(0);
 
@@ -98,74 +101,93 @@ namespace Nyx
 
         void DrawSphere(Math::Mat4f mvp)
         {
-            m_shader.Use(); // Use Shader
+            m_material.Bind();
 
-            GLuint mvpLoc = glGetUniformLocation(m_shader.GetID(), "uMVP");
+            GLuint mvpLoc = glGetUniformLocation(m_material.GetShader().GetID(), "uMVP");
             glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(mvp));
-
-            GLuint topColorLoc = glGetUniformLocation(m_shader.GetID(), "topColor");
-            glUniform3fv(topColorLoc, 1, glm::value_ptr(m_sphereDesc.topColor));
-
-            GLuint botColorLoc = glGetUniformLocation(m_shader.GetID(), "botColor");
-            glUniform3fv(botColorLoc, 1, glm::value_ptr(m_sphereDesc.botColor));
 
             glBindVertexArray(m_sphereMesh.vao.m_data);
 
             ImmediatePipeline::Get().Begin();
             ImmediatePipeline::Get().UseSphere();
-            glDrawElements(GL_TRIANGLE_STRIP, m_sphereMesh.ebo.m_indexCount, GL_UNSIGNED_INT, 0);
+            glDrawElements(GL_TRIANGLES, m_sphereMesh.ebo.m_indexCount, GL_UNSIGNED_INT, 0);
             ImmediatePipeline::Get().End();
 
         }
 
     private:
-        Vector<float32> GenerateVertices(const uint32 X_SEGMENTS, const uint32 Y_SEGMENTS)
+        Math::Vec3f GetCubeFacePosition(uint32 face, float u, float v)
+        {
+            // Map u,v from [0,1] to [-1,1]
+            float x = 2.0f * u - 1.0f;
+            float y = 2.0f * v - 1.0f;
+
+            switch (face)
+            {
+            case 0: return Math::Vec3f(1, y, -x);  // +X face
+            case 1: return Math::Vec3f(-1, y, x);  // -X face
+            case 2: return Math::Vec3f(x, 1, -y);  // +Y face
+            case 3: return Math::Vec3f(x, -1, y);  // -Y face
+            case 4: return Math::Vec3f(x, y, 1);   // +Z face
+            case 5: return Math::Vec3f(-x, y, -1); // -Z face
+            }
+            return Math::Vec3f(0, 0, 0);
+        }
+
+        Vector<float32> GenerateVertices(const uint32 resolution)
         {
             Vector<float32> vertices;
 
-            for (uint32 y = 0; y <= Y_SEGMENTS; ++y)
+            for (int y = 0; y <= resolution; ++y)
             {
-                for (uint32 x = 0; x <= X_SEGMENTS; ++x)
-                {
-                    float xSegment = (float)x / (float)X_SEGMENTS;
-                    float ySegment = (float)y / (float)Y_SEGMENTS;
-                    float xPos = cos(xSegment * 2.0f * Math::Pi) * sin(ySegment * Math::Pi);
-                    float yPos = cos(ySegment * Math::Pi);
-                    float zPos = sin(xSegment * 2.0f * Math::Pi) * sin(ySegment * Math::Pi);
+                float v = (float)y / resolution; // V coordinate
 
-                    vertices.push_back(xPos);
-                    vertices.push_back(yPos);
-                    vertices.push_back(zPos);
+                for (int x = 0; x <= resolution; ++x)
+                {
+                    float u = 1.0f - ((float)x / resolution); // flipped U
+
+                    float theta = (1.0f - u) * glm::two_pi<float>(); // longitude [0, 2PI]
+                    float phi = v * glm::pi<float>();       // latitude  [0, PI]
+
+                    glm::vec3 pos;
+                    pos.x = sinf(phi) * cosf(theta);
+                    pos.y = cosf(phi);
+                    pos.z = sinf(phi) * sinf(theta);
+
+                    vertices.push_back(pos.x);
+                    vertices.push_back(pos.y);
+                    vertices.push_back(pos.z);
+
+                    vertices.push_back(u); // flipped U
+                    vertices.push_back(v); // V
                 }
             }
 
             return vertices;
         }
 
-        Vector<uint32> GenerateIndices(const uint32 X_SEGMENTS, const uint32 Y_SEGMENTS)
+        Vector<uint32> GenerateIndices(const uint32 resolution)
         {
             Vector<uint32> indices;
 
-            bool oddRow = false;
-            for (uint32 y = 0; y < Y_SEGMENTS; ++y)
+            for (int y = 0; y < resolution; ++y)
             {
-                if (!oddRow)
+                for (int x = 0; x < resolution; ++x)
                 {
-                    for (uint32 x = 0; x <= X_SEGMENTS; ++x)
-                    {
-                        indices.push_back(y * (X_SEGMENTS + 1) + x);
-                        indices.push_back((y + 1) * (X_SEGMENTS + 1) + x);
-                    }
+                    int i0 = y * (resolution + 1) + x;
+                    int i1 = i0 + 1;
+                    int i2 = i0 + (resolution + 1);
+                    int i3 = i2 + 1;
+
+                    // Two triangles per quad
+                    indices.push_back(i0);
+                    indices.push_back(i2);
+                    indices.push_back(i1);
+
+                    indices.push_back(i1);
+                    indices.push_back(i2);
+                    indices.push_back(i3);
                 }
-                else
-                {
-                    for (int32 x = X_SEGMENTS; x >= 0; --x)
-                    {
-                        indices.push_back((y + 1) * (X_SEGMENTS + 1) + x);
-                        indices.push_back(y * (X_SEGMENTS + 1) + x);
-                    }
-                }
-                oddRow = !oddRow;
             }
 
             return indices;

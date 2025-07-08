@@ -50,6 +50,43 @@ namespace Nyx
 		return *(m_textures[name]);
 	}
 
+	Texture& ResourceManager::GetMipmappedTexture(const String& name, const String& texturePath)
+	{
+		auto it = m_textures.find(name);
+		if (it != m_textures.end())
+		{
+			return *(it->second);
+		}
+
+		if (texturePath.empty())
+		{
+			throw std::runtime_error("Mipmapped Texture '" + name + "' not loaded and no path provided!");
+		}
+
+		String path = ResourceLocator::Get(texturePath);
+
+		auto texture = MakeUnique<Texture>(path, false);
+
+		// Bind texture and generate mipmaps
+		glBindTexture(GL_TEXTURE_2D, texture->GetID());
+
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+		// Set mipmap filtering
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); // Trilinear filtering
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		// Optional: enable anisotropic filtering
+		GLfloat maxAniso = 0.0f;
+		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maxAniso);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAniso);
+
+		spdlog::info("Loaded Mipmapped Texture: {}", name);
+		m_textures[name] = std::move(texture);
+
+		return *(m_textures[name]);
+	}
+
 	void ResourceManager::Clear()
 	{
 		spdlog::info("Clearing all cached resources");

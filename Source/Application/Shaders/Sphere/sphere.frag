@@ -1,20 +1,25 @@
 #version 330 core
 
-in float vHeight;
-in vec3 fragTopColor;
-in vec3 fragBotColor;
-
+in vec2 vUV;
 out vec4 FragColor;
+
+uniform sampler2D uTexture;
+uniform bool uHasTexture;
+uniform vec3 uBaseColor;  // Base color tint
 
 void main()
 {
-    // Remap height from [-1, 1] to [0, 1]
-    float height = vHeight * 0.5 + 0.5;
+    vec3 color;
 
-    // Example gradient colors
-    vec3 bottomColor = fragBotColor;
-    vec3 topColor = fragTopColor;
+    if (uHasTexture)
+    {
+        vec3 texColor = texture(uTexture, vUV).rgb;
+        color = texColor * uBaseColor; // Apply tint
+    }
+    else
+    {
+        color = uBaseColor; // No texture, use base color
+    }
 
-    vec3 finalColor = mix(bottomColor, topColor, height);
-    FragColor = vec4(finalColor, 1.0);
+    FragColor = vec4(color, 1.0);
 }

@@ -12,6 +12,7 @@ namespace Nyx
 	public:
 		static Shader& GetShader(const String& name, const String& vertexPath = "", const String& fragmentPath = "");
 		static Texture& GetTexture(const String& name, const String& texturePath = "");
+		static Texture& GetMipmappedTexture(const String& name, const String& texturePath = "");
 		static void Clear();
 
 	private:

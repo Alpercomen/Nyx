@@ -26,6 +26,10 @@ namespace Nyx
 		glGenTextures(1, &m_textureID);
 		glBindTexture(GL_TEXTURE_2D, m_textureID);
 
+		m_width = img.width;
+		m_height = img.height;
+		m_channels = img.channels;
+
 		glTexImage2D(GL_TEXTURE_2D, 0, format, m_width, m_height, 0, format, GL_UNSIGNED_BYTE, img.pixels);
 		glGenerateMipmap(GL_TEXTURE_2D);
 
