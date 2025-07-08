@@ -208,8 +208,11 @@ namespace Nyx {
 				R"(Nyx\Source\Assets\Textures\MoonTexture.jpg)"
 			);
 
-			EntityID earthID = scenePtr->CreatePlanet("Earth", Transform{ Position{}, Rotation{}, Scale{ 250.0 } }, Rigidbody{ 5.972e24 }, earthDesc);
-			EntityID moonID = scenePtr->CreatePlanet("Moon", Transform{ glm::vec3(3844.00, 0.0f, 0.0f), Rotation{}, Scale{ 60.0 } }, Rigidbody{ 7.342e22 }, moonDesc);
+			Transform earthTransform = Transform{ Position{}, Rotation{}, Scale{ 250.0 } };
+			Transform moonTransform = Transform{ Math::Vec3f(3844.00, 0.0f, 0.0f), Rotation{}, Scale{ 60.0 } };
+
+			EntityID earthID = scenePtr->CreatePlanet("Earth", earthTransform, Rigidbody{ 5.972e24 }, earthDesc);
+			EntityID moonID = scenePtr->CreatePlanet("Moon", moonTransform, Rigidbody{ 7.342e22 }, moonDesc);
 			EntityID cameraID = scenePtr->CreateCamera("Camera", Transform{ glm::vec3(0.0f, 0.0f, 1000.0f) });
 
 			InitializeCircularOrbit(moonID, earthID);

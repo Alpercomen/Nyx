@@ -15,8 +15,8 @@
 Camera::Camera()
 {
     SetFront(glm::vec3(0.0f, 0.0f, -1.0f));
-    SetMovementSpeed(METERS_PER_UNIT * 10);
-    SetMovementSpeedMultiplier(3.5f);
+    SetMovementSpeed(METERS_PER_UNIT);
+    SetMovementSpeedMultiplier(5.f);
     SetMouseSensitivity(0.1f);
     SetZoom(45.0f);
     SetYaw(-90.0f);
@@ -34,12 +34,12 @@ glm::mat4 Camera::GetViewMatrix() const
     auto& cameraIDs = ECS::Get().GetAllComponentIDs<Camera>();
 
     if (cameraIDs.size() <= 0)
-        return glm::mat4(0.0);
+        return Math::Mat4d(0.0);
 
     const EntityID& id = cameraIDs[0];
 
     if (!ECS::Get().HasComponent<Transform>(id))
-        return glm::mat4(0.0);
+        return Math::Mat4d(0.0);
 
     Transform& transform = *ECS::Get().GetComponent<Transform>(id);
     Position& pos = transform.position;
