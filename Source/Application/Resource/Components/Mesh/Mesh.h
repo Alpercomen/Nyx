@@ -86,14 +86,14 @@ namespace Nyx
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
 
             // Position attribute (location = 0)
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
             glEnableVertexAttribArray(0);
 
             // UV attribute (location = 1)
-            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
             glEnableVertexAttribArray(1);
 
-            glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(5 * sizeof(float)));
+            glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(5 * sizeof(float)));
             glEnableVertexAttribArray(2);
 
             glBindVertexArray(0);
@@ -167,12 +167,18 @@ namespace Nyx
                     pos.y = cosf(phi);
                     pos.z = sinf(phi) * sinf(theta);
 
+                    glm::vec3 norm = glm::normalize(pos);
+
                     vertices.push_back(pos.x);
                     vertices.push_back(pos.y);
                     vertices.push_back(pos.z);
 
                     vertices.push_back(u); // flipped U
                     vertices.push_back(v); // V
+
+                    vertices.push_back(norm.x);
+                    vertices.push_back(norm.y);
+                    vertices.push_back(norm.z);
                 }
             }
 

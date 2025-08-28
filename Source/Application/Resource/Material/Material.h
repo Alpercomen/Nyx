@@ -22,6 +22,7 @@ namespace Nyx
 			if (hasTexture)
 			{
 				glBindTexture(GL_TEXTURE_2D, m_texture->GetID());
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 			}
 			else
 			{
