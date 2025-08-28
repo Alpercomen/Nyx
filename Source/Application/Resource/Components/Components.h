@@ -7,6 +7,7 @@
 #include <Application/Resource/Components/Rigidbody/Acceleration.h>
 #include <Application/Resource/Components/Mesh/Mesh.h>
 #include <Application/Resource/Components/Mesh/GridMesh/GridMesh.h>
+#include <Application/Resource/Components/Lighting/Light.h>
 
 namespace Nyx
 {
@@ -26,7 +27,21 @@ namespace Nyx
 	{
 		float64 mass;
 		Velocity velocity;
+		Velocity angularVelocity;
 		Acceleration acceleration;
+	};
+
+	struct TidallyLocked
+	{
+		TidallyLocked() = default;
+		TidallyLocked(EntityID lockedEntity) : lockedEntity(lockedEntity) {}
+
+		EntityID lockedEntity;
+	};
+
+	struct FixedRotation
+	{
+		Math::Quatf rotationPerTimeUnit;
 	};
 
 }

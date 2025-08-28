@@ -50,6 +50,51 @@ public:
 		return glm::distance(this->GetWorld(), other.GetWorld());
 	}
 
+	/*
+		OPERATOR OVERLOAD
+	*/
+
+	// Scalar multiplication
+	Position operator*(float scalar) const {
+		return Position(this->m_world * scalar);
+	}
+
+	// Scalar division
+	Position operator/(float scalar) const {
+		return Position(this->m_world / scalar);
+	}
+
+	// Scalar addition
+	Position operator+(float scalar) const {
+		return Position(this->m_world + glm::vec3(scalar));
+	}
+
+	// Scalar subtraction
+	Position operator-(float scalar) const {
+		return Position(this->m_world - glm::vec3(scalar));
+	}
+
+	// In-place versions (e.g., pos *= 2)
+	Position& operator*=(float scalar) {
+		this->SetWorld(this->m_world * scalar);
+		return *this;
+	}
+
+	Position& operator/=(float scalar) {
+		this->SetWorld(this->m_world / scalar);
+		return *this;
+	}
+
+	Position& operator+=(float scalar) {
+		this->SetWorld(this->m_world + glm::vec3(scalar));
+		return *this;
+	}
+
+	Position& operator-=(float scalar) {
+		this->SetWorld(this->m_world - glm::vec3(scalar));
+		return *this;
+	}
+
 private:
 	Math::Vec3f m_world;
 	Math::Vec3f m_normalized;

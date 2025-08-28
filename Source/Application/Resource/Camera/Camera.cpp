@@ -15,8 +15,8 @@
 Camera::Camera()
 {
     SetFront(glm::vec3(0.0f, 0.0f, -1.0f));
-    SetMovementSpeed(METERS_PER_UNIT);
-    SetMovementSpeedMultiplier(5.f);
+    SetMovementSpeed(3);
+    SetMovementSpeedMultiplier(10.f);
     SetMouseSensitivity(0.1f);
     SetZoom(45.0f);
     SetYaw(-90.0f);

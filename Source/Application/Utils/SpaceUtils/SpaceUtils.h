@@ -8,6 +8,8 @@ double GravitationalForce(double mu, double r);
 
 double CalculateOrbitalVelocity(double otherMass, double r);
 
-void InitializeCircularOrbit(EntityID satelliteID, EntityID attractorID);
+void InitializeCircularOrbit(EntityID satelliteID, EntityID attractorID, bool isTidallyLocked);
 
 void Attract(const EntityID& objID);
+
+void ApplyRotationalTorque(EntityID aID, EntityID bID);

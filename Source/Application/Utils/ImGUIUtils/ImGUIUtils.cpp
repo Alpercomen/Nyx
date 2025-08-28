@@ -89,11 +89,11 @@ void ImGUIUtils::DrawSimulationInfo()
             auto& transform = *ECS::Get().GetComponent<Transform>(id);
 
             const auto& pos = transform.position.GetWorld();
-            const auto& rot = transform.rotation.getEulerAngles();
+            const auto& rot = transform.rotation.GetEulerAngles();
             const auto& sca = transform.scale.get();
 
             ImGui::Text("Pos: (%.2f, %.2f, %.2f)", pos.x, pos.y, pos.z);
-            ImGui::Text("Rot: (%.2f, %.2f, %.2f)", rot.x, rot.y, rot.z);
+            ImGui::Text("Rot: (%.2f, %.2f, %.2f)", glm::degrees(rot.x), glm::degrees(rot.y), glm::degrees(rot.z));
             ImGui::Text("Sca: (%.2f, %.2f, %.2f)", sca.x, sca.y, sca.z);
         }
 
@@ -104,9 +104,11 @@ void ImGUIUtils::DrawSimulationInfo()
 
             const auto& velVec = rigidbody.velocity.GetWorld();
             const auto& accVec = rigidbody.acceleration.GetWorld();
+            const auto& angularVel = rigidbody.angularVelocity.GetWorld();
 
             ImGui::Text("Vel: %.2f km/h", glm::length(velVec));
             ImGui::Text("Acc: %.2f km/h2", glm::length(accVec));
+            ImGui::Text("Angular Vel: %.2f km/h", glm::length(angularVel));
         }
     }
 
@@ -140,7 +142,7 @@ void ImGUIUtils::DrawSimulationInfo()
 void ImGUIUtils::DrawSimulationControl(Engine* engine)
 {
     ImGui::Begin("Simulation Control");
-    ImGui::SliderFloat("Time Scale", &TIME_SCALE, 0.0f, 100000.0f, "%.8f", ImGuiSliderFlags_Logarithmic);
+    ImGui::SliderFloat("Time Scale", &TIME_SCALE, 0.0f, 50000.0f, "%.8f", ImGuiSliderFlags_Logarithmic);
     ImGui::Checkbox("Show Grid", &engine->GetRenderer().m_gridEnabled);
     ImGui::End();
 }

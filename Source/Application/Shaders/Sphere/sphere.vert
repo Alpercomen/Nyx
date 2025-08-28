@@ -2,13 +2,25 @@
 
 layout (location = 0) in vec3 aPos; // Position
 layout (location = 1) in vec2 aUV;  // Texture coordinate
+layout (location = 2) in vec3 aNormal; // Normal
 
-uniform highp mat4 uMVP;
+uniform mat4 uModel;
+uniform mat4 uView;
+uniform mat4 uProj;
 
-out vec2 vUV; // Pass UV to fragment shader
+out vec2 vUV;
+out vec3 vNormal;
+out vec3 vFragPos;
 
 void main()
 {
-    vUV = aUV; // Forward UV
-    gl_Position = uMVP * vec4(aPos, 1.0);
+    vUV = aUV;
+
+    vec4 worldPos = uModel * vec4(aPos, 1.0);
+    vFragPos = worldPos.xyz;
+
+    // Transform normal to world space
+    vNormal = mat3(transpose(inverse(uModel))) * aNormal;
+
+    gl_Position = uProj * uView * worldPos;
 }

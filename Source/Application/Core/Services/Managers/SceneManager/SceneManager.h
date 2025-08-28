@@ -2,12 +2,14 @@
 
 #include <Application/Core/Core.h>
 #include <Application/Core/Services/Managers/EntityManager/EntityManager.h>
+#include <Application/Core/Services/Lighting/LightingSystem.h>
 #include <Application/Resource/Components/Components.h>
 #include <Application/Utils/SpaceUtils/SpaceUtils.h>
 #include <Application/Resource/Components/Mesh/GridMesh/GridMesh.h>
 #include <Application/Constants/Constants.h>
 
-namespace Nyx {
+namespace Nyx 
+{
 	using SceneID = uint32;
 	using CameraID = uint32;
 
@@ -36,11 +38,12 @@ namespace Nyx {
 			if (!transform)
 				return;
 
-			const auto& pos = transform->position;
-			const auto& rot = transform->rotation;
-			const auto& sca = transform->scale;
+			// Scale it down for rendering purposes
+			auto pos = transform->position / METERS_PER_UNIT;
+			auto sca = transform->scale / METERS_PER_UNIT;
+			auto rot = transform->rotation;
 
-			Math::Mat4f model = glm::translate(Math::Mat4f(1.0f), pos.GetWorld()) * rot.toMatrix() * sca.toMatrix();
+			Math::Mat4f model = glm::translate(Math::Mat4f(1.0f), pos.GetWorld()) * rot.ToMatrix() * sca.ToMatrix();
 			Math::Mat4f view = camera.GetViewMatrix();
 			Math::Mat4f projection = camera.GetProjectionMatrix();
 
@@ -49,7 +52,7 @@ namespace Nyx {
 			if (ECS::Get().HasComponent<Sphere>(m_entityID))
 			{
 				const auto& sphere = ECS::Get().GetComponent<Sphere>(m_entityID);
-				sphere->DrawSphere(mvp);
+				sphere->DrawSphere(model, view, projection);
 			}
 		}
 
@@ -195,27 +198,46 @@ namespace Nyx {
 				return;
 
 			SphereDesc earthDesc;
-			earthDesc.res = 250;
+			earthDesc.res = 50;
 			earthDesc.texture = &ResourceManager::GetMipmappedTexture(
 				"EarthTexture",
 				R"(Nyx\Source\Assets\Textures\EarthTexture.jpg)"
 			);
 
 			SphereDesc moonDesc;
-			moonDesc.res = 250;
+			moonDesc.res = 50;
 			moonDesc.texture = &ResourceManager::GetMipmappedTexture(
 				"MoonTexture",
 				R"(Nyx\Source\Assets\Textures\MoonTexture.jpg)"
 			);
 
-			Transform earthTransform = Transform{ Position{}, Rotation{}, Scale{ 250.0 } };
-			Transform moonTransform = Transform{ Math::Vec3f(3844.00, 0.0f, 0.0f), Rotation{}, Scale{ 60.0 } };
+			Position earthPosition(Math::Vec3f(0.0, 0.0, 0.0));
+			Position moonPosition(Math::Vec3f(EARTH_MOON_DISTANCE, 0.0, 0.0));
+
+			Rotation earthRotation(0.0, 0.0, glm::radians(EARTH_INCLINATION));
+			Rotation moonRotation(0.0, 0.0, 0.0);
+
+			Scale earthSize(EARTH_RADIUS_EQUATORAL);
+			Scale moonSize(MOON_RADIUS_EQUATORAL);
+
+			Transform earthTransform = Transform{ earthPosition, earthRotation, earthSize };
+			Transform moonTransform = Transform{ moonPosition, moonRotation, moonSize };
 
 			EntityID earthID = scenePtr->CreatePlanet("Earth", earthTransform, Rigidbody{ 5.972e24 }, earthDesc);
 			EntityID moonID = scenePtr->CreatePlanet("Moon", moonTransform, Rigidbody{ 7.342e22 }, moonDesc);
-			EntityID cameraID = scenePtr->CreateCamera("Camera", Transform{ glm::vec3(0.0f, 0.0f, 1000.0f) });
+			EntityID cameraID = scenePtr->CreateCamera("Camera", Transform{ glm::vec3(0.0f, 0.0f, 100.0f) });
 
-			InitializeCircularOrbit(moonID, earthID);
+			EntityID lightEntityID = ECS::Get().CreateEntity();
+
+			LightComponent directionalLight;
+			directionalLight.type = LightType::DIRECTIONAL;
+			directionalLight.color = Math::Vec3f(1.0, 1.0, 1.0);
+			directionalLight.intensity = 1.0f;
+			directionalLight.direction = glm::normalize(glm::vec3(1.0f, 0.0f, 0.0f));
+
+			ECS::Get().AddComponent(lightEntityID, directionalLight);
+
+			InitializeCircularOrbit(moonID, earthID, true);
 		}
 
 	private:

@@ -12,6 +12,7 @@
 #include <Application/Core/Services/Managers/ResourceManager/ResourceManager.h>
 #include <Application/Core/Services/Pipeline/Immediate/Immediate.h>
 #include <Application/Core/Services/ResourceLocator/ResourceLocator.h>
+#include <Application/Core/Services/Lighting/LightingSystem.h>
 
 #include <Application/Resource/Components/Transform/Position.h>
 #include <Application/Resource/Components/Rigidbody/Velocity.h>
@@ -92,6 +93,9 @@ namespace Nyx
             glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
             glEnableVertexAttribArray(1);
 
+            glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(5 * sizeof(float)));
+            glEnableVertexAttribArray(2);
+
             glBindVertexArray(0);
 
             mesh.ebo.m_indexCount = static_cast<uint32>(indices.size());
@@ -99,12 +103,21 @@ namespace Nyx
             return mesh;
         }
 
-        void DrawSphere(Math::Mat4f mvp)
+        void DrawSphere(Math::Mat4f& model, Math::Mat4f& view, Math::Mat4f& projection)
         {
             m_material.Bind();
 
-            GLuint mvpLoc = glGetUniformLocation(m_material.GetShader().GetID(), "uMVP");
-            glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(mvp));
+            uint32 shaderID = m_material.GetShader().GetID();
+            LightingSystem::Get().UploadToShader(shaderID);
+
+            GLuint modelLoc = glGetUniformLocation(shaderID, "uModel");
+            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+            GLuint viewLoc = glGetUniformLocation(shaderID, "uView");
+            glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+
+            GLuint projLoc = glGetUniformLocation(shaderID, "uProj");
+            glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
             glBindVertexArray(m_sphereMesh.vao.m_data);
 
