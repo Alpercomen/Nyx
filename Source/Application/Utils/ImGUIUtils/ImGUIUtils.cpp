@@ -19,7 +19,7 @@ void ImGUIUtils::Initialize(void* window)
     ImGui::StyleColorsDark();
 
     ImGui_ImplGlfw_InitForOpenGL(static_cast<GLFWwindow*>(window), true);
-    ImGui_ImplOpenGL3_Init("#version 330");  // Use your actual GLSL version
+    ImGui_ImplOpenGL3_Init("#version 330");
 }
 
 void ImGUIUtils::InitDockableWindow()

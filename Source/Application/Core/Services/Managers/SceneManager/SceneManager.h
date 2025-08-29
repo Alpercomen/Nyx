@@ -114,6 +114,23 @@ namespace Nyx
 			return obj->GetEntityID();
 		}
 
+		EntityID CreateDirectionalLight(String name, const Transform& transform, const Math::Vec3f& direction, const Math::Vec3f& color, float intensity)
+		{
+			SharedPtr<SceneObject> obj = MakeShared<SceneObject>(name);
+			ECS::Get().AddComponent(obj->GetEntityID(), transform);
+
+			LightComponent directionalLight;
+			directionalLight.type = LightType::DIRECTIONAL;
+			directionalLight.color = color;
+			directionalLight.intensity = intensity;
+			directionalLight.direction = glm::normalize(direction);
+
+			ECS::Get().AddComponent(obj->GetEntityID(), directionalLight);
+
+			m_sceneObjectPtrs[obj->GetEntityID()] = obj;
+			return obj->GetEntityID();
+		}
+
 		SharedPtr<SceneObject> GetSceneObject(const EntityID& entityID)
 		{
 			if (m_sceneObjectPtrs.find(entityID) != m_sceneObjectPtrs.end())
@@ -226,16 +243,7 @@ namespace Nyx
 			EntityID earthID = scenePtr->CreatePlanet("Earth", earthTransform, Rigidbody{ 5.972e24 }, earthDesc);
 			EntityID moonID = scenePtr->CreatePlanet("Moon", moonTransform, Rigidbody{ 7.342e22 }, moonDesc);
 			EntityID cameraID = scenePtr->CreateCamera("Camera", Transform{ glm::vec3(0.0f, 0.0f, 100.0f) });
-
-			EntityID lightEntityID = ECS::Get().CreateEntity();
-
-			LightComponent directionalLight;
-			directionalLight.type = LightType::DIRECTIONAL;
-			directionalLight.color = Math::Vec3f(1.0, 1.0, 1.0);
-			directionalLight.intensity = 1.0f;
-			directionalLight.direction = glm::normalize(glm::vec3(1.0f, 0.0f, 0.0f));
-
-			ECS::Get().AddComponent(lightEntityID, directionalLight);
+			EntityID directionalLightID = scenePtr->CreateDirectionalLight("Directional Light", Transform{}, Math::Vec3f(1.0, 0.0, 0.0), Math::Vec3f(1.0, 1.0, 1.0), 1.0);
 
 			InitializeCircularOrbit(moonID, earthID, true);
 		}
