@@ -240,10 +240,13 @@ namespace Nyx
 			Transform earthTransform = Transform{ earthPosition, earthRotation, earthSize };
 			Transform moonTransform = Transform{ moonPosition, moonRotation, moonSize };
 
-			EntityID earthID = scenePtr->CreatePlanet("Earth", earthTransform, Rigidbody{ 5.972e24 }, earthDesc);
-			EntityID moonID = scenePtr->CreatePlanet("Moon", moonTransform, Rigidbody{ 7.342e22 }, moonDesc);
 			EntityID cameraID = scenePtr->CreateCamera("Camera", Transform{ glm::vec3(0.0f, 0.0f, 100.0f) });
 			EntityID directionalLightID = scenePtr->CreateDirectionalLight("Directional Light", Transform{}, Math::Vec3f(1.0, 0.0, 0.0), Math::Vec3f(1.0, 1.0, 1.0), 1.0);
+			EntityID moonID = scenePtr->CreatePlanet("Moon", moonTransform, Rigidbody{ 7.342e22 }, moonDesc);
+			EntityID earthID = scenePtr->CreatePlanet("Earth", earthTransform, Rigidbody{ 5.972e24 }, earthDesc);
+
+			FixedRotation fixedRotation(Math::Vec3d(0.0, 1.0, 0.0), EARTH_ROTATION_DEGREE_IN_SECONDS);
+			ECS::Get().AddComponent(earthID, fixedRotation);
 
 			InitializeCircularOrbit(moonID, earthID, true);
 		}

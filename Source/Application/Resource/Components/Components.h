@@ -1,4 +1,5 @@
 #pragma once
+#include <glm/gtx/euler_angles.hpp>
 
 #include <Application/Resource/Components/Transform/Position.h>
 #include <Application/Resource/Components/Transform/Rotation.h>
@@ -18,6 +19,7 @@ namespace Nyx
 
 	struct Transform
 	{
+	public:
 		Position position;
 		Rotation rotation;
 		Scale scale;
@@ -39,9 +41,24 @@ namespace Nyx
 		EntityID lockedEntity;
 	};
 
-	struct FixedRotation
+	class FixedRotation
 	{
-		Math::Quatf rotationPerTimeUnit;
+	public:
+
+		FixedRotation(Math::Vec3d axis, float rotateDegrees)
+		{
+			this->axis = axis;
+			this->rotateDegrees = rotateDegrees;
+		}
+
+		Math::Vec3d GetAxis() { return axis; }
+		float GetDegrees() { return rotateDegrees; }
+		float GetRadians() { return glm::radians(rotateDegrees); }
+
+	private:
+		Math::Vec3d axis;
+		float rotateDegrees;
+
 	};
 
 }

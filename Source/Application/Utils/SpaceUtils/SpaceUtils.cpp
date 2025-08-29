@@ -128,6 +128,24 @@ void Attract(const EntityID& objID)
 	}
 }
 
+void Rotate(const EntityID& objID, float deltaTime)
+{
+    if (!ECS::Get().HasComponent<FixedRotation>(objID))
+        return;
+
+    FixedRotation& fixedRotation = *ECS::Get().GetComponent<FixedRotation>(objID);
+    Transform& transform = *ECS::Get().GetComponent<Transform>(objID);
+
+    float rotationRate = fixedRotation.GetRadians() * deltaTime * TIME_SCALE;
+
+    Math::Vec3f rotation = fixedRotation.GetAxis();
+    float x = rotation.y * rotationRate;
+    float y = rotation.x * rotationRate;
+    float z = rotation.z * rotationRate;
+
+    transform.rotation.RotateLocal(x, y, z);
+}
+
 // Try to approximate scalar moment of inertia I. If we can get a radius from
 // a Sphere component, use solid sphere I = (2/5) m R^2. Otherwise fall back
 // to a mass-weighted proxy (bigger mass -> larger inertia).
@@ -244,12 +262,12 @@ void ApplyRotationalTorque(EntityID aID, EntityID bID)
 
     // Optional: make alignment stronger when gravity is stronger (1/r^2),
     // but keep it small for stability. You can tune baseGain.
-    const double baseGain = 1e-4;   // try 1e-6 .. 1e-4 depending on your scale
+    const double baseGain = 1e-12;   // try 1e-6 .. 1e-4 depending on your scale
     const double gravScale = (G * Ra.mass * Rb.mass) / std::max(1e-6f, r * r);
     const double gainA = baseGain * gravScale;   // torque tendency on A
 
     // Clamp on angular acceleration (rad/s^2)
-    const double maxAngAcc = 5e+1; // tighten/loosen if needed
+    const double maxAngAcc = 5e-1; // tighten/loosen if needed
 
     // Desired facing vector: use each body's current “forward”
     const glm::vec3 fA = Ta.rotation.GetForward();

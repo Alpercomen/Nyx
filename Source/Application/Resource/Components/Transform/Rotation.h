@@ -54,7 +54,7 @@ namespace Nyx {
         }
 
         // Rotate around local pitch/yaw/roll (in radians)
-        void RotateLocal(float pitch, float yaw, float roll) {
+        void RotateLocal(float yaw, float pitch, float roll) {
             Math::Quatf delta = Math::Quatf(Math::Vec3f(pitch, yaw, roll));
             m_rotation = glm::normalize(m_rotation * delta);
         }

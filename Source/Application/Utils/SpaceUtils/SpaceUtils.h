@@ -12,4 +12,6 @@ void InitializeCircularOrbit(EntityID satelliteID, EntityID attractorID, bool is
 
 void Attract(const EntityID& objID);
 
+void Rotate(const EntityID& objID, float deltaTime);
+
 void ApplyRotationalTorque(EntityID aID, EntityID bID);
