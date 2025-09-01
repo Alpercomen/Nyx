@@ -1,20 +1,26 @@
 #version 330 core
 
-layout(location = 0) in vec3 aPos;
+layout (location = 0) in vec3 aPos; // Position
+layout (location = 1) in vec2 aUV;  // Texture coordinate
+layout (location = 2) in vec3 aNormal; // Normal
 
-out float vHeight; // send Y value to fragment shader
-out vec3 fragTopColor;
-out vec3 fragBotColor;
-// Just pass the values to fragment shader
+uniform mat4 uModel;
+uniform mat4 uView;
+uniform mat4 uProj;
 
-uniform mat4 uMVP;
-uniform vec3 topColor;
-uniform vec3 botColor;
+out vec2 vUV;
+out vec3 vNormal;
+out vec3 vFragPos;
 
 void main()
 {
-    gl_Position = uMVP * vec4(aPos, 1.0);
-    vHeight = aPos.y; // pass Y value
-    fragTopColor = topColor;
-    fragBotColor = botColor;
+    vUV = aUV;
+
+    vec4 worldPos = uModel * vec4(aPos, 1.0);
+    vFragPos = worldPos.xyz;
+
+    // Transform normal to world space
+    vNormal = mat3(transpose(inverse(uModel))) * aNormal;
+
+    gl_Position = uProj * uView * worldPos;
 }

@@ -7,16 +7,16 @@
 #include <Application/Core/Core.h>
 #include <Application/Window/Window.h>
 #include <Application/Constants/Constants.h>
-#include <Application/Core/Input/InputDispatcher.h>
-#include <Application/Core/Input/InputEvent.h>
-#include <Application/Core/Input/InputQueue.h>
+#include <Application/Core/Services/Input/InputDispatcher.h>
+#include <Application/Core/Services/Input/InputEvent.h>
+#include <Application/Core/Services/Input/InputQueue.h>
 #include <Application/Resource/Components/Components.h>
 
 Camera::Camera()
 {
     SetFront(glm::vec3(0.0f, 0.0f, -1.0f));
-    SetMovementSpeed(METERS_PER_UNIT * 10);
-    SetMovementSpeedMultiplier(3.5f);
+    SetMovementSpeed(3);
+    SetMovementSpeedMultiplier(10.f);
     SetMouseSensitivity(0.1f);
     SetZoom(45.0f);
     SetYaw(-90.0f);
@@ -34,12 +34,12 @@ glm::mat4 Camera::GetViewMatrix() const
     auto& cameraIDs = ECS::Get().GetAllComponentIDs<Camera>();
 
     if (cameraIDs.size() <= 0)
-        return glm::mat4(0.0);
+        return Math::Mat4d(0.0);
 
     const EntityID& id = cameraIDs[0];
 
     if (!ECS::Get().HasComponent<Transform>(id))
-        return glm::mat4(0.0);
+        return Math::Mat4d(0.0);
 
     Transform& transform = *ECS::Get().GetComponent<Transform>(id);
     Position& pos = transform.position;

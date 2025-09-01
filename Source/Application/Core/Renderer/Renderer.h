@@ -5,10 +5,11 @@
 #include <Application/Constants/Constants.h>
 #include <Application/Resource/Components/Components.h>
 #include <Application/Resource/Camera/Camera.h>
-#include <Application/Resource/Physics/Meter.h>
-#include <Application/Core/Managers/EntityManager/EntityManager.h>
-#include <Application/Core/Managers/SceneManager/SceneManager.h>
-#include <Application/Resource/ShaderProgram/ShaderProgram.h>
+#include <Application/Core/Physics/Meter.h>
+#include <Application/Core/Services/Managers/EntityManager/EntityManager.h>
+#include <Application/Core/Services/Managers/SceneManager/SceneManager.h>
+#include <Application/Resource/Material/ShaderProgram/ShaderProgram.h>
+#include <Application/Core/Services/Lighting/LightingSystem.h>
 
 
 namespace Nyx
@@ -31,6 +32,8 @@ namespace Nyx
             {
                 m_grid.DrawGrid(camera);
             }
+
+            LightingSystem::Get().GatherLights();
 
             for (size_t i = 0; i < scene.GetSceneObjectSize(); ++i)
             {
