@@ -106,6 +106,7 @@ void ImGUIUtils::DrawSimulationInfo()
                     CameraService().Get().enabled = true;
                     CameraService().Get().targetEntity = id;
                     CameraService().Get().distance = (glm::length(sca) / METERS_PER_UNIT) * 2;
+                    CameraService().Get().minimumDistance = CameraService().Get().distance / 2;
                     CameraService().Get().yaw = 0.0f;
                     CameraService().Get().pitch = 0.0f;
                 }

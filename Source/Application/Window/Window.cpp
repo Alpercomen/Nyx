@@ -144,7 +144,9 @@ namespace Nyx
 
             if (CameraService().Get().enabled) {
                 CameraService().Get().distance *= (1.0f - scroll * 0.1f);
-                CameraService().Get().distance = glm::clamp(CameraService().Get().distance, 10.0f, 100000.0f);
+
+                const float& minimumDistance = CameraService().Get().minimumDistance;
+                CameraService().Get().distance = glm::clamp(CameraService().Get().distance, minimumDistance, minimumDistance * 100);
                 return;
             }
 
