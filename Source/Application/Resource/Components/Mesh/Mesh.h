@@ -39,6 +39,8 @@ namespace Nyx
         int32 res = 100;
         Texture* texture = nullptr;
         Math::Vec3f baseColor = Math::Vec3f(1.00, 1.00, 1.00);
+        Math::Vec3f emissiveColor = Math::Vec3f(0.00, 0.00, 0.00);
+        float32 emissiveStrength = 1.0;
     };
 
     class Sphere {
@@ -57,7 +59,7 @@ namespace Nyx
                 R"(Nyx\Source\Application\Shaders\Sphere\sphere.frag)"
             );
 
-            m_material = Material(shader, circleDesc.baseColor, circleDesc.texture);
+            m_material = Material(shader, circleDesc.baseColor, circleDesc.emissiveColor, circleDesc.emissiveStrength, circleDesc.texture);
         }
 
         ~Sphere()

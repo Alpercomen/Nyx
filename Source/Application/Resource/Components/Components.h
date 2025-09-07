@@ -19,7 +19,6 @@ namespace Nyx
 
 	struct Transform
 	{
-	public:
 		Position position;
 		Rotation rotation;
 		Scale scale;
@@ -28,8 +27,8 @@ namespace Nyx
 	struct Rigidbody
 	{
 		float64 mass;
-		Velocity velocity;
 		Velocity angularVelocity;
+		Velocity velocity;
 		Acceleration acceleration;
 	};
 
@@ -39,26 +38,6 @@ namespace Nyx
 		TidallyLocked(EntityID lockedEntity) : lockedEntity(lockedEntity) {}
 
 		EntityID lockedEntity;
-	};
-
-	class FixedRotation
-	{
-	public:
-
-		FixedRotation(Math::Vec3d axis, float rotateDegrees)
-		{
-			this->axis = axis;
-			this->rotateDegrees = rotateDegrees;
-		}
-
-		Math::Vec3d GetAxis() { return axis; }
-		float GetDegrees() { return rotateDegrees; }
-		float GetRadians() { return glm::radians(rotateDegrees); }
-
-	private:
-		Math::Vec3d axis;
-		float rotateDegrees;
-
 	};
 
 }

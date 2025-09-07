@@ -9,6 +9,7 @@
 #include <Application/Utils/ImGUIUtils/ImGUIUtils.h>
 #include <Application/Resource/Components/Components.h>
 #include <Application/Core/Services/Managers/EntityManager/EntityManager.h>
+#include <Application/Core/Services/CameraService/CameraService.h>
 
 namespace Nyx
 {
@@ -69,22 +70,33 @@ namespace Nyx
     {
 
         InputEventDispatcher::Get().AddCallback(EventType::MOUSE_MOVE, [&](const InputEvent& event)
+        {
+            auto& cameraIDs = ECS::Get().GetAllComponentIDs<Camera>();
+
+            if (cameraIDs.size() <= 0)
+                return;
+
+            const EntityID& id = cameraIDs[0];
+
+            auto& camera = *ECS::Get().GetComponent<Camera>(id);
+
+            if (GetMouseMode() != MouseMode::HIDDEN)
+                return;
+
+            double xPos = event.m_eventList.mouseX;
+            double yPos = event.m_eventList.mouseY;
+
+            if (firstMouse)
             {
-                auto& cameraIDs = ECS::Get().GetAllComponentIDs<Camera>();
+                lastX = (float)xPos;
+                lastY = (float)yPos;
+                firstMouse = false;
+            }
 
-                if (cameraIDs.size() <= 0)
-                    return;
+            float xoffset = (float)xPos - lastX;
+            float yoffset = lastY - (float)yPos; // reversed y
 
-                const EntityID& id = cameraIDs[0];
-
-                auto& camera = *ECS::Get().GetComponent<Camera>(id);
-
-                if (GetMouseMode() != MouseMode::HIDDEN)
-                    return;
-
-                double xPos = event.m_eventList.mouseX;
-                double yPos = event.m_eventList.mouseY;
-
+            if (CameraService().Get().enabled) {
                 if (firstMouse)
                 {
                     lastX = (float)xPos;
@@ -93,15 +105,58 @@ namespace Nyx
                 }
 
                 float xoffset = (float)xPos - lastX;
-                float yoffset = lastY - (float)yPos; // reversed y
+                float yoffset = lastY - (float)yPos;
 
                 lastX = (float)xPos;
                 lastY = (float)yPos;
 
-                camera.ProcessMouseMovement(xoffset, yoffset);
+                CameraService().Get().yaw += xoffset * 0.1f;
+                CameraService().Get().pitch += yoffset * 0.1f;
+                CameraService().Get().pitch = glm::clamp(CameraService().Get().pitch, -89.0f, 89.0f);
+                return;
             }
-        );
 
+            lastX = (float)xPos;
+            lastY = (float)yPos;
+
+            camera.ProcessMouseMovement(xoffset, yoffset);
+        });
+
+    }
+
+    void InputHelper::ProcessMouseScroll()
+    {
+        InputEventDispatcher::Get().AddCallback(EventType::MOUSE_SCROLL_WHEEL, [&](const InputEvent& event)
+        {
+            auto& cameraIDs = ECS::Get().GetAllComponentIDs<Camera>();
+
+            if (cameraIDs.size() <= 0)
+                return;
+
+            const EntityID& id = cameraIDs[0];
+
+            auto& camera = *ECS::Get().GetComponent<Camera>(id);
+
+            if (GetMouseMode() != MouseMode::HIDDEN)
+                return;
+
+            float scroll = event.m_eventList.scrollDelta;
+
+            if (CameraService().Get().enabled) {
+                CameraService().Get().distance *= (1.0f - scroll * 0.1f);
+                CameraService().Get().distance = glm::clamp(CameraService().Get().distance, 10.0f, 100000.0f);
+                return;
+            }
+
+            float currentSpeed = camera.GetMovementSpeed();
+            float step = currentSpeed * 0.1f;
+            float newSpeed = currentSpeed + scroll * step;
+
+            newSpeed = glm::clamp(newSpeed, 0.001f, 1000.0f);
+            camera.SetMovementSpeed(newSpeed);
+
+            spdlog::info("Camera speed updated: {:.3f}", newSpeed);
+        });
     }
 
     void InputCallbacks::MouseButtonCallback(GLFWwindow* window, int32 button, int32 action, int32 mods)
@@ -175,6 +230,21 @@ namespace Nyx
             InputEventDispatcher::Get().DispatchCallback(newEvent);
     }
 
+    void InputCallbacks::ScrollCallback(GLFWwindow* window, double xOffset, double yOffset)
+    {
+        InputQueue* queue = static_cast<InputQueue*>(glfwGetWindowUserPointer(window));
+        InputEvent localEvent;
+
+        localEvent.m_eventType = EventType::MOUSE_SCROLL_WHEEL;
+        localEvent.m_eventList.scrollDelta = static_cast<float>(yOffset); // yOffset controls vertical scroll
+
+        queue->PushEvent(localEvent);
+
+        InputEvent newEvent;
+        while (queue->PopEvent(newEvent))
+            InputEventDispatcher::Get().DispatchCallback(newEvent);
+    }
+
     BasicWindow::BasicWindow() : BasicWindow(BasicWindowDesc()) {}
 
     BasicWindow::BasicWindow(const BasicWindowDesc& windowDesc) : m_windowDesc(windowDesc)
@@ -206,6 +276,7 @@ namespace Nyx
         glfwSetMouseButtonCallback(gWindow, InputCallbacks::MouseButtonCallback);
         glfwSetCursorPosCallback(gWindow, InputCallbacks::CursorPosCallback);
         glfwSetKeyCallback(gWindow, InputCallbacks::KeyboardCallback);
+        glfwSetScrollCallback(gWindow, InputCallbacks::ScrollCallback);
 
         glewExperimental = GL_TRUE;
         glewInit();

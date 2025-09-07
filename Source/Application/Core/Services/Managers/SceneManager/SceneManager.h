@@ -2,10 +2,11 @@
 
 #include <Application/Core/Core.h>
 #include <Application/Core/Services/Managers/EntityManager/EntityManager.h>
-#include <Application/Core/Services/Lighting/LightingSystem.h>
 #include <Application/Resource/Components/Components.h>
-#include <Application/Utils/SpaceUtils/SpaceUtils.h>
+#include <Application/Core/Services/Lighting/LightingSystem.h>
 #include <Application/Resource/Components/Mesh/GridMesh/GridMesh.h>
+#include <Application/Utils/SpaceUtils/SpaceUtils.h>
+#include <Application/Utils/MathUtils/MathUtils.h>
 #include <Application/Constants/Constants.h>
 
 namespace Nyx 
@@ -114,18 +115,11 @@ namespace Nyx
 			return obj->GetEntityID();
 		}
 
-		EntityID CreateDirectionalLight(String name, const Transform& transform, const Math::Vec3f& direction, const Math::Vec3f& color, float intensity)
+		EntityID CreateLight(String name, const Transform& transform, LightComponent& lightParameters)
 		{
 			SharedPtr<SceneObject> obj = MakeShared<SceneObject>(name);
 			ECS::Get().AddComponent(obj->GetEntityID(), transform);
-
-			LightComponent directionalLight;
-			directionalLight.type = LightType::DIRECTIONAL;
-			directionalLight.color = color;
-			directionalLight.intensity = intensity;
-			directionalLight.direction = glm::normalize(direction);
-
-			ECS::Get().AddComponent(obj->GetEntityID(), directionalLight);
+			ECS::Get().AddComponent(obj->GetEntityID(), lightParameters);
 
 			m_sceneObjectPtrs[obj->GetEntityID()] = obj;
 			return obj->GetEntityID();
@@ -215,39 +209,58 @@ namespace Nyx
 				return;
 
 			SphereDesc earthDesc;
-			earthDesc.res = 50;
 			earthDesc.texture = &ResourceManager::GetMipmappedTexture(
 				"EarthTexture",
 				R"(Nyx\Source\Assets\Textures\EarthTexture.jpg)"
 			);
 
 			SphereDesc moonDesc;
-			moonDesc.res = 50;
 			moonDesc.texture = &ResourceManager::GetMipmappedTexture(
 				"MoonTexture",
 				R"(Nyx\Source\Assets\Textures\MoonTexture.jpg)"
 			);
 
-			Position earthPosition(Math::Vec3f(0.0, 0.0, 0.0));
-			Position moonPosition(Math::Vec3f(EARTH_MOON_DISTANCE, 0.0, 0.0));
+			SphereDesc sunDesc;
+			sunDesc.emissiveColor = Math::Vec3f(1.0, 0.9, 0.7);
+			sunDesc.emissiveStrength = 1.0;
+			sunDesc.texture = &ResourceManager::GetMipmappedTexture(
+				"SunTexture",
+				R"(Nyx\Source\Assets\Textures\SunTexture.jpg)"
+			);
 
+			Position sunPosition(Math::Vec3f(0.0, 0.0, 0.0));
+			Position earthPosition(Math::Vec3f(AU, 0.0, 0.0));
+			Position moonPosition(Math::Vec3f(AU + EARTH_MOON_DISTANCE, 0.0, 0.0));
+
+			Rotation sunRotation(0.0, 0.0, 0.0);
 			Rotation earthRotation(0.0, 0.0, glm::radians(EARTH_INCLINATION));
 			Rotation moonRotation(0.0, 0.0, 0.0);
 
 			Scale earthSize(EARTH_RADIUS_EQUATORAL);
 			Scale moonSize(MOON_RADIUS_EQUATORAL);
+			Scale sunSize(SUN_RADIUS);
 
 			Transform earthTransform = Transform{ earthPosition, earthRotation, earthSize };
 			Transform moonTransform = Transform{ moonPosition, moonRotation, moonSize };
+			Transform sunTransform = Transform{ sunPosition, sunRotation, sunSize };
 
-			EntityID cameraID = scenePtr->CreateCamera("Camera", Transform{ glm::vec3(0.0f, 0.0f, 100.0f) });
-			EntityID directionalLightID = scenePtr->CreateDirectionalLight("Directional Light", Transform{}, Math::Vec3f(1.0, 0.0, 0.0), Math::Vec3f(1.0, 1.0, 1.0), 1.0);
-			EntityID moonID = scenePtr->CreatePlanet("Moon", moonTransform, Rigidbody{ 7.342e22 }, moonDesc);
-			EntityID earthID = scenePtr->CreatePlanet("Earth", earthTransform, Rigidbody{ 5.972e24 }, earthDesc);
+			Velocity earthAngularVelocity = LocalToWorld(Math::Vec3f(0.0, EARTH_ANGULAR_VELOCITY_RADIANS, 0.0), earthTransform);
 
-			FixedRotation fixedRotation(Math::Vec3d(0.0, 1.0, 0.0), EARTH_ROTATION_DEGREE_IN_SECONDS);
-			ECS::Get().AddComponent(earthID, fixedRotation);
+			EntityID cameraID = scenePtr->CreateCamera("Camera", Transform{ glm::vec3(AU / METERS_PER_UNIT, 0.0f, 10.0f) });
+			EntityID moonID = scenePtr->CreatePlanet("Moon", moonTransform, Rigidbody{ MOON_MASS }, moonDesc);
+			EntityID earthID = scenePtr->CreatePlanet("Earth", earthTransform, Rigidbody{ EARTH_MASS , earthAngularVelocity }, earthDesc);
+			EntityID sunID = scenePtr->CreatePlanet("Sun", sunTransform, Rigidbody{ SUN_MASS }, sunDesc);
 
+			LightComponent pointLight;
+			pointLight.type = LightType::POINT;
+			pointLight.position = Position( Math::Vec3f(0.0, 0.0, 0.0) );
+			pointLight.color = Math::Vec3f(1.0, 1.0, 1.0);
+			pointLight.intensity = 1.0;
+			pointLight.range = SOL_SYSTEM_RADIUS;
+			pointLight.decay = 1 / SOL_SYSTEM_RADIUS;
+			ECS::Get().AddComponent(sunID, pointLight);
+
+			InitializeCircularOrbit(earthID, sunID);
 			InitializeCircularOrbit(moonID, earthID, true);
 		}
 

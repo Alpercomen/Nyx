@@ -20,6 +20,12 @@ double CalculateOrbitalVelocity(double otherMass, double r)
 	return std::sqrt(G * otherMass / r);
 }
 
+double RotationDegreeToLinearVelocity(float degreesPerSecond, float radiusMeters)
+{
+    float radiansPerSecond = glm::radians(degreesPerSecond);
+    return (radiansPerSecond * radiusMeters) / METERS_PER_UNIT;
+}
+
 void InitializeCircularOrbit(EntityID satelliteID, EntityID attractorID, bool isTidallyLocked) {
     // Ensure required components
     if (!ECS::Get().HasComponent<Transform>(satelliteID) ||
@@ -64,15 +70,14 @@ void InitializeCircularOrbit(EntityID satelliteID, EntityID attractorID, bool is
     // Compute tangential direction
     glm::vec3 up = glm::vec3(0, 1, 0);
 
-    if (std::abs(glm::dot(direction, up)) > 0.99f) {
+    if (std::abs(glm::dot(direction, up)) > 0.99f)
         up = glm::vec3(1, 0, 0); // avoid near-parallel vectors
-    }
 
     glm::vec3 tangential = glm::normalize(glm::cross(direction, up));
     glm::vec3 satelliteVel = tangential * static_cast<float>(orbitalSpeed);
 
     // Apply to satellite
-    satelliteRig.velocity.SetWorld(satelliteVel);
+    satelliteRig.velocity.SetWorld(attractorRig.velocity.GetWorld() + satelliteVel);
 
     // Conservation of momentum: Apply opposite to attractor
     glm::vec3 momentum = satelliteVel * static_cast<float>(satelliteRig.mass);
@@ -123,71 +128,16 @@ void Attract(const EntityID& objID)
         obj2Rigidbody.acceleration = attraction;
         obj2Rigidbody.velocity.Accelerate(attraction);
 
-        // Apply rotational torque caused by the attraction of two bodies around the barycenter
-        ApplyRotationalTorque(objID, id);
+        // If object is tidally locked to another object
+        if (ECS::Get().HasComponent<TidallyLocked>(objID))
+        {
+            const auto& lockedEntityId = ECS::Get().GetComponent<TidallyLocked>(objID)->lockedEntity;
+
+            if (lockedEntityId == id)
+                ApplyTidalLock(objTransform, obj2Transform, objRigidbody);
+        }
+
 	}
-}
-
-void Rotate(const EntityID& objID, float deltaTime)
-{
-    if (!ECS::Get().HasComponent<FixedRotation>(objID))
-        return;
-
-    FixedRotation& fixedRotation = *ECS::Get().GetComponent<FixedRotation>(objID);
-    Transform& transform = *ECS::Get().GetComponent<Transform>(objID);
-
-    float rotationRate = fixedRotation.GetRadians() * deltaTime * TIME_SCALE;
-
-    Math::Vec3f rotation = fixedRotation.GetAxis();
-    float x = rotation.y * rotationRate;
-    float y = rotation.x * rotationRate;
-    float z = rotation.z * rotationRate;
-
-    transform.rotation.RotateLocal(x, y, z);
-}
-
-// Try to approximate scalar moment of inertia I. If we can get a radius from
-// a Sphere component, use solid sphere I = (2/5) m R^2. Otherwise fall back
-// to a mass-weighted proxy (bigger mass -> larger inertia).
-static double ApproxMomentOfInertia(EntityID id, const Rigidbody& rb)
-{
-    double m = rb.mass;
-    return std::max(1e-6, 0.4 * m); // 0.4 mimics solid sphere factor without R^2
-}
-
-// Returns angular acceleration vector for “align forward to dirTarget”
-static glm::vec3 AlignmentAngularAcceleration(const glm::vec3& forward, const glm::vec3& dirTarget, double alignGain, double I, double maxAngAcc) 
-{
-    glm::vec3 f = glm::normalize(forward);
-    glm::vec3 d = glm::normalize(dirTarget);
-
-    // Axis that would rotate f toward d
-    glm::vec3 axis = glm::cross(f, d);
-    double misalign = static_cast<double>(glm::length(axis));
-    if (misalign < 1e-8) return glm::vec3(0);
-
-    axis = glm::normalize(axis);
-
-    // Simple physics-inspired model: torque ~ gain * misalignment,
-    // angular acceleration = torque / I
-    double aMag = (alignGain * misalign) / std::max(1e-12, I);
-
-    // Clamp for stability
-    aMag = std::min(aMag, static_cast<double>(maxAngAcc));
-    return static_cast<float>(aMag) * axis;
-}
-
-// Apply angular velocity to a transform quaternion
-static void IntegrateAngularVelocity(Transform& tr, Rigidbody& rb, float dt)
-{
-    glm::vec3 w = rb.angularVelocity.GetWorld();
-    float wlen = glm::length(w);
-    if (wlen > 1e-8f) 
-    {
-        glm::vec3 axis = w / wlen;
-        glm::quat dq = glm::angleAxis(wlen * dt, axis);
-        tr.rotation.SetQuaternion(glm::normalize(dq * tr.rotation.GetQuaternion()));
-    }
 }
 
 // Make Ta tidally locked towards Tb
@@ -215,74 +165,4 @@ void ApplyTidalLock(Transform& Ta, Transform& Tb, Rigidbody& Ra)
 
     Ta.rotation.SetQuaternion(qWorld);
     Ra.angularVelocity.SetWorld(glm::vec3(0.0f));
-}
-
-// --- main tidal torque -----------------------------------------------------
-void ApplyRotationalTorque(EntityID aID, EntityID bID)
-{
-    if (!ECS::Get().HasComponent<Transform>(aID) ||
-        !ECS::Get().HasComponent<Transform>(bID) ||
-        !ECS::Get().HasComponent<Rigidbody>(aID) ||
-        !ECS::Get().HasComponent<Rigidbody>(bID)) 
-    {
-        return;
-    }
-
-    auto& Ta = *ECS::Get().GetComponent<Transform>(aID);
-    auto& Tb = *ECS::Get().GetComponent<Transform>(bID);
-    auto& Ra = *ECS::Get().GetComponent<Rigidbody>(aID);
-    auto& Rb = *ECS::Get().GetComponent<Rigidbody>(bID);
-
-    // If Ra is tidally locked to Rb
-    if (ECS::Get().HasComponent<TidallyLocked>(aID))
-    {
-        const auto& lockedEntityId = ECS::Get().GetComponent<TidallyLocked>(aID)->lockedEntity;
-
-        if (lockedEntityId == bID)
-            ApplyTidalLock(Ta, Tb, Ra);
-
-        return;
-    }
-
-    const glm::vec3 pa = Ta.position.GetWorld();
-    const glm::vec3 pb = Tb.position.GetWorld();
-    glm::vec3 rab = pb - pa;
-    float r = glm::length(rab);
-
-    if (r < 1e-6f) 
-        return;
-
-    glm::vec3 dirAB = rab / r;        // a -> b
-
-    // Time step
-    const float dt = DELTA_TIME * TIME_SCALE;
-
-    // Inertia estimates
-    const double Ia = ApproxMomentOfInertia(aID, Ra);
-
-    // Optional: make alignment stronger when gravity is stronger (1/r^2),
-    // but keep it small for stability. You can tune baseGain.
-    const double baseGain = 1e-12;   // try 1e-6 .. 1e-4 depending on your scale
-    const double gravScale = (G * Ra.mass * Rb.mass) / std::max(1e-6f, r * r);
-    const double gainA = baseGain * gravScale;   // torque tendency on A
-
-    // Clamp on angular acceleration (rad/s^2)
-    const double maxAngAcc = 5e-1; // tighten/loosen if needed
-
-    // Desired facing vector: use each body's current “forward”
-    const glm::vec3 fA = Ta.rotation.GetForward();
-
-    // Angular accelerations
-    glm::vec3 alphaA = AlignmentAngularAcceleration(fA, dirAB, gainA, Ia, maxAngAcc);
-
-    // Integrate angular velocity
-    Ra.angularVelocity.SetWorld(Ra.angularVelocity.GetWorld() + alphaA * dt);
-
-    // Damping (critically important for stability at large time scales)
-    const float dampingPerSec = 0.5f; // 0.5 -> strong damping; tune as needed
-    const float damper = glm::clamp(1.0f - dampingPerSec * dt, 0.90f, 0.9999f);
-    Ra.angularVelocity.SetWorld(Ra.angularVelocity.GetWorld() * damper);
-
-    // Apply rotation
-    IntegrateAngularVelocity(Ta, Ra, dt);
 }

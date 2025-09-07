@@ -10,13 +10,14 @@
 #include <Application/Core/Services/Input/InputDispatcher.h>
 #include <Application/Core/Services/Input/InputEvent.h>
 #include <Application/Core/Services/Input/InputQueue.h>
+#include <Application/Core/Services/CameraService/CameraService.h>
 #include <Application/Resource/Components/Components.h>
 
 Camera::Camera()
 {
     SetFront(glm::vec3(0.0f, 0.0f, -1.0f));
     SetMovementSpeed(3);
-    SetMovementSpeedMultiplier(10.f);
+    SetMovementSpeedMultiplier(5.f);
     SetMouseSensitivity(0.1f);
     SetZoom(45.0f);
     SetYaw(-90.0f);
@@ -27,6 +28,7 @@ Camera::Camera()
 
     InputHelper::ProcessMouseButtons();
     InputHelper::ProcessMouseMovement();
+    InputHelper::ProcessMouseScroll();
 }
 
 glm::mat4 Camera::GetViewMatrix() const
@@ -41,8 +43,45 @@ glm::mat4 Camera::GetViewMatrix() const
     if (!ECS::Get().HasComponent<Transform>(id))
         return Math::Mat4d(0.0);
 
+    // Called every frame inside your render/update loop if follow is enabled
+    if (CameraService().Get().enabled)
+    {
+        const EntityID& targetID = CameraService().Get().targetEntity;
+
+        if (ECS::Get().HasComponent<Transform>(targetID))
+        {
+            auto& targetTransform = *ECS::Get().GetComponent<Transform>(targetID);
+            const Position& pos = targetTransform.position / METERS_PER_UNIT;
+            glm::vec3 targetPos = pos.GetWorld();
+
+            float distance = CameraService().Get().distance;
+            float yaw = CameraService().Get().yaw;
+            float pitch = CameraService().Get().pitch;
+
+            // Spherical to Cartesian
+            glm::vec3 direction;
+            direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+            direction.y = sin(glm::radians(pitch));
+            direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+            direction = glm::normalize(direction);
+
+            glm::vec3 cameraPos = targetPos - direction * distance;
+
+            // Now update camera's Transform
+            auto& cameraTransform = *ECS::Get().GetComponent<Transform>(id);
+            cameraTransform.position.SetWorld(cameraPos);
+
+            // Update camera direction
+            auto& camera = *ECS::Get().GetComponent<Camera>(id);
+            camera.SetFront(glm::normalize(targetPos - cameraPos));
+            camera.SetRight(glm::normalize(glm::cross(camera.GetFront(), camera.GetWorldUp())));
+            camera.SetUp(glm::cross(camera.GetRight(), camera.GetFront()));
+        }
+    }
+
     Transform& transform = *ECS::Get().GetComponent<Transform>(id);
     Position& pos = transform.position;
+
     return glm::lookAt(pos.GetWorld(), pos.GetWorld() + GetFront(), GetUp());
 }
 

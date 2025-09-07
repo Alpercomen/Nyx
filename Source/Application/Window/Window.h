@@ -38,6 +38,7 @@ namespace Nyx
 
 		static void ProcessMouseButtons();
 		static void ProcessMouseMovement();
+		static void ProcessMouseScroll();
 	};
 
 	struct InputCallbacks
@@ -45,6 +46,7 @@ namespace Nyx
 		static void MouseButtonCallback(GLFWwindow* window, int32 button, int32 action, int32 mods);
 		static void CursorPosCallback(GLFWwindow* window, float64 xPos, float64 yPos);
 		static void KeyboardCallback(GLFWwindow* window, int32 key, int32 scanCode, int32 action, int32 mods);
+		static void ScrollCallback(GLFWwindow* window, double xOffset, double yOffset);
 	};
 
 	class BasicWindow 

@@ -22,12 +22,12 @@ vec4 grid(vec3 fragPos3D, float scale)
     vec3 color = baseColor;
 
     //z axis
-    if (fragPos3D.x > -5 * minimumx && fragPos3D.x < 5 * minimumx)
-        color.z = 1.0;
+    if (fragPos3D.x > -10 * minimumx && fragPos3D.x < 10 * minimumx)
+        color.z = 0.4;
 
     //x axis
-    if (fragPos3D.z > -5 * minimumz && fragPos3D.z < 5 * minimumz)
-        color.x = 1.0;
+    if (fragPos3D.z > -10 * minimumz && fragPos3D.z < 10 * minimumz)
+        color.x = 0.4;
 
     float alpha = max(max(color.x, color.y), color.z);
 

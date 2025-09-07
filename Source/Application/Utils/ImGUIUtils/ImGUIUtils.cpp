@@ -3,6 +3,7 @@
 
 #include <spdlog/spdlog.h>
 #include <Application/Utils/ImGUIUtils/ImGUIUtils.h>
+#include <Application/Core/Services/CameraService/CameraService.h>
 
 void ImGUIUtils::Initialize(void* window)
 {
@@ -71,17 +72,22 @@ void ImGUIUtils::DrawSimulationInfo()
     auto& cameraIDs = ECS::Get().GetAllComponentIDs<Camera>();
 
     ImGui::Begin("Simulation Info");
-
     ImGui::Text("Objects: %d", static_cast<int>(spheres.size()));
+
+    if (CameraService().Get().enabled && ImGui::Button("Stop Following")) {
+        CameraService().Get().enabled = false;
+    }
+
     for (size_t i = 0; i < spheres.size(); ++i)
     {
         auto& sphere = spheres[i];
         const EntityID& id = sphereIDs[i];
 
+        String* name = nullptr;
         if (ECS::Get().HasComponent<Name>(id))
         {
-            const auto& name = ECS::Get().GetComponent<Name>(id)->name;
-            ImGui::Text("[%s]", name.data());
+            name = &ECS::Get().GetComponent<Name>(id)->name;
+            ImGui::Text("[%s]", name->data());
         }
 
         if (ECS::Get().HasComponent<Transform>(id))
@@ -91,6 +97,19 @@ void ImGUIUtils::DrawSimulationInfo()
             const auto& pos = transform.position.GetWorld();
             const auto& rot = transform.rotation.GetEulerAngles();
             const auto& sca = transform.scale.get();
+
+            if (name != nullptr)
+            {
+                String label = "Follow " + *name;
+
+                if (ImGui::Button(label.data())) {
+                    CameraService().Get().enabled = true;
+                    CameraService().Get().targetEntity = id;
+                    CameraService().Get().distance = (glm::length(sca) / METERS_PER_UNIT) * 2;
+                    CameraService().Get().yaw = 0.0f;
+                    CameraService().Get().pitch = 0.0f;
+                }
+            }
 
             ImGui::Text("Pos: (%.2f, %.2f, %.2f)", pos.x, pos.y, pos.z);
             ImGui::Text("Rot: (%.2f, %.2f, %.2f)", glm::degrees(rot.x), glm::degrees(rot.y), glm::degrees(rot.z));
@@ -108,7 +127,7 @@ void ImGUIUtils::DrawSimulationInfo()
 
             ImGui::Text("Vel: %.2f km/h", glm::length(velVec));
             ImGui::Text("Acc: %.2f km/h2", glm::length(accVec));
-            ImGui::Text("Angular Vel: %.2f km/h", glm::length(angularVel));
+            ImGui::Text("Angular Vel: %.10f km/h", glm::length(angularVel));
         }
     }
 

@@ -32,8 +32,8 @@ struct CameraDesc {
     float32 Zoom = 45.0f;
     float32 AspectRatio = 1.7777f;
 
-    float32 NearPlane = 0.1f;
-    float32 FarPlane = 100000.0f;
+    float32 NearPlane = 0.01f;
+    float32 FarPlane = (AU / METERS_PER_UNIT) * 2;
 };
 
 class Camera
