@@ -77,12 +77,12 @@ namespace Nyx {
         }
 
         Scale& operator+=(float scalar) {
-            m_scale += glm::vec3(scalar);
+            m_scale += Math::Vec3f(scalar);
             return *this;
         }
 
         Scale& operator-=(float scalar) {
-            m_scale -= glm::vec3(scalar);
+            m_scale -= Math::Vec3f(scalar);
             return *this;
         }
 

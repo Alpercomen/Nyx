@@ -2,6 +2,7 @@
 #include <Application/Core/Core.h>
 #include <Application/Core/Services/Managers/EntityManager/EntityManager.h>
 #include <Application/Resource/Components/Lighting/Light.h>
+#include <Application/Resource/Components/Components.h>
 
 namespace Nyx
 {
@@ -26,8 +27,15 @@ namespace Nyx
 					directionalLights.push_back(light);
 					break;
 				case LightType::POINT:
+				{
+					if (!ECS::Get().HasComponent<Transform>(entityID))
+						continue;
+
+					const Transform& transform = *ECS::Get().GetComponent<Transform>(entityID);
+					light->position = transform.position / METERS_PER_UNIT;
 					pointLights.push_back(light);
 					break;
+				}
 				}
 			}
 		}

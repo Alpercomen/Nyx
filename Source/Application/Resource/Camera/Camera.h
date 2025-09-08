@@ -18,10 +18,10 @@ enum Camera_Movement {
 };
 
 struct CameraDesc {
-    glm::vec3 Front = glm::vec3(0.0f, 0.0f, -1.0f);
-    glm::vec3 Up = glm::vec3(0.0f, 1.0f, 0.0f);
-    glm::vec3 Right = glm::vec3(1.0f, 0.0f, 0.0f);
-    glm::vec3 WorldUp = glm::vec3(0.0f, 1.0f, 0.0f);
+    Math::Vec3f Front = Math::Vec3f(0.0f, 0.0f, -1.0f);
+    Math::Vec3f Up = Math::Vec3f(0.0f, 1.0f, 0.0f);
+    Math::Vec3f Right = Math::Vec3f(1.0f, 0.0f, 0.0f);
+    Math::Vec3f WorldUp = Math::Vec3f(0.0f, 1.0f, 0.0f);
 
     float32 Yaw = -90.0f;
     float32 Pitch = 0.0f;
@@ -46,10 +46,10 @@ public:
     glm::mat4 GetViewMatrix() const;
     glm::mat4 GetProjectionMatrix() const;
 
-    const glm::vec3& GetFront() const { return m_cameraDesc.Front; }
-    const glm::vec3& GetUp() const { return m_cameraDesc.Up; }
-    const glm::vec3& GetRight() const { return m_cameraDesc.Right; }
-    const glm::vec3& GetWorldUp() const { return m_cameraDesc.WorldUp; }
+    const Math::Vec3f& GetFront() const { return m_cameraDesc.Front; }
+    const Math::Vec3f& GetUp() const { return m_cameraDesc.Up; }
+    const Math::Vec3f& GetRight() const { return m_cameraDesc.Right; }
+    const Math::Vec3f& GetWorldUp() const { return m_cameraDesc.WorldUp; }
 
     const float GetYaw() const { return m_cameraDesc.Yaw; }
     const float GetPitch() const { return m_cameraDesc.Pitch; }
@@ -62,10 +62,10 @@ public:
     const float GetNearPlane() const { return m_cameraDesc.NearPlane; }
     const float GetFarPlane() const { return m_cameraDesc.FarPlane; }
 
-    void SetFront(const glm::vec3& Front) { m_cameraDesc.Front = Front; }
-    void SetUp(const glm::vec3& Up) { m_cameraDesc.Up = Up; }
-    void SetRight(const glm::vec3& Right) { m_cameraDesc.Right = Right; }
-    void SetWorldUp(const glm::vec3& WorldUp) { m_cameraDesc.WorldUp = WorldUp; }
+    void SetFront(const Math::Vec3f& Front) { m_cameraDesc.Front = Front; }
+    void SetUp(const Math::Vec3f& Up) { m_cameraDesc.Up = Up; }
+    void SetRight(const Math::Vec3f& Right) { m_cameraDesc.Right = Right; }
+    void SetWorldUp(const Math::Vec3f& WorldUp) { m_cameraDesc.WorldUp = WorldUp; }
 
     void SetYaw(const float32& Yaw) { m_cameraDesc.Yaw = Yaw; }
     void SetPitch(const float32& Pitch) { m_cameraDesc.Pitch = Pitch; }

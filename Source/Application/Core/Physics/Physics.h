@@ -11,11 +11,11 @@ namespace Physics
     // Apply angular velocity to a transform quaternion
     void IntegrateAngularVelocity(Transform& tr, Rigidbody& rb, float dt)
     {
-        glm::vec3 w = rb.angularVelocity.GetWorld();
+        Math::Vec3f w = rb.angularVelocity.GetWorld();
         float wlen = glm::length(w);
         if (wlen > 1e-8f)
         {
-            glm::vec3 axis = w / wlen;
+            Math::Vec3f axis = w / wlen;
             glm::quat dq = glm::angleAxis(wlen * dt, axis);
             tr.rotation.SetQuaternion(glm::normalize(dq * tr.rotation.GetQuaternion()));
         }
@@ -31,7 +31,7 @@ namespace Physics
         Position& pos = transform.position;
         Velocity& vel = rigidbody.velocity;
 
-        glm::vec3 next = pos.GetWorld() + vel.GetWorld() * deltaTime * TIME_SCALE;
+        Math::Vec3f next = pos.GetWorld() + vel.GetWorld() * deltaTime * TIME_SCALE;
         pos.SetWorld(next);
 
         // Apply rotation

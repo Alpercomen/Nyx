@@ -11,11 +11,11 @@ public:
 	// CTOR
 	Velocity()
 	{
-		m_world = glm::vec3();
-		m_normalized = glm::vec3();
+		m_world = Math::Vec3f();
+		m_normalized = Math::Vec3f();
 	}
 
-	Velocity(glm::vec3 velocity, bool normal = false)
+	Velocity(Math::Vec3f velocity, bool normal = false)
 	{
 		normal ? SetNormal(velocity) : SetWorld(velocity);
 	}
@@ -23,11 +23,11 @@ public:
 	~Velocity() = default;
 
 	// Getters
-	const glm::vec3& GetWorld() const { return m_world; }
-	const glm::vec3& GetNormal() const { return m_normalized; }
+	const Math::Vec3f& GetWorld() const { return m_world; }
+	const Math::Vec3f& GetNormal() const { return m_normalized; }
 
 	// Setters
-	void SetWorld(const glm::vec3& velocity)
+	void SetWorld(const Math::Vec3f& velocity)
 	{
 		m_world = velocity;
 
@@ -36,7 +36,7 @@ public:
 		m_normalized.z = velocity.z / METERS_PER_UNIT;
 	}
 
-	void SetNormal(const glm::vec3& velocity)
+	void SetNormal(const Math::Vec3f& velocity)
 	{
 		m_world.x = velocity.x * METERS_PER_UNIT;
 		m_world.y = velocity.y * METERS_PER_UNIT;
@@ -52,10 +52,10 @@ public:
 		double nextY = GetWorld().y + acceleration.GetWorld().y * DELTA_TIME * TIME_SCALE;
 		double nextZ = GetWorld().z + acceleration.GetWorld().z * DELTA_TIME * TIME_SCALE;
 
-		SetWorld(glm::vec3(nextX, nextY, nextZ));
+		SetWorld(Math::Vec3f(nextX, nextY, nextZ));
 	}
 
 private:
-	glm::vec3 m_world;
-	glm::vec3 m_normalized;
+	Math::Vec3f m_world;
+	Math::Vec3f m_normalized;
 };

@@ -66,15 +66,15 @@ public:
 
 	// Scalar addition
 	Position operator+(float scalar) const {
-		return Position(this->m_world + glm::vec3(scalar));
+		return Position(this->m_world + Math::Vec3f(scalar));
 	}
 
 	// Scalar subtraction
 	Position operator-(float scalar) const {
-		return Position(this->m_world - glm::vec3(scalar));
+		return Position(this->m_world - Math::Vec3f(scalar));
 	}
 
-	// In-place versions (e.g., pos *= 2)
+	// In-place versions
 	Position& operator*=(float scalar) {
 		this->SetWorld(this->m_world * scalar);
 		return *this;
@@ -86,12 +86,12 @@ public:
 	}
 
 	Position& operator+=(float scalar) {
-		this->SetWorld(this->m_world + glm::vec3(scalar));
+		this->SetWorld(this->m_world + Math::Vec3f(scalar));
 		return *this;
 	}
 
 	Position& operator-=(float scalar) {
-		this->SetWorld(this->m_world - glm::vec3(scalar));
+		this->SetWorld(this->m_world - Math::Vec3f(scalar));
 		return *this;
 	}
 

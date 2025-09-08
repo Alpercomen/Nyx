@@ -49,7 +49,7 @@ namespace Nyx {
 
         // Rotate around world-space axis by angle (radians)
         void Rotate(const Math::Vec3d& axis, float angleRadians) {
-            Math::Quatf delta = glm::angleAxis(angleRadians, glm::normalize(glm::vec3(axis)));
+            Math::Quatf delta = glm::angleAxis(angleRadians, glm::normalize(Math::Vec3f(axis)));
             m_rotation = glm::normalize(delta * m_rotation);
         }
 

@@ -61,27 +61,27 @@ void InitializeCircularOrbit(EntityID satelliteID, EntityID attractorID, bool is
     auto& satelliteRig = *ECS::Get().GetComponent<Rigidbody>(satelliteID);
     auto& attractorRig = *ECS::Get().GetComponent<Rigidbody>(attractorID);
 
-    glm::vec3 direction = glm::normalize(attractorPos.GetWorld() - satellitePos.GetWorld());
+    Math::Vec3f direction = glm::normalize(attractorPos.GetWorld() - satellitePos.GetWorld());
     float distanceMeters = glm::length(attractorPos.GetWorld() - satellitePos.GetWorld());
 
     // Correct orbital speed calculation (SI units)
     double orbitalSpeed = std::sqrt(G * attractorRig.mass / distanceMeters);
 
     // Compute tangential direction
-    glm::vec3 up = glm::vec3(0, 1, 0);
+    Math::Vec3f up = Math::Vec3f(0, 1, 0);
 
     if (std::abs(glm::dot(direction, up)) > 0.99f)
-        up = glm::vec3(1, 0, 0); // avoid near-parallel vectors
+        up = Math::Vec3f(1, 0, 0); // avoid near-parallel vectors
 
-    glm::vec3 tangential = glm::normalize(glm::cross(direction, up));
-    glm::vec3 satelliteVel = tangential * static_cast<float>(orbitalSpeed);
+    Math::Vec3f tangential = glm::normalize(glm::cross(direction, up));
+    Math::Vec3f satelliteVel = tangential * static_cast<float>(orbitalSpeed);
 
     // Apply to satellite
     satelliteRig.velocity.SetWorld(attractorRig.velocity.GetWorld() + satelliteVel);
 
     // Conservation of momentum: Apply opposite to attractor
-    glm::vec3 momentum = satelliteVel * static_cast<float>(satelliteRig.mass);
-    glm::vec3 attractorDeltaVel = -momentum / static_cast<float>(attractorRig.mass);
+    Math::Vec3f momentum = satelliteVel * static_cast<float>(satelliteRig.mass);
+    Math::Vec3f attractorDeltaVel = -momentum / static_cast<float>(attractorRig.mass);
     attractorRig.velocity.SetWorld(attractorRig.velocity.GetWorld() + attractorDeltaVel);
 
     spdlog::info("Initialized orbit:");
@@ -115,7 +115,7 @@ void Attract(const EntityID& objID)
 		double dy = objTransform.position.GetWorld().y - obj2Transform.position.GetWorld().y;
 		double dz = objTransform.position.GetWorld().z - obj2Transform.position.GetWorld().z;
 
-		Math::Vec3d diff = glm::vec3(dx, dy, dz);
+		Math::Vec3d diff = Math::Vec3f(dx, dy, dz);
 		float distance = glm::length(diff);
 		Math::Vec3d unitVector = glm::normalize(diff);
 
@@ -164,5 +164,5 @@ void ApplyTidalLock(Transform& Ta, Transform& Tb, Rigidbody& Ra)
     Math::Quatf qWorld = glm::normalize(glm::quat_cast(basis));
 
     Ta.rotation.SetQuaternion(qWorld);
-    Ra.angularVelocity.SetWorld(glm::vec3(0.0f));
+    Ra.angularVelocity.SetWorld(Math::Vec3f(0.0f));
 }

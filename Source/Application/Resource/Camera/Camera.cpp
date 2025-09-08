@@ -15,14 +15,14 @@
 
 Camera::Camera()
 {
-    SetFront(glm::vec3(0.0f, 0.0f, -1.0f));
+    SetFront(Math::Vec3f(0.0f, 0.0f, -1.0f));
     SetMovementSpeed(3);
     SetMovementSpeedMultiplier(5.f);
     SetMouseSensitivity(0.1f);
     SetZoom(45.0f);
     SetYaw(-90.0f);
     SetPitch(0.0f);
-    SetWorldUp(glm::vec3(0.0f, 1.0f, 0.0f));
+    SetWorldUp(Math::Vec3f(0.0f, 1.0f, 0.0f));
 
     UpdateCameraVectors();
 
@@ -52,20 +52,20 @@ glm::mat4 Camera::GetViewMatrix() const
         {
             auto& targetTransform = *ECS::Get().GetComponent<Transform>(targetID);
             const Position& pos = targetTransform.position / METERS_PER_UNIT;
-            glm::vec3 targetPos = pos.GetWorld();
+            Math::Vec3f targetPos = pos.GetWorld();
 
             float distance = CameraService().Get().distance;
             float yaw = CameraService().Get().yaw;
             float pitch = CameraService().Get().pitch;
 
             // Spherical to Cartesian
-            glm::vec3 direction;
+            Math::Vec3f direction;
             direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
             direction.y = sin(glm::radians(pitch));
             direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
             direction = glm::normalize(direction);
 
-            glm::vec3 cameraPos = targetPos - direction * distance;
+            Math::Vec3f cameraPos = targetPos - direction * distance;
 
             // Now update camera's Transform
             auto& cameraTransform = *ECS::Get().GetComponent<Transform>(id);
@@ -160,7 +160,7 @@ void Camera::ProcessMouseMovement(float xoffset, float yoffset, bool constrainPi
 
 void Camera::UpdateCameraVectors()
 {
-    glm::vec3 front;
+    Math::Vec3f front;
     front.x = cos(glm::radians(GetYaw())) * cos(glm::radians(GetPitch()));
     front.y = sin(glm::radians(GetPitch()));
     front.z = sin(glm::radians(GetYaw())) * cos(glm::radians(GetPitch()));

@@ -246,14 +246,13 @@ namespace Nyx
 
 			Velocity earthAngularVelocity = LocalToWorld(Math::Vec3f(0.0, EARTH_ANGULAR_VELOCITY_RADIANS, 0.0), earthTransform);
 
-			EntityID cameraID = scenePtr->CreateCamera("Camera", Transform{ glm::vec3(AU / METERS_PER_UNIT, 0.0f, 10.0f) });
+			EntityID cameraID = scenePtr->CreateCamera("Camera", Transform{ Math::Vec3f(AU / METERS_PER_UNIT, 0.0f, 10.0f) });
 			EntityID moonID = scenePtr->CreatePlanet("Moon", moonTransform, Rigidbody{ MOON_MASS }, moonDesc);
 			EntityID earthID = scenePtr->CreatePlanet("Earth", earthTransform, Rigidbody{ EARTH_MASS , earthAngularVelocity }, earthDesc);
 			EntityID sunID = scenePtr->CreatePlanet("Sun", sunTransform, Rigidbody{ SUN_MASS }, sunDesc);
 
 			LightComponent pointLight;
 			pointLight.type = LightType::POINT;
-			pointLight.position = Position( Math::Vec3f(0.0, 0.0, 0.0) );
 			pointLight.color = Math::Vec3f(1.0, 1.0, 1.0);
 			pointLight.intensity = 1.0;
 			pointLight.range = SOL_SYSTEM_RADIUS;

@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <Application/Resource/Components/Components.h>
+#include <Application/Resource/Components/Transform/Transform.h>
 #include <Application/Core/Core.h>
 
 double GravitationalForce(double mu, double r);
