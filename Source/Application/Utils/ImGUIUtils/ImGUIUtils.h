@@ -20,9 +20,11 @@ namespace ImGUIUtils
 
 	ImVec2 DrawGameWindow(Engine* engine);
 
-	void DrawSimulationInfo();
-
 	void DrawSimulationControl(Engine* engine);
+
+	void DrawHierarchy();
+
+	void DrawInspector();
 
 	void DrawWindow(Engine* enginePtr, Scene* scenePtr);
 }

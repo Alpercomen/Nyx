@@ -3,6 +3,7 @@
 
 #include <spdlog/spdlog.h>
 #include <Application/Utils/ImGUIUtils/ImGUIUtils.h>
+#include <Application/Core/Services/Editor/Editor.h>
 #include <Application/Core/Services/CameraService/CameraService.h>
 
 void ImGUIUtils::Initialize(void* window)
@@ -63,32 +64,40 @@ ImVec2 ImGUIUtils::DrawGameWindow(Engine* engine)
     return textureSize;
 }
 
-void ImGUIUtils::DrawSimulationInfo()
+void ImGUIUtils::DrawSimulationControl(Engine* engine)
 {
-    auto& spheres = ECS::Get().GetAllComponents<Sphere>();
-    auto& sphereIDs = ECS::Get().GetAllComponentIDs<Sphere>();
+    ImGui::Begin("Simulation Control");
+    ImGui::SliderFloat("Time Scale", &TIME_SCALE, 0.0f, 50000.0f, "%.8f", ImGuiSliderFlags_Logarithmic);
+    ImGui::Checkbox("Show Grid", &engine->GetRenderer().m_gridEnabled);
+    ImGui::End();
+}
 
-    auto& cameras = ECS::Get().GetAllComponents<Camera>();
-    auto& cameraIDs = ECS::Get().GetAllComponentIDs<Camera>();
+void ImGUIUtils::DrawHierarchy()
+{
+    Optional<EntityID>& selectedEntity = Editor::Get().selectedEntity;
 
-    ImGui::Begin("Simulation Info");
-    ImGui::Text("Objects: %d", static_cast<int>(spheres.size()));
-
-    if (CameraService().Get().enabled && ImGui::Button("Stop Following")) {
-        CameraService().Get().enabled = false;
-    }
-
-    for (size_t i = 0; i < spheres.size(); ++i)
+    ImGui::Begin("Hierarchy");
+    for (EntityID entityID : ECS::Get().View<Name>())
     {
-        auto& sphere = spheres[i];
-        const EntityID& id = sphereIDs[i];
+        Name& name = *ECS::Get().GetComponent<Name>(entityID);
+        bool selected = (selectedEntity.has_value() && selectedEntity.value() == entityID);
+        if (ImGui::Selectable(name.name.data(), selected))
+            selectedEntity = entityID;
+    }
+    ImGui::End();
+}
 
-        String* name = nullptr;
-        if (ECS::Get().HasComponent<Name>(id))
-        {
-            name = &ECS::Get().GetComponent<Name>(id)->name;
-            ImGui::Text("[%s]", name->data());
-        }
+void ImGUIUtils::DrawInspector()
+{
+    Optional<EntityID>& selectedEntity = Editor::Get().selectedEntity;
+
+    ImGui::Begin("Inspector");
+    if (selectedEntity.has_value())
+    {
+        EntityID& id = selectedEntity.value();
+        String& name = ECS::Get().GetComponent<Name>(id)->name;
+
+        ImGui::Text("[%s]", name.data());
 
         if (ECS::Get().HasComponent<Transform>(id))
         {
@@ -98,11 +107,15 @@ void ImGUIUtils::DrawSimulationInfo()
             const auto& rot = transform.rotation.GetEulerAngles();
             const auto& sca = transform.scale.get();
 
-            if (name != nullptr)
-            {
-                String label = "Follow " + *name;
+            bool hasCamera = ECS::Get().HasComponent<Camera>(id);
 
-                if (ImGui::Button(label.data())) {
+            if (hasCamera == false)
+            {
+                if (CameraService().Get().enabled && CameraService().Get().targetEntity == id && ImGui::Button("Stop Following"))
+                    CameraService().Get().enabled = false;
+
+                if (CameraService().Get().enabled == false && ImGui::Button("Track"))
+                {
                     CameraService().Get().enabled = true;
                     CameraService().Get().targetEntity = id;
                     CameraService().Get().distance = (glm::length(sca) / METERS_PER_UNIT) * 2;
@@ -113,13 +126,22 @@ void ImGUIUtils::DrawSimulationInfo()
             }
 
             ImGui::Text("Pos: (%.2f, %.2f, %.2f)", pos.x, pos.y, pos.z);
-            ImGui::Text("Rot: (%.2f, %.2f, %.2f)", glm::degrees(rot.x), glm::degrees(rot.y), glm::degrees(rot.z));
-            ImGui::Text("Sca: (%.2f, %.2f, %.2f)", sca.x, sca.y, sca.z);
+            if (hasCamera)
+            {
+                const auto& camera = *ECS::Get().GetComponent<Camera>(id);
+                ImGui::Text("Yaw: %.2f", camera.GetYaw());
+                ImGui::Text("Pitch: %.2f", camera.GetPitch());
+            }
+            else
+            {
+                ImGui::Text("Rot: (%.2f, %.2f, %.2f)", glm::degrees(rot.x), glm::degrees(rot.y), glm::degrees(rot.z));
+                ImGui::Text("Sca: (%.2f, %.2f, %.2f)", sca.x, sca.y, sca.z);
+            }
         }
 
         if (ECS::Get().HasComponent<Rigidbody>(id))
         {
-
+            ImGui::Separator();
             const auto& rigidbody = *ECS::Get().GetComponent<Rigidbody>(id);
 
             const auto& velVec = rigidbody.velocity.GetWorld();
@@ -131,39 +153,6 @@ void ImGUIUtils::DrawSimulationInfo()
             ImGui::Text("Angular Vel: %.10f km/h", glm::length(angularVel));
         }
     }
-
-    ImGui::Separator();
-    ImGui::Text("Camera Info");
-
-    for (size_t i = 0; i < cameras.size(); ++i)
-    {
-        auto& camera = cameras[i];
-        const EntityID& id = cameraIDs[i];
-
-        if (!ECS::Get().HasComponent<Transform>(id) || !ECS::Get().HasComponent<Name>(id))
-            continue;
-
-        auto& transform = *ECS::Get().GetComponent<Transform>(id);
-
-        const auto& pos = transform.position;
-        const auto& posVec = pos.GetWorld();
-
-        const auto& name = ECS::Get().GetComponent<Name>(id)->name;
-
-        ImGui::Text("[%s]", name.data());
-        ImGui::Text("Pos: (%.2f, %.2f, %.2f)", posVec.x, posVec.y, posVec.z);
-        ImGui::Text("Yaw: %.2f", camera.GetYaw());
-        ImGui::Text("Pitch: %.2f", camera.GetPitch());
-    }
-
-    ImGui::End();
-}
-
-void ImGUIUtils::DrawSimulationControl(Engine* engine)
-{
-    ImGui::Begin("Simulation Control");
-    ImGui::SliderFloat("Time Scale", &TIME_SCALE, 0.0f, 50000.0f, "%.8f", ImGuiSliderFlags_Logarithmic);
-    ImGui::Checkbox("Show Grid", &engine->GetRenderer().m_gridEnabled);
     ImGui::End();
 }
 
@@ -175,8 +164,9 @@ void ImGUIUtils::DrawWindow(Engine* enginePtr, Scene* scenePtr)
 
     ImGUIUtils::InitDockableWindow();
     ImVec2 textureSize = ImGUIUtils::DrawGameWindow(enginePtr);
-    ImGUIUtils::DrawSimulationInfo();
     ImGUIUtils::DrawSimulationControl(enginePtr);
+    ImGUIUtils::DrawHierarchy();
+    ImGUIUtils::DrawInspector();
 
     Math::Vec2f textureSizeVec = { (int)textureSize.x, (int)textureSize.y };
     enginePtr->ResizeFBO(textureSizeVec, scenePtr);

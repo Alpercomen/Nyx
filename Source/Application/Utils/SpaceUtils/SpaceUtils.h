@@ -11,7 +11,7 @@ double CalculateOrbitalVelocity(double otherMass, double r);
 
 double RotationDegreeToLinearVelocity(float degreesPerSecond, float radiusMeters);
 
-void InitializeCircularOrbit(EntityID satelliteID, EntityID attractorID, bool isTidallyLocked = false);
+void InitializeCircularOrbit(EntityID satelliteID, EntityID attractorID, float32 inclination, bool isTidallyLocked = false);
 
 void Attract(const EntityID& objID);
 

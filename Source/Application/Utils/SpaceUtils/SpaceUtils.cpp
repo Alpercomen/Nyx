@@ -26,7 +26,7 @@ double RotationDegreeToLinearVelocity(float degreesPerSecond, float radiusMeters
     return (radiansPerSecond * radiusMeters) / METERS_PER_UNIT;
 }
 
-void InitializeCircularOrbit(EntityID satelliteID, EntityID attractorID, bool isTidallyLocked) {
+void InitializeCircularOrbit(EntityID satelliteID, EntityID attractorID, float32 inclination, bool isTidallyLocked) {
     // Ensure required components
     if (!ECS::Get().HasComponent<Transform>(satelliteID) ||
         !ECS::Get().HasComponent<Transform>(attractorID) ||

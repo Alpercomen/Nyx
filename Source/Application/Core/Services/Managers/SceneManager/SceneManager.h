@@ -220,6 +220,12 @@ namespace Nyx
 				R"(Nyx\Source\Assets\Textures\MoonTexture.jpg)"
 			);
 
+			SphereDesc mercuryDesc;
+			mercuryDesc.texture = &ResourceManager::GetMipmappedTexture(
+				"MercuryTexture",
+				R"(Nyx\Source\Assets\Textures\MercuryTexture.jpg)"
+			);
+
 			SphereDesc sunDesc;
 			sunDesc.emissiveColor = Math::Vec3f(1.0, 0.9, 0.7);
 			sunDesc.emissiveStrength = 1.0;
@@ -231,25 +237,31 @@ namespace Nyx
 			Position sunPosition(Math::Vec3f(0.0, 0.0, 0.0));
 			Position earthPosition(Math::Vec3f(AU, 0.0, 0.0));
 			Position moonPosition(Math::Vec3f(AU + EARTH_MOON_DISTANCE, 0.0, 0.0));
+			Position mercuryPosition(Math::Vec3f(MERCURY_SUN_DISTANCE, 0.0, 0.0));
 
 			Rotation sunRotation(0.0, 0.0, 0.0);
 			Rotation earthRotation(0.0, 0.0, glm::radians(EARTH_INCLINATION));
 			Rotation moonRotation(0.0, 0.0, 0.0);
+			Rotation mercuryRotation(0.0, 0.0, 0.0);
 
 			Scale earthSize(EARTH_RADIUS_EQUATORAL);
 			Scale moonSize(MOON_RADIUS_EQUATORAL);
 			Scale sunSize(SUN_RADIUS);
+			Scale mercurySize(MERCURY_EQUATORAL_RADIUS);
 
 			Transform earthTransform = Transform{ earthPosition, earthRotation, earthSize };
 			Transform moonTransform = Transform{ moonPosition, moonRotation, moonSize };
 			Transform sunTransform = Transform{ sunPosition, sunRotation, sunSize };
+			Transform mercuryTransform = Transform{ mercuryPosition, mercuryRotation, mercurySize };
 
 			Velocity earthAngularVelocity = LocalToWorld(Math::Vec3f(0.0, EARTH_ANGULAR_VELOCITY_RADIANS, 0.0), earthTransform);
+			Velocity mercuryAngularVelocity = LocalToWorld(Math::Vec3f(0.0, MERCURY_ANGULAR_VELOCITY_RADIANS, 0.0), mercuryTransform);
 
 			EntityID cameraID = scenePtr->CreateCamera("Camera", Transform{ Math::Vec3f(AU / METERS_PER_UNIT, 0.0f, 10.0f) });
 			EntityID moonID = scenePtr->CreatePlanet("Moon", moonTransform, Rigidbody{ MOON_MASS }, moonDesc);
 			EntityID earthID = scenePtr->CreatePlanet("Earth", earthTransform, Rigidbody{ EARTH_MASS , earthAngularVelocity }, earthDesc);
 			EntityID sunID = scenePtr->CreatePlanet("Sun", sunTransform, Rigidbody{ SUN_MASS }, sunDesc);
+			EntityID mercuryID = scenePtr->CreatePlanet("Mercury", mercuryTransform, Rigidbody{ MERCURY_MASS , mercuryAngularVelocity }, mercuryDesc);
 
 			LightComponent pointLight;
 			pointLight.type = LightType::POINT;
@@ -259,8 +271,9 @@ namespace Nyx
 			pointLight.decay = 1 / SOL_SYSTEM_RADIUS;
 			ECS::Get().AddComponent(sunID, pointLight);
 
-			InitializeCircularOrbit(earthID, sunID);
-			InitializeCircularOrbit(moonID, earthID, true);
+			InitializeCircularOrbit(mercuryID, sunID, 0.0);
+			InitializeCircularOrbit(earthID, sunID, 0.0);
+			InitializeCircularOrbit(moonID, earthID, 0.0, true);
 		}
 
 	private:
