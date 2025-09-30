@@ -11,13 +11,9 @@ void RegisterComponents()
 
             auto& t = *ECS::Get().GetComponent<Transform>(id);
 
-            Position scaledPos = t.position / METERS_PER_UNIT;
-            Scale scaledSca = t.scale / METERS_PER_UNIT;
-            
-
-            addEditorVec3(form, "Position", scaledPos.GetWorld());
+            addEditorVec3(form, "Position", t.position.GetWorld());
             addEditorVec3(form, "Rotation", t.rotation.GetEulerAngles());
-            addEditorVec3(form, "Scale", scaledSca.get());
+            addEditorVec3(form, "Scale", t.scale.get());
             return &t;
         });
 
@@ -28,6 +24,7 @@ void RegisterComponents()
                 return nullptr;
 
             auto& c = *ECS::Get().GetComponent<Camera>(id);
+
             addEditor(form, "FOV", c.GetZoom(), 1.0, 179.0, 0.1);
             addEditor(form, "Near", c.GetNearPlane(), 0.001, 1000.0, 0.001);
             addEditor(form, "Far", c.GetFarPlane(), 1.0, 100000.0, 1.0);

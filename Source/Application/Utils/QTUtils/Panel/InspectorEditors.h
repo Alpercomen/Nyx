@@ -76,8 +76,12 @@ inline QWidget* addEditorVec3(QFormLayout* form, const char* name, Vec3 v)
 {
     QWidget* row = new QWidget;
 
-    auto* layout = new QHBoxLayout(row); layout->setContentsMargins(0, 0, 0, 0);
-    auto* xs = new QDoubleSpinBox; auto* ys = new QDoubleSpinBox; auto* zs = new QDoubleSpinBox;
+    auto* layout = new QHBoxLayout(row); 
+    layout->setContentsMargins(0, 0, 0, 0);
+
+    auto* xs = new QDoubleSpinBox;
+    auto* ys = new QDoubleSpinBox;
+    auto* zs = new QDoubleSpinBox;
 
     for (auto* s : { xs,ys,zs }) 
     { 
@@ -94,7 +98,9 @@ inline QWidget* addEditorVec3(QFormLayout* form, const char* name, Vec3 v)
     QObject::connect(ys, qOverload<double>(&QDoubleSpinBox::valueChanged), [&v](double y) { v.y = float(y); });
     QObject::connect(zs, qOverload<double>(&QDoubleSpinBox::valueChanged), [&v](double z) { v.z = float(z); });
 
-    layout->addWidget(xs); layout->addWidget(ys); layout->addWidget(zs);
+    layout->addWidget(xs); 
+    layout->addWidget(ys); 
+    layout->addWidget(zs);
 
     form->addRow(new QLabel(name), row);
 

@@ -18,7 +18,7 @@ vec4 grid(vec3 fragPos3D, float scale)
     float minimumz = min(derivative.y, 1);
     float minimumx = min(derivative.x, 1);
     float visibility = 1.0 - min(line, 1.0);
-    vec3 baseColor = mix(vec3(0.0), vec3(0.15), visibility); // Dark background, bright grid lines
+    vec3 baseColor = mix(vec3(0.0), vec3(0.2), visibility); // Dark background, bright grid lines
     vec3 color = baseColor;
 
     //z axis
