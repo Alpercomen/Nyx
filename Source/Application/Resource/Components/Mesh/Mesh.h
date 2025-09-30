@@ -4,10 +4,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <string>
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-
+#include <Application/Core/Core.h>
 #include <Application/Core/Services/Managers/EntityManager/EntityManager.h>
 #include <Application/Core/Services/Managers/ResourceManager/ResourceManager.h>
 #include <Application/Core/Services/Pipeline/Immediate/Immediate.h>

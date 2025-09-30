@@ -150,14 +150,7 @@ namespace Nyx
 			while (m_scenes.contains(sceneID)) 
 				++sceneID;
 
-			if (sceneID == NO_ID) 
-			{
-				spdlog::critical("SceneID overflow: exhausted all SceneIDs!");
-				return NO_ID;
-			}
-
-			Scene newScene;
-			m_scenes[sceneID] = newScene;
+			m_scenes[sceneID] = MakeShared<Scene>();
 			m_activeSceneID = sceneID;
 
 			return sceneID;
@@ -176,11 +169,11 @@ namespace Nyx
 			m_scenes.erase(it);
 		}
 
-		Scene* GetScene(SceneID& id)
+		SharedPtr<Scene> GetScene(SceneID& id)
 		{
 			auto it = m_scenes.find(id);
 			if (it != m_scenes.end())
-				return &m_scenes[id];
+				return m_scenes[id];
 
 			spdlog::critical("Could not get the scene with the given ID = {} ", id);
 			return nullptr;
@@ -194,16 +187,22 @@ namespace Nyx
 				spdlog::error("Scene ID {} does not exist!", id);
 		}
 
-		Scene* GetActiveScene() 
+		SharedPtr<Scene> GetActiveScene()
 		{
 			if (m_scenes.find(m_activeSceneID) != m_scenes.end())
-				return &m_scenes[m_activeSceneID];
+				return m_scenes[m_activeSceneID];
+
 			return nullptr;
 		}
 
-		void GenerateEntities(SceneID& sceneID)
+		SceneID GetActiveSceneID() const
 		{
-			Scene* scenePtr = GetScene(sceneID);
+			return m_activeSceneID;
+		}
+
+		void GenerateEntities(SceneID sceneID)
+		{
+			SharedPtr<Scene> scenePtr = GetScene(sceneID);
 
 			if (scenePtr == nullptr)
 				return;
@@ -278,6 +277,6 @@ namespace Nyx
 
 	private:
 		SceneID m_activeSceneID = NO_ID;
-		HashMap<SceneID, Scene> m_scenes;
+		HashMap<SceneID, SharedPtr<Scene>> m_scenes;
 	};
 }

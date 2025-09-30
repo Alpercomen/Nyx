@@ -1,8 +1,5 @@
+#pragma once
 #include "Camera.h"
-
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-#include <spdlog/spdlog.h>
 
 #include <Application/Core/Core.h>
 #include <Application/Window/Window.h>
@@ -26,7 +23,6 @@ Camera::Camera()
 
     UpdateCameraVectors();
 
-    InputHelper::ProcessMouseButtons();
     InputHelper::ProcessMouseMovement();
     InputHelper::ProcessMouseScroll();
 }

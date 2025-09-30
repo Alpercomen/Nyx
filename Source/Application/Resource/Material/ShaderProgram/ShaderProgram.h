@@ -1,37 +1,39 @@
 #pragma once
 
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-
 #include <Application/Core/Core.h>
 #include <Application/Utils/ShaderUtils/ShaderUtils.h>
 
 namespace Nyx
 {
-	class Shader
-	{
-	public:
-		Shader()
-		{
-			id = NO_ID;
-		}
+    class Shader
+    {
+    public:
+        Shader()
+            : id(NO_ID)
+        {
+        }
 
-		Shader(const String& vertexPath, const String& fragmentPath)
-		{
-			id = CreateShaderProgram(vertexPath, fragmentPath);
-		}
+        // Store the paths; do not compile yet.
+        Shader(const String& vertexPath, const String& fragmentPath)
+            : id(NO_ID), vsPath(vertexPath), fsPath(fragmentPath)
+        {
+        }
 
-		void Use() const
-		{
-			glUseProgram(id);
-		}
+        // First call compiles/links; subsequent calls just bind.
+        void Use()
+        {
+            if (id == NO_ID)
+            {
+                id = CreateShaderProgram(vsPath, fsPath);
+            }
+            glUseProgram(id);
+        }
 
-		uint32 GetID() const
-		{
-			return id;
-		}
+        uint32 GetID() const { return id; }
 
-	private:
-		uint32 id;
-	};
+    private:
+        uint32 id;
+        String vsPath;
+        String fsPath;
+    };
 }

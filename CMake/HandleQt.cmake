@@ -1,16 +1,11 @@
-if(QT_VERSION VERSION_LESS 6.3)
-    macro(qt_standard_project_setup)
-        set(CMAKE_AUTOMOC ON)
-        set(CMAKE_AUTOUIC ON)
-    endmacro()
-endif()
+# CMake/HandleQt.cmake
+include_guard(GLOBAL)
 
-if(QT_VERSION VERSION_LESS 6.0)
-    macro(qt_add_executable name)
-         if(ANDROID)
-            add_library(name SHARED ${ARGN})
-        else()
-            add_executable(${ARGV})
-        endif()
-    endmacro()
-endif()
+# Prefer Qt6, fall back to Qt5
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+
+# Good defaults for QObject/QRC/UI
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTORCC ON)

@@ -1,6 +1,5 @@
+#pragma once
 #include "ShaderUtils.h"
-
-#include <spdlog/spdlog.h>
 
 static String ReadFile(const String& filePath)
 {

@@ -8,38 +8,45 @@ namespace Nyx
 {
 	Texture::Texture(const String& path, bool flipVertically)
 	{
-		TextureData img = TextureLoader::Load(path, flipVertically);
-		
-		if (!img.IsValid())
-		{
-			throw std::runtime_error("Failed to load texture: " + path);
-		}
+        TextureData img = TextureLoader::Load(path, flipVertically);
+        if (!img.IsValid()) {
+            throw std::runtime_error("Failed to load texture: " + path);
+        }
 
-		GLenum format = GL_RGB;
-		if (m_channels == 1)
-			format = GL_RED;
-		else if (m_channels == 3)
-			format = GL_RGB;
-		else if (m_channels == 4)
-			format = GL_RGBA;
+        // Assign first, then decide the format
+        m_width = img.width;
+        m_height = img.height;
+        m_channels = img.channels;
 
-		glGenTextures(1, &m_textureID);
-		glBindTexture(GL_TEXTURE_2D, m_textureID);
+        GLenum format = GL_RGB;
+        if (m_channels == 1)      format = GL_RED;
+        else if (m_channels == 3) format = GL_RGB;
+        else if (m_channels == 4) format = GL_RGBA;
 
-		m_width = img.width;
-		m_height = img.height;
-		m_channels = img.channels;
+        glGenTextures(1, &m_textureID);
+        glBindTexture(GL_TEXTURE_2D, m_textureID);
 
-		glTexImage2D(GL_TEXTURE_2D, 0, format, m_width, m_height, 0, format, GL_UNSIGNED_BYTE, img.pixels);
-		glGenerateMipmap(GL_TEXTURE_2D);
+        // For 1- or 3-channel data, avoid row padding issues
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-		// Set default parameters
-		glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, m_width, m_height, 0,
+            format, GL_UNSIGNED_BYTE, img.pixels);
+        glGenerateMipmap(GL_TEXTURE_2D);
 
-		TextureLoader::Free(img);
+        // Use bind-to-edit API in GL 3.3 (NOT glTextureParameteri)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        // Optional: swizzle for single-channel textures (visualization)
+        // if (m_channels == 1) {
+        //     GLint swizzle[] = { GL_RED, GL_RED, GL_RED, GL_ONE };
+        //     glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzle);
+        // }
+
+        glBindTexture(GL_TEXTURE_2D, 0);
+        TextureLoader::Free(img);
 	}
 
 	Texture::~Texture()

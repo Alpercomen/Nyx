@@ -63,5 +63,5 @@ void main()
     vec4 g2 = grid(fragPos3D, 10.0);
     vec4 finalColor = (g1 + g2) * fading;
 
-    FragColor = vec4(finalColor); // Keep alpha 1 if you're not using blending
+    FragColor = vec4(finalColor);
 }

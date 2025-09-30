@@ -1,6 +1,7 @@
-#include <GLFW/glfw3.h>
+#pragma once
 #include <Application/Core/Services/Input/InputDispatcher.h>
 #include <Application/Constants/Constants.h>
+#include <Application/Core/Core.h>
 
 namespace Nyx
 {

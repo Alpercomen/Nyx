@@ -1,5 +1,4 @@
 #pragma once
-#include <Application/Core/Core.h>
 #include <Application/Core/Services/Input/InputEvent.h>
 #include <Application/Resource/Camera/Camera.h>
 
