@@ -89,55 +89,63 @@ void InitializeCircularOrbit(EntityID satelliteID, EntityID attractorID, float32
     spdlog::info(" - Attractor vel = ({:.6f}, {:.6f}, {:.6f})", attractorDeltaVel.x, attractorDeltaVel.y, attractorDeltaVel.z);
 }
 
-void Attract(const EntityID& objID)
+void Attract()
 {
-	if (!ECS::Get().HasComponent<Rigidbody>(objID) || !ECS::Get().HasComponent<Transform>(objID))
-		return;
+    auto& ids = ECS::Get().GetAllComponentIDs<Rigidbody>();
 
-    auto sphereIDs = ECS::Get().GetAllComponentIDs<Sphere>();
+    for (auto id : ids)
+    {
+        auto& rb = *ECS::Get().GetComponent<Rigidbody>(id);
+        rb.acceleration = Math::Vec3f(0.0);
+    }
 
-	for (size_t i = 0; i < sphereIDs.size(); ++i)
-	{
-        const EntityID& id = sphereIDs[i];
-		if (objID == id)
-			continue;
-
-        if (!ECS::Get().HasComponent<Rigidbody>(id) || !ECS::Get().HasComponent<Transform>(id))
+    // --- compute pairwise accelerations ---
+    for (size_t i = 0; i < ids.size(); ++i)
+    {
+        const EntityID& aID = ids[i];
+        if (!ECS::Get().HasComponent<Rigidbody>(aID) || !ECS::Get().HasComponent<Transform>(aID))
             continue;
 
-        auto& objTransform  = *ECS::Get().GetComponent<Transform>(objID);
-        auto& objRigidbody  = *ECS::Get().GetComponent<Rigidbody>(objID);
+        auto& aBody = *ECS::Get().GetComponent<Rigidbody>(aID);
+        auto& aTransform = *ECS::Get().GetComponent<Transform>(aID);
 
-		auto& obj2Transform  = *ECS::Get().GetComponent<Transform>(id);
-		auto& obj2Rigidbody  = *ECS::Get().GetComponent<Rigidbody>(id);
+        const Math::Vec3d posA = aTransform.position.GetWorld();
 
-		double dx = objTransform.position.GetWorld().x - obj2Transform.position.GetWorld().x;
-		double dy = objTransform.position.GetWorld().y - obj2Transform.position.GetWorld().y;
-		double dz = objTransform.position.GetWorld().z - obj2Transform.position.GetWorld().z;
-
-		Math::Vec3d diff = Math::Vec3f(dx, dy, dz);
-		float distance = glm::length(diff);
-		Math::Vec3d unitVector = glm::normalize(diff);
-
-		float Gforce = (G * objRigidbody.mass * obj2Rigidbody.mass) / (distance * distance);
-		float acc = Gforce / obj2Rigidbody.mass;
-
-        Math::Vec3d accVec(acc * unitVector.x, acc * unitVector.y, acc * unitVector.z);
-		Acceleration attraction(accVec);
-
-        obj2Rigidbody.acceleration = attraction;
-        obj2Rigidbody.velocity.Accelerate(attraction);
-
-        // If object is tidally locked to another object
-        if (ECS::Get().HasComponent<TidallyLocked>(objID))
+        for (size_t j = i + 1; j < ids.size(); ++j)
         {
-            const auto& lockedEntityId = ECS::Get().GetComponent<TidallyLocked>(objID)->lockedEntity;
+            const EntityID& bID = ids[j];
+            if (!ECS::Get().HasComponent<Rigidbody>(bID) || !ECS::Get().HasComponent<Transform>(bID))
+                continue;
 
-            if (lockedEntityId == id)
-                ApplyTidalLock(objTransform, obj2Transform, objRigidbody);
+            auto& bBody = *ECS::Get().GetComponent<Rigidbody>(bID);
+            auto& bTransform = *ECS::Get().GetComponent<Transform>(bID);
+
+            const Math::Vec3d posB = bTransform.position.GetWorld();
+
+            Math::Vec3d delta = posB - posA;
+            double distSq = glm::dot(delta, delta) + 1e-6;  // prevent div/0
+            double dist = sqrt(distSq);
+            Math::Vec3d dir = delta / dist;
+
+            // Newton’s law of universal gravitation
+            double force = (G * aBody.mass * bBody.mass) / distSq;
+
+            // accelerations
+            Math::Vec3f accA = dir * (force / aBody.mass);
+            Math::Vec3f accB = -dir * (force / bBody.mass);
+
+            aBody.acceleration += accA;
+            bBody.acceleration += accB;
+
+            if (ECS::Get().HasComponent<TidallyLocked>(aID))
+            {
+                const auto& lockedEntityId = ECS::Get().GetComponent<TidallyLocked>(aID)->lockedEntity;
+
+                if (lockedEntityId == bID)
+                    ApplyTidalLock(aTransform, bTransform, aBody);
+            }
         }
-
-	}
+    }
 }
 
 // Make Ta tidally locked towards Tb

@@ -23,6 +23,9 @@ public:
 	~Velocity() = default;
 
 	// Getters
+	Math::Vec3f& GetWorld() { return m_world; }
+	Math::Vec3f& GetNormal() { return m_normalized; }
+
 	const Math::Vec3f& GetWorld() const { return m_world; }
 	const Math::Vec3f& GetNormal() const { return m_normalized; }
 

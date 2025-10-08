@@ -13,6 +13,6 @@ double RotationDegreeToLinearVelocity(float degreesPerSecond, float radiusMeters
 
 void InitializeCircularOrbit(EntityID satelliteID, EntityID attractorID, float32 inclination, bool isTidallyLocked = false);
 
-void Attract(const EntityID& objID);
+void Attract();
 
 void ApplyTidalLock(Transform& Ta, Transform& Tb, Rigidbody& Ra);

@@ -11,15 +11,18 @@ namespace Nyx
 {
 	using BuildUIFn = function<void* (EntityID, QFormLayout*, QWidget*)>;
 
-    struct ComponentInfo {
+    struct ComponentInfo 
+    {
         String  displayName;
         BuildUIFn    buildUI;
     };
 
-    class ComponentRegistry : public Singleton<ComponentRegistry> {
+    class ComponentRegistry : public Singleton<ComponentRegistry> 
+    {
     public:
         template<typename T>
-        void registerComponent(const std::string& displayName, BuildUIFn uiBuilder) {
+        void registerComponent(const std::string& displayName, BuildUIFn uiBuilder) 
+        {
             _components.emplace_back(ComponentInfo{ displayName, std::move(uiBuilder) });
             _byType[std::type_index(typeid(T))] = &_components.back();
         }

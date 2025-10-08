@@ -21,35 +21,35 @@ namespace Physics
         }
     }
 
-    void Iterate(const EntityID& objID, float deltaTime)
+    void Integrate(float deltaTime)
     {
         const float dt = deltaTime * TIME_SCALE;
 
-        Transform& transform = *ECS::Get().GetComponent<Transform>(objID);
-        Rigidbody& rigidbody = *ECS::Get().GetComponent<Rigidbody>(objID);
+        auto& ids = ECS::Get().GetAllComponentIDs<Rigidbody>();
+        for (const EntityID& id : ids)
+        {
+            if (!ECS::Get().HasComponent<Rigidbody>(id) || !ECS::Get().HasComponent<Transform>(id))
+                continue;
 
-        Position& pos = transform.position;
-        Velocity& vel = rigidbody.velocity;
+            auto& rb = *ECS::Get().GetComponent<Rigidbody>(id);
+            auto& tr = *ECS::Get().GetComponent<Transform>(id);
 
-        Math::Vec3f next = pos.GetWorld() + vel.GetWorld() * deltaTime * TIME_SCALE;
-        pos.SetWorld(next);
+            Math::Vec3f vel = rb.velocity.GetWorld();
+            Math::Vec3f pos = tr.position.GetWorld();
 
-        // Apply rotation
-        IntegrateAngularVelocity(transform, rigidbody, dt);
+            vel += rb.acceleration.GetWorld() * dt;
+            pos += vel * dt;
+
+            rb.velocity.SetWorld(vel);
+            tr.position.SetWorld(pos);
+
+            IntegrateAngularVelocity(tr, rb, dt);
+        }
     }
 
 	void Update(float deltaTime)
 	{
-        const auto& sphereIDs = ECS::Get().GetAllComponentIDs<Sphere>();
-
-        for (size_t i = 0; i < sphereIDs.size(); ++i)
-        {
-            const EntityID& id = sphereIDs[i];
-            if (!ECS::Get().HasComponent<Transform>(id) || !ECS::Get().HasComponent<Rigidbody>(id))
-                continue;
-
-            Attract(id);
-            Iterate(id, deltaTime);
-        }
+        Attract();
+        Integrate(deltaTime);
 	}
 }

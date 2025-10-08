@@ -6,3 +6,9 @@
 #include <Application/Resource/Components/Components.h>
 
 void RegisterComponents();
+
+class Editor : public Singleton<Editor>
+{
+public:
+	Optional<EntityID> selectedEntity;
+};

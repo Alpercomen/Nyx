@@ -47,7 +47,7 @@ namespace Nyx
 
 			for (int i = 0; i < count; ++i)
 			{
-				const auto* l = directionalLights[i];
+				const auto l = directionalLights[i];
 				String base = "uDirectionalLights[" + std::to_string(i) + "]";
 
 				glUniform3fv(glGetUniformLocation(shaderID, (base + ".direction").c_str()), 1, glm::value_ptr(l->direction));
@@ -60,7 +60,7 @@ namespace Nyx
 
 			for (int i = 0; i < count; ++i)
 			{
-				const auto* l = pointLights[i];
+				const auto l = pointLights[i];
 				String base = "uPointLights[" + std::to_string(i) + "]";
 
 				glUniform3fv(glGetUniformLocation(shaderID, (base + ".position").c_str()), 1, glm::value_ptr(l->position.GetWorld()));

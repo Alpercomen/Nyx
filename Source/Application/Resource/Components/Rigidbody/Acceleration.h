@@ -21,6 +21,9 @@ public:
 	~Acceleration() = default;
 
 	// Getters
+	Math::Vec3f& GetWorld() { return m_world; }
+	Math::Vec3f& GetNormal() { return m_normalized; }
+
 	const Math::Vec3f& GetWorld() const { return m_world; }
 	const Math::Vec3f& GetNormal() const { return m_normalized; }
 
@@ -41,6 +44,71 @@ public:
 		m_world.z = acceleration.z * METERS_PER_UNIT;
 
 		m_normalized = acceleration;
+	}
+
+	/*
+		OPERATOR OVERLOAD
+	*/
+
+	// Scalar multiplication
+	Acceleration operator*(float scalar) const {
+		return Acceleration(this->m_world * scalar);
+	}
+
+	// Scalar division
+	Acceleration operator/(float scalar) const {
+		return Acceleration(this->m_world / scalar);
+	}
+
+	// Scalar addition
+	Acceleration operator+(float scalar) const {
+		return Acceleration(this->m_world + Math::Vec3f(scalar));
+	}
+
+	// Scalar subtraction
+	Acceleration operator-(float scalar) const {
+		return Acceleration(this->m_world - Math::Vec3f(scalar));
+	}
+
+	// In-place versions
+	Acceleration& operator*=(float scalar) {
+		this->SetWorld(this->m_world * scalar);
+		return *this;
+	}
+
+	Acceleration& operator/=(float scalar) {
+		this->SetWorld(this->m_world / scalar);
+		return *this;
+	}
+
+	Acceleration& operator+=(float scalar) {
+		this->SetWorld(this->m_world + Math::Vec3f(scalar));
+		return *this;
+	}
+
+	Acceleration& operator-=(float scalar) {
+		this->SetWorld(this->m_world - Math::Vec3f(scalar));
+		return *this;
+	}
+
+	Acceleration& operator*=(Math::Vec3f& acc) {
+		this->SetWorld(this->m_world * acc);
+		return *this;
+	}
+
+	Acceleration& operator/=(Math::Vec3f& acc) {
+		this->SetWorld(this->m_world / acc);
+		return *this;
+	}
+
+	Acceleration& operator+=(Math::Vec3f& acc) {
+		this->SetWorld(this->m_world + acc);
+		return *this;
+	}
+
+	Acceleration& operator-=(Math::Vec3f& acc) {
+		this->SetWorld(this->m_world - acc);
+		return *this;
 	}
 
 private:

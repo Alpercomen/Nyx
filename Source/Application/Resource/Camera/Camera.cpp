@@ -46,9 +46,9 @@ glm::mat4 Camera::GetViewMatrix() const
 
         if (ECS::Get().HasComponent<Transform>(targetID))
         {
-            auto& targetTransform = *ECS::Get().GetComponent<Transform>(targetID);
+            const auto& targetTransform = *ECS::Get().GetComponent<Transform>(targetID);
             const Position& pos = targetTransform.position / METERS_PER_UNIT;
-            Math::Vec3f targetPos = pos.GetWorld();
+            const Math::Vec3f& targetPos = pos.GetWorld();
 
             float distance = CameraService().Get().distance;
             float yaw = CameraService().Get().yaw;

@@ -23,6 +23,9 @@ public:
 	~Position() = default;
 
 	// Getters
+	Math::Vec3f& GetWorld() { return m_world; }
+	Math::Vec3f& GetNormal() { return m_normalized; }
+
 	const Math::Vec3f& GetWorld() const { return m_world; }
 	const Math::Vec3f& GetNormal() const { return m_normalized; }
 
@@ -45,7 +48,7 @@ public:
 		m_normalized = position;
 	}
 
-	double distance3D(const Position& other) const
+	double distance3D(Position other)
 	{
 		return glm::distance(this->GetWorld(), other.GetWorld());
 	}

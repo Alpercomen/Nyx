@@ -38,9 +38,8 @@ namespace Nyx {
         }
 
         // Access quaternion
-        Math::Quatf GetQuaternion() const {
-            return m_rotation;
-        }
+        Math::Quatf& GetQuaternion() { return m_rotation; }
+        const Math::Quatf& GetQuaternion() const { return m_rotation; }
 
         // Return Euler angles in radians
         Math::Vec3f GetEulerAngles() const {

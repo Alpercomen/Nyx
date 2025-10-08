@@ -82,6 +82,8 @@ public:
     void ProcessMouseMovement(float xoffset, float yoffset, bool constrainPitch = true);
     void UpdateCameraVectors();
 
+    CameraDesc& GetCameraDesc() { return m_cameraDesc; }
+
 private:
     CameraDesc m_cameraDesc;
 };
