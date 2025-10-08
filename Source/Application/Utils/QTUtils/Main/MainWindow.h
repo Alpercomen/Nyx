@@ -15,6 +15,10 @@ public:
 private:
 	// helpers
 	void buildMenusAndToolbars();
+	void buildFastBackward(QToolBar* tb);
+	void buildFastForward(QToolBar* tb);
+	void buildPlay(QToolBar* tb);
+	void buildStop(QToolBar* tb);
 	void buildContentBrowser();
 	void buildHierarchyAndInspector();
 
@@ -30,6 +34,7 @@ private:
 	QAction* actPlay = nullptr;
 	QAction* actStop = nullptr;
 	QAction* actFF = nullptr;
+	QAction* actFB = nullptr;
 
 	// Nyx
 	SharedPtr<Engine> engine;

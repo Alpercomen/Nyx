@@ -67,13 +67,51 @@ void MainWindow::buildMenusAndToolbars()
 
 	tb->addWidget(leftSpacer);
 
-	actPlay = tb->addAction(style()->standardIcon(QStyle::SP_MediaPlay), "Play");
-	actStop = tb->addAction(style()->standardIcon(QStyle::SP_MediaStop), "Stop");
-	actFF = tb->addAction(style()->standardIcon(QStyle::SP_MediaSkipForward), "Fast-Forward");
+	buildFastBackward(tb);
+	buildPlay(tb);
+	buildStop(tb);
+	buildFastForward(tb);
 
 	tb->addWidget(rightSpacer);
-
 	tb->setMovable(false);
+}
+
+void MainWindow::buildFastBackward(QToolBar* tb)
+{
+	actFB = tb->addAction(style()->standardIcon(QStyle::SP_MediaSkipBackward), "Fast-Backward");
+	connect(actFB, &QAction::triggered, this, [&]() {
+	if (TIME_SCALE > 1.0f)
+		TIME_SCALE = std::max(TIME_SCALE / 10.0f, TIME_SCALE_MIN);
+
+	statusBar()->showMessage(QString("Speed: %1x").arg(TIME_SCALE));
+	});
+}
+
+void MainWindow::buildFastForward(QToolBar* tb)
+{
+	actFF = tb->addAction(style()->standardIcon(QStyle::SP_MediaSkipForward), "Fast-Forward");
+	connect(actFF, &QAction::triggered, this, [&]() {
+		TIME_SCALE = std::min(TIME_SCALE * 10.0f, TIME_SCALE_MAX);
+		statusBar()->showMessage(QString("Fast-Forward: %1x").arg(TIME_SCALE));
+	});
+}
+
+void MainWindow::buildPlay(QToolBar* tb)
+{
+	actPlay = tb->addAction(style()->standardIcon(QStyle::SP_MediaPlay), "Play");
+	connect(actPlay, &QAction::triggered, this, [&]() {
+		TIME_SCALE = 1.0f;
+		statusBar()->showMessage("Simulation running at 1x");
+	});
+}
+
+void MainWindow::buildStop(QToolBar* tb)
+{
+	actStop = tb->addAction(style()->standardIcon(QStyle::SP_MediaStop), "Stop");
+	connect(actStop, &QAction::triggered, this, [&]() {
+		TIME_SCALE = 0.0f;
+		statusBar()->showMessage("Simulation stopped");
+	});
 }
 
 void MainWindow::buildContentBrowser()

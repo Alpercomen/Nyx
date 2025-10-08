@@ -47,6 +47,9 @@ extern float TIME_SCALE;
 
 #define DELTA_TIME 0.01666666666666666666666666666667
 
+#define TIME_SCALE_MAX 1000.0f
+#define TIME_SCALE_MIN 1.0f
+
 #define NO_INDEX -1
 #define NO_ID 0
 
