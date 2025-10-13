@@ -63,7 +63,7 @@ glm::mat4 Camera::GetViewMatrix() const
 
             Math::Vec3f cameraPos = targetPos - direction * distance;
 
-            // Now update camera's Transform
+            // Update camera's Transform
             auto& cameraTransform = *ECS::Get().GetComponent<Transform>(id);
             cameraTransform.position.SetWorld(cameraPos);
 

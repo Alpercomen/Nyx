@@ -5,6 +5,7 @@
 #include <QAction>
 #include <QStyle>
 #include <QTreeView>
+#include <QTreeWidget>
 #include <QStatusBar>
 #include <QModelIndex>
 #include <QDir>
@@ -17,6 +18,7 @@
 #include <Application/Utils/QTUtils/Panel/Inspector.h>
 #include <Application/Utils/QTUtils/View/ContentBrowser.h>
 #include <Application/Core/Services/Editor/EditorComponentUI.h>
+#include <Application/Core/Services/CameraService/CameraService.h>
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 {
@@ -34,11 +36,16 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 	setCentralWidget(sceneView);
 
 	// When the GL context is ready, then create entities (textures, VAOs, etc.)
-	connect(sceneView, &SceneViewGL::glInitialized, this, [&]() 
+	connect(sceneView, &SceneViewGL::glInitialized, this, [&]()
 	{
 		sceneManager->GenerateEntities(sceneManager->GetActiveSceneID());
 		RegisterComponents();
 		buildHierarchyAndInspector();
+	});
+
+	connect(sceneView, &SceneViewGL::statusMessageRequested, this, [this](const QString& msg) 
+	{
+		statusBar()->showMessage(msg, 3000);
 	});
 
 	buildMenusAndToolbars();
@@ -148,5 +155,23 @@ void MainWindow::buildHierarchyAndInspector()
 		inspectorPanel, [=](const QModelIndex& curr, const QModelIndex&) {
 			EntityID id = hierarchyModel->idAt(curr.row());
 			inspectorPanel->setSelectedEntity(id);
+		});
+
+	QObject::connect(hierarchyView, &QTreeView::doubleClicked, 
+		this, [this, hierarchyModel](const QModelIndex& index) {
+			if (!index.isValid())
+				return;
+
+			EntityID id = hierarchyModel->idAt(index.row());
+			if (id == NO_ID)
+				return;
+
+			const Transform& tr = *ECS::Get().GetComponent<Transform>(id);
+ 			const Scale& sc = tr.scale;
+			double followDistance = tr.scale.getRadius() / METERS_PER_UNIT;
+			followDistance *= CAMERA_ZOOM_SCALE;
+
+			CameraService::Get().Focus(id, followDistance);
+			statusBar()->showMessage(QString("Camera focused on %1").arg(hierarchyModel->data(index, Qt::DisplayRole).toString()));
 		});
 }

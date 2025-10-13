@@ -43,6 +43,11 @@ namespace Nyx {
             return value;
         }
 
+        float getRadius() const
+        {
+            return std::max(std::max(value.x, value.y), value.z);
+        }
+
         /*
             OPERATOR OVERLOAD
         */

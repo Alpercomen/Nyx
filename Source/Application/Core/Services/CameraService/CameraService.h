@@ -14,6 +14,20 @@ namespace Nyx
 		bool enabled = false;
 
 		~CameraService() = default;
+
+		void Focus(EntityID id, float dist = 100.0f)
+		{
+			targetEntity = id;
+			distance = dist;
+			minimumDistance = distance;
+			enabled = true;
+		}
+
+		void StopFocus()
+		{
+			enabled = false;
+			targetEntity = NO_ID;
+		}
 	};
 
 }

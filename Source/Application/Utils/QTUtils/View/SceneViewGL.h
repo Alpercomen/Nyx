@@ -20,6 +20,7 @@ namespace Nyx
 
     signals:
         void glInitialized();
+        void statusMessageRequested(QString);
 
     protected:
         void initializeGL() override;

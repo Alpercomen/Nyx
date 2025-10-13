@@ -6,6 +6,8 @@
 #include <QWheelEvent>
 #include <QCursor>
 
+#include <Application/Core/Services/CameraService/CameraService.h>
+
 namespace Nyx
 {
 
@@ -97,6 +99,9 @@ namespace Nyx
         ev.m_eventList.keyCode = e->key();
         m_pressedKeys.insert(e->key());
         InputEventDispatcher::Get().DispatchCallback(ev); // Listener
+
+        CameraService::Get().StopFocus();
+        emit statusMessageRequested("Exited camera focus mode");
     }
 
     void SceneViewGL::keyReleaseEvent(QKeyEvent* e)
