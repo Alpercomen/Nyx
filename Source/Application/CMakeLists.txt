@@ -7,6 +7,9 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Gui)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets OpenGLWidgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets OpenGLWidgets)
 
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Network)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Network)
+
 # Sources
 file(GLOB_RECURSE APP_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp"
@@ -45,6 +48,7 @@ target_link_libraries(Nyx PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::OpenGLWidgets
     Qt${QT_VERSION_MAJOR}::Gui
+    Qt${QT_VERSION_MAJOR}::Network
 )
 
 if (QT_VERSION_MAJOR EQUAL 6)

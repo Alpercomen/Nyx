@@ -21,13 +21,14 @@ namespace Nyx
         m_gridTick = new QCheckBox(tr("Grid"), this);
         m_gridTick->setChecked(true);  // default ON like before
         m_gridTick->setToolTip(tr("Show/hide grid"));
-        // keep it small & subtle
+
         m_gridTick->setStyleSheet(
             "QCheckBox { font-size: 10px; color: #ddd; background: rgba(0,0,0,90); "
             "padding: 2px 6px; border-radius: 4px; }"
             "QCheckBox::indicator { width: 11px; height: 11px; }"
         );
         m_gridTick->raise(); // make sure it’s above the GL surface
+
         connect(m_gridTick, &QCheckBox::toggled, this, [this](bool on) {
             if (m_engine)
                 m_engine->SetGrid(on);
@@ -100,8 +101,11 @@ namespace Nyx
         m_pressedKeys.insert(e->key());
         InputEventDispatcher::Get().DispatchCallback(ev); // Listener
 
-        CameraService::Get().StopFocus();
-        emit statusMessageRequested("Exited camera focus mode");
+        if (CameraService::Get().enabled)
+        {
+            CameraService::Get().StopFocus();
+            emit statusMessageRequested("Exited camera focus mode");
+        }
     }
 
     void SceneViewGL::keyReleaseEvent(QKeyEvent* e)

@@ -28,7 +28,7 @@ InspectorPanel::InspectorPanel(QWidget* parent) : QScrollArea(parent)
     m_form->addRow(new QLabel("No selection"));
 
     m_timer = new QTimer(this);
-    m_timer->setInterval(100);
+    m_timer->setInterval(1000);
     connect(m_timer, &QTimer::timeout, this, &InspectorPanel::pullModelToUI);
     m_timer->start();
 }

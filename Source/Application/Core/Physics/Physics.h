@@ -13,7 +13,7 @@ namespace Physics
     {
         Math::Vec3f w = rb.angularVelocity.GetWorld();
         float wlen = glm::length(w);
-        if (wlen > 1e-8f)
+        if (wlen > 0.0f)
         {
             Math::Vec3f axis = w / wlen;
             glm::quat dq = glm::angleAxis(wlen * dt, axis);

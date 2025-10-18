@@ -57,7 +57,7 @@ void main()
 
     gl_FragDepth = computeDepth(fragPos3D);
     float linearDepth = computeLinearDepth(fragPos3D);
-    float fading = exp(-linearDepth * 100.0);
+    float fading = exp(-linearDepth * 1000.0);
 
     vec4 g1 = grid(fragPos3D, 1.0);
     vec4 g2 = grid(fragPos3D, 10.0);
