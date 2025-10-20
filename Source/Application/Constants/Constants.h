@@ -124,7 +124,7 @@ constexpr double DELTA_TIME = 1.0 / 60.0;
 // =====================
 #define SOL_SYSTEM_RADIUS 2.992e13 // 299.2 AU in meters
 
-#define METERS_PER_UNIT 10000000.0
+#define METERS_PER_UNIT 100000000.0
 #define METER_PER_KILOMETER 1000.0
 
 #define KILOGRAM_PER_TON		1e3

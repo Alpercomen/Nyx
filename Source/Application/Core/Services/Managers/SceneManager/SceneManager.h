@@ -33,7 +33,7 @@ namespace Nyx
 			return m_entityID;
 		}
 
-		void Draw(const Camera& camera)
+		void Draw(const Camera& camera, Position cameraPos)
 		{
 			const auto& transform = ECS::Get().GetComponent<Transform>(m_entityID);
 			if (!transform)
@@ -48,12 +48,12 @@ namespace Nyx
 			Math::Mat4f view = camera.GetViewMatrix();
 			Math::Mat4f projection = camera.GetProjectionMatrix();
 
-			Math::Mat4f mvp = projection * view * model;
+			const float& farPlane = camera.GetFarPlane();
 
 			if (ECS::Get().HasComponent<Sphere>(m_entityID))
 			{
 				const auto& sphere = ECS::Get().GetComponent<Sphere>(m_entityID);
-				sphere->DrawSphere(model, view, projection);
+				sphere->DrawSphere(model, view, projection, farPlane);
 			}
 		}
 
@@ -322,7 +322,7 @@ namespace Nyx
 			Velocity uranusAngularVelocity = LocalToWorld(Math::Vec3f(0.0, URANUS_ANGULAR_VELOCITY_RADIANS, 0.0), uranusTransform);
 			Velocity neptuneAngularVelocity = LocalToWorld(Math::Vec3f(0.0, NEPTUNE_ANGULAR_VELOCITY_RADIANS, 0.0), neptuneTransform);
 
-			EntityID cameraID = scenePtr->CreateCamera("Camera", Transform{ Math::Vec3f(AU / METERS_PER_UNIT, 0.0f, 10.0f) });
+			EntityID cameraID = scenePtr->CreateCamera("Camera", Transform{ Math::Vec3f(AU / METERS_PER_UNIT, 0.0f, 1.0) });
 			EntityID moonID = scenePtr->CreatePlanet("Moon", moonTransform, Rigidbody{ MOON_MASS }, moonDesc);
 			EntityID earthID = scenePtr->CreatePlanet("Earth", earthTransform, Rigidbody{ EARTH_MASS , earthAngularVelocity }, earthDesc);
 			EntityID sunID = scenePtr->CreatePlanet("Sun", sunTransform, Rigidbody{ SUN_MASS }, sunDesc);

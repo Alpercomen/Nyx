@@ -21,6 +21,7 @@ struct PointLight
 in vec2 vUV;
 in vec3 vNormal;
 in vec3 vFragPos;
+in float vFragDepth;
 
 out vec4 FragColor;
 
@@ -29,6 +30,7 @@ uniform bool uHasTexture;
 uniform vec3 uBaseColor;
 uniform vec3 uEmissiveColor;
 uniform float uEmissiveStrength;
+uniform float uFarPlane;
 uniform int uDirLightCount;
 uniform int uPointLightCount;
 uniform DirectionalLight uDirectionalLights[MAX_DIR_LIGHTS];
@@ -91,4 +93,7 @@ void main()
     vec3 finalColor = glowBlend + baseColor * lighting;
 
     FragColor = vec4(finalColor, 1.0);
+
+    float c = 1.0 / log2(uFarPlane + 1.0);
+    gl_FragDepth = log2(vFragDepth) * c;
 }

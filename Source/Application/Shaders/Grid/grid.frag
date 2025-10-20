@@ -22,12 +22,12 @@ vec4 grid(vec3 fragPos3D, float scale)
     vec3 color = baseColor;
 
     //z axis
-    if (fragPos3D.x > -0.1 * minimumx && fragPos3D.x < 0.1 * minimumx)
-        color.z = 0.3;
+    if (fragPos3D.x > -0.01 * minimumx && fragPos3D.x < 0.01 * minimumx)
+        color.z = 0.5;
 
     //x axis
-    if (fragPos3D.z > -0.1 * minimumz && fragPos3D.z < 0.1 * minimumz)
-        color.x = 0.3;
+    if (fragPos3D.z > -0.01 * minimumz && fragPos3D.z < 0.01 * minimumz)
+        color.x = 0.5;
 
     float alpha = max(max(color.x, color.y), color.z);
 
@@ -59,8 +59,8 @@ void main()
     float linearDepth = computeLinearDepth(fragPos3D);
     float fading = exp(-linearDepth * 1000.0);
 
-    vec4 g1 = grid(fragPos3D, 1.0);
-    vec4 g2 = grid(fragPos3D, 10.0);
+    vec4 g1 = grid(fragPos3D, 10.0);
+    vec4 g2 = grid(fragPos3D, 100.0);
     vec4 finalColor = (g1 + g2) * fading;
 
     FragColor = vec4(finalColor);

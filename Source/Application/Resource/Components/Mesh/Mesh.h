@@ -103,7 +103,7 @@ namespace Nyx
             return mesh;
         }
 
-        void DrawSphere(Math::Mat4f& model, Math::Mat4f& view, Math::Mat4f& projection)
+        void DrawSphere(Math::Mat4f& model, Math::Mat4f& view, Math::Mat4f& projection, const float farPlane)
         {
             m_material.Bind();
 
@@ -118,6 +118,9 @@ namespace Nyx
 
             GLuint projLoc = glGetUniformLocation(shaderID, "uProj");
             glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+            GLuint uFar = glGetUniformLocation(shaderID, "uFarPlane");
+            glUniform1f(uFar, farPlane);
 
             glBindVertexArray(m_sphereMesh.vao.m_data);
 
