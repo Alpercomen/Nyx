@@ -13,7 +13,7 @@
 Camera::Camera()
 {
     SetFront(Math::Vec3f(0.0f, 0.0f, -1.0f));
-    SetMovementSpeed(3);
+    SetMovementSpeed(0.1);
     SetMovementSpeedMultiplier(5.f);
     SetMouseSensitivity(0.1f);
     SetZoom(45.0f);

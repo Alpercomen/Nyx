@@ -33,7 +33,7 @@ struct CameraDesc {
     float32 AspectRatio = 1.7777f;
 
     float32 NearPlane = 0.01;
-    float32 FarPlane = 1.0e4;
+    float32 FarPlane = 1.0e8;
 };
 
 class Camera
