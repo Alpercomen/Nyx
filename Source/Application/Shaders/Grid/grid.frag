@@ -20,7 +20,7 @@ vec4 grid(vec3 fragPos3D, float scale)
     float minz = min(derivative.y, 1.0);
     float minx = min(derivative.x, 1.0);
     float visibility = 1.0 - min(line, 1.0);
-    vec3 base = mix(vec3(0.0), vec3(0.3), visibility);
+    vec3 base = mix(vec3(0.0), vec3(0.2), visibility);
     vec3 color = base;
 
     float alpha = max(max(color.x, color.y), color.z);
@@ -51,11 +51,11 @@ void main()
     vec3 worldPos = nearPoint + t * (farPoint - nearPoint);
 
     // Evaluate the grid pattern relative to where camera is. Modulus by a number so it doesn't get distorted.
-    vec3 rel = worldPos + mod(uCameraPos, 1000.0);
+    vec3 rel = worldPos + mod(uCameraPos, 100);
 
     gl_FragDepth = computeDepth(worldPos);
     float linearDepth = computeLinearDepth(worldPos);
-    float fading = exp(-linearDepth * 1.0e8);
+    float fading = exp(-linearDepth * 1.0e7);
 
     vec4 g1 = grid(rel, 10.0);
     vec4 g2 = grid(rel, 100.0);
