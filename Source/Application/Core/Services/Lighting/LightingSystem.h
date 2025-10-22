@@ -3,6 +3,7 @@
 #include <Application/Core/Services/Managers/EntityManager/EntityManager.h>
 #include <Application/Resource/Components/Lighting/Light.h>
 #include <Application/Resource/Components/Components.h>
+#include <Application/Resource/Camera/Camera.h>
 
 namespace Nyx
 {
@@ -12,7 +13,7 @@ namespace Nyx
 		Vector<LightComponent*> directionalLights;
 		Vector<LightComponent*> pointLights;
 
-		void GatherLights()
+		void GatherLights(Camera& camera)
 		{
 			directionalLights.clear();
 			pointLights.clear();
@@ -33,6 +34,8 @@ namespace Nyx
 
 					const Transform& transform = *ECS::Get().GetComponent<Transform>(entityID);
 					light->position = transform.position / METERS_PER_UNIT;
+					light->position.SetWorld(light->position.GetWorld() - camera.GetPosition().GetWorld());
+
 					pointLights.push_back(light);
 					break;
 				}

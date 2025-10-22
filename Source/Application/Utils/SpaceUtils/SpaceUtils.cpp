@@ -89,7 +89,7 @@ void InitializeCircularOrbit(EntityID satelliteID, EntityID attractorID, float32
     spdlog::info(" - Attractor vel = ({:.6f}, {:.6f}, {:.6f})", attractorDeltaVel.x, attractorDeltaVel.y, attractorDeltaVel.z);
 }
 
-void Attract()
+void Attract(EntityID& cameraID)
 {
     auto& ids = ECS::Get().GetAllComponentIDs<Rigidbody>();
 
@@ -137,22 +137,34 @@ void Attract()
             aBody.acceleration += accA;
             bBody.acceleration += accB;
 
+            // Check if A is tidally locked to B
             if (ECS::Get().HasComponent<TidallyLocked>(aID))
             {
                 const auto& lockedEntityId = ECS::Get().GetComponent<TidallyLocked>(aID)->lockedEntity;
-
                 if (lockedEntityId == bID)
-                    ApplyTidalLock(aTransform, bTransform, aBody);
+                    ApplyTidalLock(aTransform, bTransform, aBody, cameraID);
+            }
+
+            // Check if B is tidally locked to A
+            if (ECS::Get().HasComponent<TidallyLocked>(bID))
+            {
+                const auto& lockedEntityId = ECS::Get().GetComponent<TidallyLocked>(bID)->lockedEntity;
+                if (lockedEntityId == aID)
+                    ApplyTidalLock(bTransform, aTransform, bBody, cameraID);
             }
         }
     }
 }
 
 // Make Ta tidally locked towards Tb
-void ApplyTidalLock(Transform& Ta, Transform& Tb, Rigidbody& Ra)
+void ApplyTidalLock(Transform& Ta, Transform& Tb, Rigidbody& Ra, EntityID& cameraID)
 {
-    const Math::Vec3f& Pa = Ta.position.GetWorld();
-    const Math::Vec3f& Pb = Tb.position.GetWorld();
+    Camera& camera = *ECS::Get().GetComponent<Camera>(cameraID);
+
+    const Math::Vec3f& Pc = camera.GetPosition().GetWorld();
+
+    const Math::Vec3f& Pa = Ta.position.GetWorld() - Pc;
+    const Math::Vec3f& Pb = Tb.position.GetWorld() - Pc;
 
     Math::Vec3f dir = Pb - Pa;
     if (glm::length2(dir) < 1e-12f)

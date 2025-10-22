@@ -4,7 +4,10 @@
 #include <Application/Constants/Constants.h>
 #include <Application/Resource/Components/Components.h>
 #include <Application/Core/Services/Managers/EntityManager/EntityManager.h>
+#include <Application/Core/Services/Managers/SceneManager/SceneManager.h>
 #include <Application/Utils/SpaceUtils/SpaceUtils.h>
+
+using namespace Nyx;
 
 namespace Physics
 {
@@ -47,9 +50,9 @@ namespace Physics
         }
     }
 
-	void Update(float deltaTime)
+	void Update(EntityID cameraID)
 	{
-        Attract();
-        Integrate(deltaTime);
+        Attract(cameraID);
+        Integrate(DELTA_TIME);
 	}
 }

@@ -5,11 +5,13 @@
 #include <Application/Resource/Camera/Camera.h>
 #include <Application/Utils/ShaderUtils/ShaderUtils.h>
 
+#include <Application/Core/Services/Managers/SceneManager/SceneManager.h>
 #include <Application/Core/Renderer/Renderer.h>
 
 namespace Nyx 
 {
-    class Engine {
+    class Engine 
+    {
     public:
         Engine() = default;
         void EnsureGL();

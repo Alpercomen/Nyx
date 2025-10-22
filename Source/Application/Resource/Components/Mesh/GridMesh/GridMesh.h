@@ -12,7 +12,7 @@ class GridMesh {
 public:
     GridMesh();
 
-    void DrawGrid(const Camera& camera);
+    void DrawGrid(Camera& camera);
 
 private:
     Vector<Math::Vec3f> m_vertices;

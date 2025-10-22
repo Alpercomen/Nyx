@@ -10,7 +10,7 @@ GridMesh::GridMesh()
 
 }
 
-void GridMesh::DrawGrid(const Camera& camera)
+void GridMesh::DrawGrid(Camera& camera)
 {
     m_shader.Use();
 

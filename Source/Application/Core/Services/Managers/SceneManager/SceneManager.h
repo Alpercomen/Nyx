@@ -33,7 +33,7 @@ namespace Nyx
 			return m_entityID;
 		}
 
-		void Draw(const Camera& camera, Position cameraPos)
+		void Draw(Camera& camera)
 		{
 			const auto& transform = ECS::Get().GetComponent<Transform>(m_entityID);
 			if (!transform)
@@ -44,7 +44,10 @@ namespace Nyx
 			auto sca = transform->scale / METERS_PER_UNIT;
 			auto rot = transform->rotation;
 
-			Math::Mat4f model = glm::translate(Math::Mat4f(1.0f), pos.GetWorld()) * rot.ToMatrix() * sca.ToMatrix();
+			Position cameraPos = camera.GetPosition();
+			auto relPos = Math::Vec3f(pos.GetWorld() - cameraPos.GetWorld());
+
+			Math::Mat4f model = glm::translate(Math::Mat4f(1.0f), relPos) * rot.ToMatrix() * sca.ToMatrix();
 			Math::Mat4f view = camera.GetViewMatrix();
 			Math::Mat4f projection = camera.GetProjectionMatrix();
 
@@ -95,11 +98,14 @@ namespace Nyx
 			return obj->GetEntityID();
 		}
 
-		EntityID CreateCamera(String name, const Transform& transform)
+		EntityID CreateCamera(String name, const Position& position)
 		{
 			SharedPtr<SceneObject> obj = MakeShared<SceneObject>(name);
-			ECS::Get().AddComponent(obj->GetEntityID(), Camera{});
-			ECS::Get().AddComponent(obj->GetEntityID(), transform);
+
+			Camera newCamera;
+			newCamera.GetPosition() = position;
+
+			ECS::Get().AddComponent(obj->GetEntityID(), std::move(newCamera));
 
 			// Only set if valid
 			if (ECS::Get().HasComponent<Camera>(obj->GetEntityID()))
@@ -322,12 +328,12 @@ namespace Nyx
 			Velocity uranusAngularVelocity = LocalToWorld(Math::Vec3f(0.0, URANUS_ANGULAR_VELOCITY_RADIANS, 0.0), uranusTransform);
 			Velocity neptuneAngularVelocity = LocalToWorld(Math::Vec3f(0.0, NEPTUNE_ANGULAR_VELOCITY_RADIANS, 0.0), neptuneTransform);
 
-			EntityID cameraID = scenePtr->CreateCamera("Camera", Transform{ Math::Vec3f(AU / METERS_PER_UNIT, 0.0f, 1.0) });
-			EntityID moonID = scenePtr->CreatePlanet("Moon", moonTransform, Rigidbody{ MOON_MASS }, moonDesc);
-			EntityID earthID = scenePtr->CreatePlanet("Earth", earthTransform, Rigidbody{ EARTH_MASS , earthAngularVelocity }, earthDesc);
+			EntityID cameraID = scenePtr->CreateCamera("Camera", Position{ Math::Vec3f(AU / METERS_PER_UNIT, 0.0f, 1.0) });
 			EntityID sunID = scenePtr->CreatePlanet("Sun", sunTransform, Rigidbody{ SUN_MASS }, sunDesc);
 			EntityID mercuryID = scenePtr->CreatePlanet("Mercury", mercuryTransform, Rigidbody{ MERCURY_MASS , mercuryAngularVelocity }, mercuryDesc);
 			EntityID venusID = scenePtr->CreatePlanet("Venus", venusTransform, Rigidbody{ VENUS_MASS, venusAngularVelocity }, venusDesc);
+			EntityID earthID = scenePtr->CreatePlanet("Earth", earthTransform, Rigidbody{ EARTH_MASS , earthAngularVelocity }, earthDesc);
+			EntityID moonID = scenePtr->CreatePlanet("Moon", moonTransform, Rigidbody{ MOON_MASS }, moonDesc);
 			EntityID marsID = scenePtr->CreatePlanet("Mars", marsTransform, Rigidbody{ MARS_MASS, marsAngularVelocity }, marsDesc);
 			EntityID jupiterID = scenePtr->CreatePlanet("Jupiter", jupiterTransform, Rigidbody{ JUPITER_MASS, jupiterAngularVelocity }, jupiterDesc);
 			EntityID saturnID = scenePtr->CreatePlanet("Saturn", saturnTransform, Rigidbody{ SATURN_MASS, saturnAngularVelocity }, saturnDesc);

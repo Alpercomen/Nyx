@@ -43,8 +43,10 @@ public:
     Camera();
     ~Camera() = default;
 
-    glm::mat4 GetViewMatrix() const;
+    glm::mat4 GetViewMatrix();
     glm::mat4 GetProjectionMatrix() const;
+
+    void FocusCamera(const EntityID& targetID);
 
     const Math::Vec3f& GetFront() const { return m_cameraDesc.Front; }
     const Math::Vec3f& GetUp() const { return m_cameraDesc.Up; }
@@ -82,8 +84,10 @@ public:
     void ProcessMouseMovement(float xoffset, float yoffset, bool constrainPitch = true);
     void UpdateCameraVectors();
 
+    Position& GetPosition() { return m_worldPos; }
     CameraDesc& GetCameraDesc() { return m_cameraDesc; }
 
 private:
     CameraDesc m_cameraDesc;
+    Position m_worldPos;
 };

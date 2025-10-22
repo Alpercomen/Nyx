@@ -26,7 +26,12 @@ void RegisterComponents()
 
             addEditor(form, "FOV", c.GetCameraDesc().Zoom, 1.0, 179.0, 0.1);
             addEditor(form, "Near", c.GetCameraDesc().NearPlane, 0.001, 1000.0, 0.001);
-            addEditor(form, "Far", c.GetCameraDesc().FarPlane, 1.0, 100000.0, 1.0);
+            addEditor(form, "Far", c.GetCameraDesc().FarPlane, 1.0, 1000000.0, 1.0);
+
+            addEditor(form, "Yaw", c.GetCameraDesc().Yaw, -360.0, 360.0, 0.1);
+            addEditor(form, "Pitch", c.GetCameraDesc().Pitch, -90.0, 90.0, 0.1);
+
+            addEditorVec3(form, "Position", c.GetPosition().GetWorld());
             return &c;
         });
 

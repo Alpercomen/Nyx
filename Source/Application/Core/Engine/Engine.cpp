@@ -4,7 +4,6 @@
 
 #include <Application/Core/Engine/Engine.h>
 #include <Application/Core/Services/Input/InputDispatcher.h>
-#include <Application/Core/Services/Managers/SceneManager/SceneManager.h>
 
 #include <Application/Utils/SpaceUtils/SpaceUtils.h>
 #include <Application/Core/Physics/Physics.h>
@@ -79,7 +78,7 @@ namespace Nyx
         glClearColor(0, 0, 0, 1);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        Physics::Update(DELTA_TIME);
+        Physics::Update(scene.GetActiveCameraID());
         m_Renderer.DrawScene(scene);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
