@@ -57,7 +57,9 @@ namespace Nyx
         if (m_sceneDepthRBO) 
             glDeleteRenderbuffers(1, &m_sceneDepthRBO);
 
-        m_sceneTexWidth = w;  m_sceneTexHeight = h;
+        m_sceneTexWidth = w;  
+        m_sceneTexHeight = h;
+
         MakeSceneFBO(m_sceneFBO, m_sceneColorTex, m_sceneDepthRBO, w, h);
         m_fboReady = true;
     }
