@@ -1,3 +1,4 @@
+#pragma once
 #include <QString>
 
 #include <Application/Utils/QTUtils/Model/Hierarchy.h>
