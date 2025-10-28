@@ -6,15 +6,16 @@
 #include <Application/Utils/ShaderUtils/ShaderUtils.h>
 
 #include <Application/Core/Services/Managers/SceneManager/SceneManager.h>
+#include <Application/Core/Services/Managers/RenderManager/OpenGL.h>
 #include <Application/Core/Renderer/Renderer.h>
+
 
 namespace Nyx 
 {
-    class Engine 
+    class Engine
     {
     public:
         Engine() = default;
-        void EnsureGL();
         void EnsureFBO(int w, int h);
         void ResizeFBO(Math::Vec2f size, SharedPtr<Scene> s);
         void Render(Scene& scene);
@@ -23,7 +24,6 @@ namespace Nyx
         GLuint GetSceneFBO() const { return m_sceneFBO; }
 
     private:
-        bool m_glReady = false;
         bool m_fboReady = false;
         int  m_sceneTexWidth = 1280;
         int  m_sceneTexHeight = 720;

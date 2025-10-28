@@ -9,7 +9,9 @@ namespace Nyx
 	Texture::Texture(const String& path, bool flipVertically)
 	{
         TextureData img = TextureLoader::Load(path, flipVertically);
-        if (!img.IsValid()) {
+
+        if (!img.IsValid()) 
+        {
             throw std::runtime_error("Failed to load texture: " + path);
         }
 
@@ -23,21 +25,20 @@ namespace Nyx
         else if (m_channels == 3) format = GL_RGB;
         else if (m_channels == 4) format = GL_RGBA;
 
-        glGenTextures(1, &m_textureID);
-        glBindTexture(GL_TEXTURE_2D, m_textureID);
+        GL::Get()->glGenTextures(1, &m_textureID);
+        GL::Get()->glBindTexture(GL_TEXTURE_2D, m_textureID);
 
         // For 1- or 3-channel data, avoid row padding issues
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        GL::Get()->glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-        glTexImage2D(GL_TEXTURE_2D, 0, format, m_width, m_height, 0,
-            format, GL_UNSIGNED_BYTE, img.pixels);
-        glGenerateMipmap(GL_TEXTURE_2D);
+        GL::Get()->glTexImage2D(GL_TEXTURE_2D, 0, format, m_width, m_height, 0, format, GL_UNSIGNED_BYTE, img.pixels);
+        GL::Get()->glGenerateMipmap(GL_TEXTURE_2D);
 
         // Use bind-to-edit API in GL 3.3 (NOT glTextureParameteri)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        GL::Get()->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        GL::Get()->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        GL::Get()->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        GL::Get()->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
         // Optional: swizzle for single-channel textures (visualization)
         // if (m_channels == 1) {
@@ -45,7 +46,7 @@ namespace Nyx
         //     glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzle);
         // }
 
-        glBindTexture(GL_TEXTURE_2D, 0);
+        GL::Get()->glBindTexture(GL_TEXTURE_2D, 0);
         TextureLoader::Free(img);
 	}
 
@@ -57,9 +58,9 @@ namespace Nyx
 		}
 	}
 
-	void Texture::Bind(uint32 slot) const
+	void Texture::Bind(uint32 slot)
 	{
-		glActiveTexture(GL_TEXTURE0 + slot);
-		glBindTexture(GL_TEXTURE_2D, m_textureID);
+        GL::Get()->glActiveTexture(GL_TEXTURE0 + slot);
+        GL::Get()->glBindTexture(GL_TEXTURE_2D, m_textureID);
 	}
 }

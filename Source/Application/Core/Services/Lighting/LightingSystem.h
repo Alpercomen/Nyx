@@ -46,31 +46,31 @@ namespace Nyx
 		void UploadToShader(uint32 shaderID)
 		{
 			int count = std::min((int)directionalLights.size(), MAX_DIRECTIONAL_LIGHTS);
-			glUniform1i(glGetUniformLocation(shaderID, "uDirLightCount"), count);
+			GL::Get()->glUniform1i(GL::Get()->glGetUniformLocation(shaderID, "uDirLightCount"), count);
 
 			for (int i = 0; i < count; ++i)
 			{
 				const auto l = directionalLights[i];
 				String base = "uDirectionalLights[" + std::to_string(i) + "]";
 
-				glUniform3fv(glGetUniformLocation(shaderID, (base + ".direction").c_str()), 1, glm::value_ptr(l->direction));
-				glUniform3fv(glGetUniformLocation(shaderID, (base + ".color").c_str()), 1, glm::value_ptr(l->color));
-				glUniform1f(glGetUniformLocation(shaderID, (base + ".intensity").c_str()), l->intensity);
+				GL::Get()->glUniform3fv(GL::Get()->glGetUniformLocation(shaderID, (base + ".direction").c_str()), 1, glm::value_ptr(l->direction));
+				GL::Get()->glUniform3fv(GL::Get()->glGetUniformLocation(shaderID, (base + ".color").c_str()), 1, glm::value_ptr(l->color));
+				GL::Get()->glUniform1f(GL::Get()->glGetUniformLocation(shaderID, (base + ".intensity").c_str()), l->intensity);
 			}
 
 			count = std::min((int)pointLights.size(), MAX_POINT_LIGHTS);
-			glUniform1i(glGetUniformLocation(shaderID, "uPointLightCount"), count);
+			GL::Get()->glUniform1i(GL::Get()->glGetUniformLocation(shaderID, "uPointLightCount"), count);
 
 			for (int i = 0; i < count; ++i)
 			{
 				const auto l = pointLights[i];
 				String base = "uPointLights[" + std::to_string(i) + "]";
 
-				glUniform3fv(glGetUniformLocation(shaderID, (base + ".position").c_str()), 1, glm::value_ptr(l->position.GetWorld()));
-				glUniform3fv(glGetUniformLocation(shaderID, (base + ".color").c_str()), 1, glm::value_ptr(l->color));
-				glUniform1f(glGetUniformLocation(shaderID, (base + ".intensity").c_str()), l->intensity);
-				glUniform1f(glGetUniformLocation(shaderID, (base + ".range").c_str()), l->range);
-				glUniform1f(glGetUniformLocation(shaderID, (base + ".decay").c_str()), l->decay);
+				GL::Get()->glUniform3fv(GL::Get()->glGetUniformLocation(shaderID, (base + ".position").c_str()), 1, glm::value_ptr(l->position.GetWorld()));
+				GL::Get()->glUniform3fv(GL::Get()->glGetUniformLocation(shaderID, (base + ".color").c_str()), 1, glm::value_ptr(l->color));
+				GL::Get()->glUniform1f(GL::Get()->glGetUniformLocation(shaderID, (base + ".intensity").c_str()), l->intensity);
+				GL::Get()->glUniform1f(GL::Get()->glGetUniformLocation(shaderID, (base + ".range").c_str()), l->range);
+				GL::Get()->glUniform1f(GL::Get()->glGetUniformLocation(shaderID, (base + ".decay").c_str()), l->decay);
 			}
 		}
 	};

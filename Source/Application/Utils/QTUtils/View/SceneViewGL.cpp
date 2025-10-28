@@ -47,9 +47,8 @@ namespace Nyx
         if (!m_engine)
             return;
 
-        glewExperimental = GL_TRUE;
-        m_engine->EnsureGL(); // glewInit in this Qt context
-
+        initializeOpenGLFunctions();
+        GL::BindFrom(QOpenGLContext::currentContext());
         emit glInitialized();
     }
 
@@ -67,10 +66,10 @@ namespace Nyx
         if (m_engine && m_scene)
         {
             m_engine->Render(*m_scene); // renders into engine FBO in this context
-            ::glBindFramebuffer(GL_READ_FRAMEBUFFER, m_engine->GetSceneFBO());
-            ::glBindFramebuffer(GL_DRAW_FRAMEBUFFER, defaultFramebufferObject());
-            ::glBlitFramebuffer(0, 0, w, h, 0, 0, w, h, GL_COLOR_BUFFER_BIT, GL_LINEAR);
-            ::glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebufferObject());
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, m_engine->GetSceneFBO());
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, defaultFramebufferObject());
+            glBlitFramebuffer(0, 0, w, h, 0, 0, w, h, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+            glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebufferObject());
         }
         else
         {

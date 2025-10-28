@@ -3,6 +3,8 @@
 #include <Application/Core/Core.h>
 #include <Application/Utils/ShaderUtils/ShaderUtils.h>
 
+#include <Application/Core/Services/Managers/RenderManager/OpenGL.h>
+
 namespace Nyx
 {
     class Shader
@@ -26,7 +28,7 @@ namespace Nyx
             {
                 id = CreateShaderProgram(vsPath, fsPath);
             }
-            glUseProgram(id);
+            GL::Get()->glUseProgram(id);
         }
 
         uint32 GetID() const { return id; }

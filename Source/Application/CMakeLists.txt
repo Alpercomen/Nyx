@@ -44,7 +44,7 @@ target_compile_definitions(Nyx PRIVATE
 
 # Link
 target_link_libraries(Nyx PRIVATE
-    glfw glm::glm spdlog libglew_static Imgui stb
+    glfw glm::glm spdlog opengl32 Imgui stb
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::OpenGLWidgets
     Qt${QT_VERSION_MAJOR}::Gui

@@ -3,7 +3,7 @@
 #include <Application/Core/Services/Input/InputDispatcher.h>
 #include <Application/Core/Services/Input/InputQueue.h>
 
-#include <GL/glew.h>
+#include <QOpenGLExtraFunctions>
 #include <QOpenGLWidget>
 #include <QCheckBox>
 
@@ -11,7 +11,7 @@ namespace Nyx
 { 
     extern bool firstMouse;
 
-    class SceneViewGL : public QOpenGLWidget {
+    class SceneViewGL : public QOpenGLWidget, protected QOpenGLExtraFunctions {
         Q_OBJECT
     public:
         explicit SceneViewGL(QWidget* parent = nullptr);

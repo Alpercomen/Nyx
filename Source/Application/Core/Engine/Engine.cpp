@@ -11,51 +11,43 @@
 
 namespace Nyx 
 {
-    void Engine::EnsureGL() 
-    {
-        if (m_glReady) return;
-        GLenum err = glewInit();
-        if (err != GLEW_OK) throw std::runtime_error("glewInit failed");
-        m_glReady = true;
-    }
 
     static void MakeSceneFBO(GLuint& fbo, GLuint& color, GLuint& depth, int w, int h) 
     {
-        glGenTextures(1, &color);
-        glBindTexture(GL_TEXTURE_2D, color);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        GL::Get()->glGenTextures(1, &color);
+        GL::Get()->glBindTexture(GL_TEXTURE_2D, color);
+        GL::Get()->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+        GL::Get()->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        GL::Get()->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        glGenRenderbuffers(1, &depth);
-        glBindRenderbuffer(GL_RENDERBUFFER, depth);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, w, h);
+        GL::Get()->glGenRenderbuffers(1, &depth);
+        GL::Get()->glBindRenderbuffer(GL_RENDERBUFFER, depth);
+        GL::Get()->glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, w, h);
 
-        glGenFramebuffers(1, &fbo);
-        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color, 0);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depth);
+        GL::Get()->glGenFramebuffers(1, &fbo);
+        GL::Get()->glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+        GL::Get()->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color, 0);
+        GL::Get()->glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depth);
 
-        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        if (GL::Get()->glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
             spdlog::critical("Scene FBO incomplete");
 
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        GL::Get()->glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
     void Engine::EnsureFBO(int w, int h) 
     {
-        EnsureGL();
         if (m_fboReady && w == m_sceneTexWidth && h == m_sceneTexHeight) 
             return;
 
         if (m_sceneFBO)      
-            glDeleteFramebuffers(1, &m_sceneFBO);
+            GL::Get()->glDeleteFramebuffers(1, &m_sceneFBO);
 
         if (m_sceneColorTex) 
-            glDeleteTextures(1, &m_sceneColorTex);
+            GL::Get()->glDeleteTextures(1, &m_sceneColorTex);
 
         if (m_sceneDepthRBO) 
-            glDeleteRenderbuffers(1, &m_sceneDepthRBO);
+            GL::Get()->glDeleteRenderbuffers(1, &m_sceneDepthRBO);
 
         m_sceneTexWidth = w;  
         m_sceneTexHeight = h;
@@ -75,15 +67,15 @@ namespace Nyx
     {
         EnsureFBO(m_sceneTexWidth, m_sceneTexHeight);
 
-        glBindFramebuffer(GL_FRAMEBUFFER, m_sceneFBO);
-        glViewport(0, 0, m_sceneTexWidth, m_sceneTexHeight);
-        glClearColor(0, 0, 0, 1);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        GL::Get()->glBindFramebuffer(GL_FRAMEBUFFER, m_sceneFBO);
+        GL::Get()->glViewport(0, 0, m_sceneTexWidth, m_sceneTexHeight);
+        GL::Get()->glClearColor(0, 0, 0, 1);
+        GL::Get()->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         Physics::Update(scene.GetActiveCameraID());
         m_Renderer.DrawScene(scene);
 
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        GL::Get()->glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
     void Engine::SetGrid(bool enabled)

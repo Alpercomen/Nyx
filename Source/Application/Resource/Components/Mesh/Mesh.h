@@ -7,6 +7,7 @@
 #include <Application/Core/Core.h>
 #include <Application/Core/Services/Managers/EntityManager/EntityManager.h>
 #include <Application/Core/Services/Managers/ResourceManager/ResourceManager.h>
+#include <Application/Core/Services/Managers/RenderManager/OpenGL.h>
 #include <Application/Core/Services/Pipeline/Immediate/Immediate.h>
 #include <Application/Core/Services/ResourceLocator/ResourceLocator.h>
 #include <Application/Core/Services/Lighting/LightingSystem.h>
@@ -72,31 +73,31 @@ namespace Nyx
 
             Mesh mesh;
 
-            glGenVertexArrays(1, &mesh.vao.m_data);
-            glGenBuffers(1, &mesh.vbo.m_data);
-            glGenBuffers(1, &mesh.ebo.m_data);
+            GL::Get()->glGenVertexArrays(1, &mesh.vao.m_data);
+            GL::Get()->glGenBuffers(1, &mesh.vbo.m_data);
+            GL::Get()->glGenBuffers(1, &mesh.ebo.m_data);
 
-            glBindVertexArray(mesh.vao.m_data);
+            GL::Get()->glBindVertexArray(mesh.vao.m_data);
 
-            glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo.m_data);
-            glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+            GL::Get()->glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo.m_data);
+            GL::Get()->glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
 
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ebo.m_data);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
+            GL::Get()->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ebo.m_data);
+            GL::Get()->glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
 
             // Position attribute (location = 0)
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-            glEnableVertexAttribArray(0);
+            GL::Get()->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+            GL::Get()->glEnableVertexAttribArray(0);
 
             // UV attribute (location = 1)
-            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-            glEnableVertexAttribArray(1);
+            GL::Get()->glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+            GL::Get()->glEnableVertexAttribArray(1);
 
             // Normal attribute (location = 2)
-            glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(5 * sizeof(float)));
-            glEnableVertexAttribArray(2);
+            GL::Get()->glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(5 * sizeof(float)));
+            GL::Get()->glEnableVertexAttribArray(2);
 
-            glBindVertexArray(0);
+            GL::Get()->glBindVertexArray(0);
 
             mesh.ebo.m_indexCount = static_cast<uint32>(indices.size());
 
@@ -110,19 +111,19 @@ namespace Nyx
             uint32 shaderID = m_material.GetShader().GetID();
             LightingSystem::Get().UploadToShader(shaderID);
 
-            GLuint modelLoc = glGetUniformLocation(shaderID, "uModel");
-            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+            GLuint modelLoc = GL::Get()->glGetUniformLocation(shaderID, "uModel");
+            GL::Get()->glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
-            GLuint viewLoc = glGetUniformLocation(shaderID, "uView");
-            glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+            GLuint viewLoc = GL::Get()->glGetUniformLocation(shaderID, "uView");
+            GL::Get()->glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 
-            GLuint projLoc = glGetUniformLocation(shaderID, "uProj");
-            glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+            GLuint projLoc = GL::Get()->glGetUniformLocation(shaderID, "uProj");
+            GL::Get()->glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
-            GLuint uFar = glGetUniformLocation(shaderID, "uFarPlane");
-            glUniform1f(uFar, farPlane);
+            GLuint uFar = GL::Get()->glGetUniformLocation(shaderID, "uFarPlane");
+            GL::Get()->glUniform1f(uFar, farPlane);
 
-            glBindVertexArray(m_sphereMesh.vao.m_data);
+            GL::Get()->glBindVertexArray(m_sphereMesh.vao.m_data);
 
             ImmediatePipeline::Get().Begin();
             ImmediatePipeline::Get().UseSphere();
