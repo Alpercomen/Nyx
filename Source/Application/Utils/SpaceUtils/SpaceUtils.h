@@ -2,16 +2,17 @@
 
 #include <vector>
 #include <Application/Resource/Components/Components.h>
+#include <Application/Resource/Components/Transform/Transform.h>
 #include <Application/Core/Core.h>
 
 double GravitationalForce(double mu, double r);
 
 double CalculateOrbitalVelocity(double otherMass, double r);
 
-void InitializeCircularOrbit(EntityID satelliteID, EntityID attractorID, bool isTidallyLocked);
+double RotationDegreeToLinearVelocity(float degreesPerSecond, float radiusMeters);
 
-void Attract(const EntityID& objID);
+void InitializeCircularOrbit(EntityID satelliteID, EntityID attractorID, float32 inclination, bool isTidallyLocked = false);
 
-void Rotate(const EntityID& objID, float deltaTime);
+void Attract(EntityID& cameraID);
 
-void ApplyRotationalTorque(EntityID aID, EntityID bID);
+void ApplyTidalLock(Transform& Ta, Transform& Tb, Rigidbody& Ra, EntityID& cameraID);

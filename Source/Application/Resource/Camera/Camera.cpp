@@ -1,8 +1,5 @@
+#pragma once
 #include "Camera.h"
-
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-#include <spdlog/spdlog.h>
 
 #include <Application/Core/Core.h>
 #include <Application/Window/Window.h>
@@ -10,40 +7,43 @@
 #include <Application/Core/Services/Input/InputDispatcher.h>
 #include <Application/Core/Services/Input/InputEvent.h>
 #include <Application/Core/Services/Input/InputQueue.h>
+#include <Application/Core/Services/CameraService/CameraService.h>
 #include <Application/Resource/Components/Components.h>
 
 Camera::Camera()
 {
-    SetFront(glm::vec3(0.0f, 0.0f, -1.0f));
-    SetMovementSpeed(3);
-    SetMovementSpeedMultiplier(10.f);
+    SetFront(Math::Vec3f(0.0f, 0.0f, -1.0f));
+    SetMovementSpeed(0.1);
+    SetMovementSpeedMultiplier(5.f);
     SetMouseSensitivity(0.1f);
     SetZoom(45.0f);
     SetYaw(-90.0f);
     SetPitch(0.0f);
-    SetWorldUp(glm::vec3(0.0f, 1.0f, 0.0f));
+    SetWorldUp(Math::Vec3f(0.0f, 1.0f, 0.0f));
 
     UpdateCameraVectors();
 
-    InputHelper::ProcessMouseButtons();
     InputHelper::ProcessMouseMovement();
+    InputHelper::ProcessMouseScroll();
 }
 
-glm::mat4 Camera::GetViewMatrix() const
+glm::mat4 Camera::GetViewMatrix() 
 {
     auto& cameraIDs = ECS::Get().GetAllComponentIDs<Camera>();
 
     if (cameraIDs.size() <= 0)
         return Math::Mat4d(0.0);
 
-    const EntityID& id = cameraIDs[0];
+    // Called every frame inside your render/update loop if follow is enabled
+    if (CameraService().Get().enabled)
+    {
+        const EntityID& targetID = CameraService().Get().targetEntity;
 
-    if (!ECS::Get().HasComponent<Transform>(id))
-        return Math::Mat4d(0.0);
+        if (ECS::Get().HasComponent<Transform>(targetID))
+            FocusCamera(targetID);
+    }
 
-    Transform& transform = *ECS::Get().GetComponent<Transform>(id);
-    Position& pos = transform.position;
-    return glm::lookAt(pos.GetWorld(), pos.GetWorld() + GetFront(), GetUp());
+    return glm::lookAt(glm::vec3(0.0f), GetFront(), GetUp());
 }
 
 glm::mat4 Camera::GetProjectionMatrix() const
@@ -51,48 +51,62 @@ glm::mat4 Camera::GetProjectionMatrix() const
     return glm::perspective(glm::radians(GetZoom()), GetAspectRatio(), GetNearPlane(), GetFarPlane());
 }
 
+void Camera::FocusCamera(const EntityID& targetID)
+{
+    const auto& targetTransform = *ECS::Get().GetComponent<Transform>(targetID);
+    const Position& pos = targetTransform.position / METERS_PER_UNIT;
+    const Math::Vec3f& targetPos = pos.GetWorld();
+
+    float distance = CameraService().Get().distance;
+    float yaw = CameraService().Get().yaw;
+    float pitch = CameraService().Get().pitch;
+
+    // Spherical to Cartesian
+    Math::Vec3f direction;
+    direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    direction.y = sin(glm::radians(pitch));
+    direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    direction = glm::normalize(direction);
+
+    Math::Vec3f cameraPos = targetPos - direction * distance;
+
+    // Update camera's Transform
+    GetPosition().SetWorld(cameraPos);
+
+    // Update camera direction
+    SetFront(glm::normalize(targetPos - cameraPos));
+    SetRight(glm::normalize(glm::cross(GetFront(), GetWorldUp())));
+    SetUp(glm::cross(GetRight(), GetFront()));
+}
+
 void Camera::ProcessKeyboardMovement(Camera_Movement direction, float deltaTime)
 {
-    auto& cameraIDs = ECS::Get().GetAllComponentIDs<Camera>();
-
-    if (cameraIDs.size() <= 0)
-        return;
-
-    const EntityID& id = cameraIDs[0];
-
-    if (!ECS::Get().HasComponent<Transform>(id) || !ECS::Get().HasComponent<Name>(id))
-        return;
-
     float velocity = GetMovementSpeed() * deltaTime;
-
-    auto& transform = *ECS::Get().GetComponent<Transform>(id);
-
-    auto& pos = transform.position;
-    auto& name = ECS::Get().GetComponent<Name>(id)->name;
+    auto& pos = this->m_worldPos;
 
     switch (direction) {
         case FORWARD:
-            spdlog::info("{} move forward input detected by {:03.6f} unit.", name, velocity);
+            spdlog::info("Move forward input detected by {:03.6f} unit.", velocity);
             pos.SetWorld(pos.GetWorld() + GetFront() * velocity);
             break;
         case BACKWARD:
-            spdlog::info("{} move backward input detected by {:03.6f} unit.", name, velocity);
+            spdlog::info("Move backward input detected by {:03.6f} unit.", velocity);
             pos.SetWorld(pos.GetWorld() - GetFront() * velocity);
             break;
         case RIGHT:
-            spdlog::info("{} move right input detected by {:03.6f} unit.", name, velocity);
+            spdlog::info("Move right input detected by {:03.6f} unit.", velocity);
             pos.SetWorld(pos.GetWorld() + GetRight() * velocity);
             break;
         case LEFT:
-            spdlog::info("{} move left input detected by {:03.6f} unit.", name, velocity);
+            spdlog::info("Move left input detected by {:03.6f} unit.", velocity);
             pos.SetWorld(pos.GetWorld() - GetRight() * velocity);
             break;
         case UP:
-            spdlog::info("{} move up input detected by {:03.6f} unit.", name, velocity);
+            spdlog::info("Move up input detected by {:03.6f} unit.", velocity);
             pos.SetWorld(pos.GetWorld() + GetWorldUp() * velocity);
             break;
         case DOWN:
-            spdlog::info("{} move down input detected by {:03.6f} unit.", name, velocity);
+            spdlog::info("Move down input detected by {:03.6f} unit.", velocity);
             pos.SetWorld(pos.GetWorld() - GetWorldUp() * velocity);
             break;
     }
@@ -121,7 +135,7 @@ void Camera::ProcessMouseMovement(float xoffset, float yoffset, bool constrainPi
 
 void Camera::UpdateCameraVectors()
 {
-    glm::vec3 front;
+    Math::Vec3f front;
     front.x = cos(glm::radians(GetYaw())) * cos(glm::radians(GetPitch()));
     front.y = sin(glm::radians(GetPitch()));
     front.z = sin(glm::radians(GetYaw())) * cos(glm::radians(GetPitch()));

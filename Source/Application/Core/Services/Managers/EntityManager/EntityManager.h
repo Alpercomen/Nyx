@@ -47,6 +47,11 @@ namespace Nyx {
 			return it != m_alive.end() && it->second;
 		}
 
+		const HashMap<EntityID, bool>& GetAliveMap() const 
+		{ 
+			return m_alive;
+		}
+
 	private:
 		EntityID m_nextID = NO_ID;
 		Vector<EntityID> m_freeList;
@@ -186,6 +191,19 @@ namespace Nyx {
 				}
 			}
 
+			return result;
+		}
+
+		Vector<EntityID> GetAllEntityIDs() const
+		{
+			Vector<EntityID> result;
+			result.reserve(m_entityManager.GetAliveMap().size());
+
+			for (const auto& [id, alive] : m_entityManager.GetAliveMap())
+			{
+				if (alive)
+					result.push_back(id);
+			}
 			return result;
 		}
 

@@ -1,8 +1,10 @@
 #pragma once
 #include <Application/Core/Core.h>
 
-namespace Nyx {
-	enum class MouseButton {
+namespace Nyx
+{
+	enum class MouseButton 
+	{
 		NONE = 0,
 		LEFT_BUTTON = 1 << 0,
 		RIGHT_BUTTON = 1 << 1,
@@ -10,7 +12,8 @@ namespace Nyx {
 		ALL = LEFT_BUTTON | RIGHT_BUTTON | MIDDLE_BUTTON,
 	};
 
-	enum class EventType {
+	enum class EventType 
+	{
 		NONE,
 		MOUSE_PRESS,
 		MOUSE_RELEASE,
@@ -22,7 +25,8 @@ namespace Nyx {
 		KEY_CHAR
 	};
 
-	struct EventList {
+	struct EventList 
+	{
 		int32 keyCode;
 		int8 inputChar;
 		int32 mouseX;
@@ -31,7 +35,8 @@ namespace Nyx {
 		float32 scrollDelta;
 	};
 
-	struct InputEvent {
+	struct InputEvent 
+	{
 		InputEvent (EventType eventType = EventType::NONE) : m_eventType(eventType) {}
 		~InputEvent() = default;
 

@@ -38,9 +38,8 @@ namespace Nyx {
         }
 
         // Access quaternion
-        Math::Quatf GetQuaternion() const {
-            return m_rotation;
-        }
+        Math::Quatf& GetQuaternion() { return m_rotation; }
+        const Math::Quatf& GetQuaternion() const { return m_rotation; }
 
         // Return Euler angles in radians
         Math::Vec3f GetEulerAngles() const {
@@ -49,7 +48,7 @@ namespace Nyx {
 
         // Rotate around world-space axis by angle (radians)
         void Rotate(const Math::Vec3d& axis, float angleRadians) {
-            Math::Quatf delta = glm::angleAxis(angleRadians, glm::normalize(glm::vec3(axis)));
+            Math::Quatf delta = glm::angleAxis(angleRadians, glm::normalize(Math::Vec3f(axis)));
             m_rotation = glm::normalize(delta * m_rotation);
         }
 

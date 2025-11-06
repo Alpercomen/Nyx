@@ -4,12 +4,10 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <string>
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-
+#include <Application/Core/Core.h>
 #include <Application/Core/Services/Managers/EntityManager/EntityManager.h>
 #include <Application/Core/Services/Managers/ResourceManager/ResourceManager.h>
+#include <Application/Core/Services/Managers/RenderManager/OpenGL.h>
 #include <Application/Core/Services/Pipeline/Immediate/Immediate.h>
 #include <Application/Core/Services/ResourceLocator/ResourceLocator.h>
 #include <Application/Core/Services/Lighting/LightingSystem.h>
@@ -36,9 +34,11 @@ namespace Nyx
     // Stores the attributes of a circle
     struct SphereDesc {
     public:
-        int32 res = 100;
+        int32 res = 200;
         Texture* texture = nullptr;
         Math::Vec3f baseColor = Math::Vec3f(1.00, 1.00, 1.00);
+        Math::Vec3f emissiveColor = Math::Vec3f(0.00, 0.00, 0.00);
+        float32 emissiveStrength = 1.0;
     };
 
     class Sphere {
@@ -57,7 +57,7 @@ namespace Nyx
                 R"(Nyx\Source\Application\Shaders\Sphere\sphere.frag)"
             );
 
-            m_material = Material(shader, circleDesc.baseColor, circleDesc.texture);
+            m_material = Material(shader, circleDesc.baseColor, circleDesc.emissiveColor, circleDesc.emissiveStrength, circleDesc.texture);
         }
 
         ~Sphere()
@@ -73,54 +73,57 @@ namespace Nyx
 
             Mesh mesh;
 
-            glGenVertexArrays(1, &mesh.vao.m_data);
-            glGenBuffers(1, &mesh.vbo.m_data);
-            glGenBuffers(1, &mesh.ebo.m_data);
+            GL::Get()->glGenVertexArrays(1, &mesh.vao.m_data);
+            GL::Get()->glGenBuffers(1, &mesh.vbo.m_data);
+            GL::Get()->glGenBuffers(1, &mesh.ebo.m_data);
 
-            glBindVertexArray(mesh.vao.m_data);
+            GL::Get()->glBindVertexArray(mesh.vao.m_data);
 
-            glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo.m_data);
-            glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+            GL::Get()->glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo.m_data);
+            GL::Get()->glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
 
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ebo.m_data);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
+            GL::Get()->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ebo.m_data);
+            GL::Get()->glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
 
             // Position attribute (location = 0)
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-            glEnableVertexAttribArray(0);
+            GL::Get()->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+            GL::Get()->glEnableVertexAttribArray(0);
 
             // UV attribute (location = 1)
-            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-            glEnableVertexAttribArray(1);
+            GL::Get()->glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+            GL::Get()->glEnableVertexAttribArray(1);
 
             // Normal attribute (location = 2)
-            glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(5 * sizeof(float)));
-            glEnableVertexAttribArray(2);
+            GL::Get()->glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(5 * sizeof(float)));
+            GL::Get()->glEnableVertexAttribArray(2);
 
-            glBindVertexArray(0);
+            GL::Get()->glBindVertexArray(0);
 
             mesh.ebo.m_indexCount = static_cast<uint32>(indices.size());
 
             return mesh;
         }
 
-        void DrawSphere(Math::Mat4f& model, Math::Mat4f& view, Math::Mat4f& projection)
+        void DrawSphere(Math::Mat4f& model, Math::Mat4f& view, Math::Mat4f& projection, const float farPlane)
         {
             m_material.Bind();
 
             uint32 shaderID = m_material.GetShader().GetID();
             LightingSystem::Get().UploadToShader(shaderID);
 
-            GLuint modelLoc = glGetUniformLocation(shaderID, "uModel");
-            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+            GLuint modelLoc = GL::Get()->glGetUniformLocation(shaderID, "uModel");
+            GL::Get()->glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
-            GLuint viewLoc = glGetUniformLocation(shaderID, "uView");
-            glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+            GLuint viewLoc = GL::Get()->glGetUniformLocation(shaderID, "uView");
+            GL::Get()->glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 
-            GLuint projLoc = glGetUniformLocation(shaderID, "uProj");
-            glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+            GLuint projLoc = GL::Get()->glGetUniformLocation(shaderID, "uProj");
+            GL::Get()->glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
-            glBindVertexArray(m_sphereMesh.vao.m_data);
+            GLuint uFar = GL::Get()->glGetUniformLocation(shaderID, "uFarPlane");
+            GL::Get()->glUniform1f(uFar, farPlane);
+
+            GL::Get()->glBindVertexArray(m_sphereMesh.vao.m_data);
 
             ImmediatePipeline::Get().Begin();
             ImmediatePipeline::Get().UseSphere();
@@ -163,12 +166,12 @@ namespace Nyx
                     float theta = (1.0f - u) * glm::two_pi<float>(); // longitude [0, 2PI]
                     float phi = v * glm::pi<float>();       // latitude  [0, PI]
 
-                    glm::vec3 pos;
+                    Math::Vec3f pos;
                     pos.x = sinf(phi) * cosf(theta);
                     pos.y = cosf(phi);
                     pos.z = sinf(phi) * sinf(theta);
 
-                    glm::vec3 norm = glm::normalize(pos);
+                    Math::Vec3f norm = glm::normalize(pos);
 
                     vertices.push_back(pos.x);
                     vertices.push_back(pos.y);

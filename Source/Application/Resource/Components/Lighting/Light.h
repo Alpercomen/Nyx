@@ -1,6 +1,6 @@
 #pragma once
 #include <Application/Core/Core.h>
-#include <Application/Resource/Components/Transform/Position.h>
+#include <Application/Resource/Components/Components.h>
 
 namespace Nyx
 {
@@ -18,8 +18,9 @@ namespace Nyx
 		Math::Vec3f color;
 		float intensity;
 
+		Position position;
 		Math::Vec3f direction;
 		float range;
-		float angle;
+		float decay;
 	};
 }

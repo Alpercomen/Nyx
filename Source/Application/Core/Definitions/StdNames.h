@@ -114,3 +114,6 @@ using OfStream = std::ofstream;
 using FileStream = std::fstream;
 
 #include <stdexcept>
+
+template<typename T>
+using Optional = std::optional<T>;

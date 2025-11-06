@@ -1,6 +1,6 @@
 #pragma once
 
-#include <gl/glew.h>
+#include <Application/Core/Services/Managers/RenderManager/OpenGL.h>
 
 namespace Nyx
 {
@@ -10,7 +10,7 @@ namespace Nyx
 		Texture(const String& path, bool flipVertically = true);
 		~Texture();
 
-		void Bind(uint32 slot = 0) const;
+		void Bind(uint32 slot = 0);
 		uint32 GetID() const { return m_textureID; }
 
 	private:

@@ -70,7 +70,7 @@ namespace Nyx
 		// Bind texture and generate mipmaps
 		glBindTexture(GL_TEXTURE_2D, texture->GetID());
 
-		glGenerateMipmap(GL_TEXTURE_2D);
+		GL::Get()->glGenerateMipmap(GL_TEXTURE_2D);
 
 		// Set mipmap filtering
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); // Trilinear filtering
