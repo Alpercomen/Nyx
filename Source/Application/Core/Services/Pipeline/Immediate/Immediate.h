@@ -36,8 +36,6 @@ namespace Nyx
 			glDepthFunc(m_depthFunc);
 			glBlendFunc(m_blendSrc, m_blendDst);
 			glCullFace(m_cullMode);
-
-			glDepthMask(GL_TRUE);
 		}
 
 	private:
@@ -66,8 +64,8 @@ namespace Nyx
 			glEnable(GL_DEPTH_TEST);
 			glEnable(GL_BLEND);
 			glEnable(GL_DEPTH_CLAMP);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glDepthMask(GL_FALSE);
 		}
 
@@ -75,10 +73,23 @@ namespace Nyx
 		{
 			glDisable(GL_CULL_FACE);
 			glEnable(GL_DEPTH_TEST);
-			glEnable(GL_BLEND);
 			glEnable(GL_DEPTH_CLAMP);
+			glEnable(GL_BLEND);
 
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glDepthMask(GL_TRUE);
+		}
+
+		void UseAtmosphere()
+		{
+			glEnable(GL_CULL_FACE);
+			glEnable(GL_BLEND);
+			glEnable(GL_DEPTH_TEST);
+			glCullFace(GL_FRONT);
+			glEnable(GL_DEPTH_CLAMP);
+			glDepthFunc(GL_LESS);
+
+			glBlendFunc(GL_ONE, GL_ONE);
 			glDepthMask(GL_TRUE);
 		}
 

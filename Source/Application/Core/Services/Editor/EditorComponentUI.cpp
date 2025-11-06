@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include <Application/Core/Services/Editor/EditorComponentUI.h>
+#include <Application/Core/Services/Managers/EffectManager/Atmosphere/AtmosphereSystem.h>
 
 void RegisterComponents()
 {
@@ -63,5 +64,21 @@ void RegisterComponents()
 
             addEditor(form, "Locked Entity", name.name);
             return &l;
+        });
+
+    ComponentRegistry::Get().registerComponent<Atmosphere>("Atmosphere",
+        [](EntityID id, QFormLayout* form, QWidget*) -> void* {
+            if (!ECS::Get().HasComponent<Atmosphere>(id))
+                return nullptr;
+
+            auto& a = *ECS::Get().GetComponent<Atmosphere>(id);
+
+            AtmosphereDesc& atmosphereDesc = a.m_atmosphereDesc;
+
+            addEditorVec3(form, "Scatter Color", atmosphereDesc.scatteringColor);
+            addEditor(form, "Intensity", atmosphereDesc.intensity);
+            addEditor(form, "Thickness", atmosphereDesc.atmosphereThickness);
+
+            return &a;
         });
 }

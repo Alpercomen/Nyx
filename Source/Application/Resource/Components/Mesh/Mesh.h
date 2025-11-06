@@ -34,7 +34,7 @@ namespace Nyx
     // Stores the attributes of a circle
     struct SphereDesc {
     public:
-        int32 res = 100;
+        int32 res = 200;
         Texture* texture = nullptr;
         Math::Vec3f baseColor = Math::Vec3f(1.00, 1.00, 1.00);
         Math::Vec3f emissiveColor = Math::Vec3f(0.00, 0.00, 0.00);

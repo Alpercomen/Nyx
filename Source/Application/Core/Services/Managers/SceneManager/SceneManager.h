@@ -2,8 +2,8 @@
 
 #include <Application/Core/Core.h>
 #include <Application/Core/Services/Managers/EntityManager/EntityManager.h>
-#include <Application/Resource/Components/Components.h>
 #include <Application/Core/Services/Lighting/LightingSystem.h>
+#include <Application/Resource/Components/Components.h>
 #include <Application/Resource/Components/Mesh/GridMesh/GridMesh.h>
 #include <Application/Utils/SpaceUtils/SpaceUtils.h>
 #include <Application/Utils/MathUtils/MathUtils.h>
@@ -347,6 +347,16 @@ namespace Nyx
 			pointLight.range = SOL_SYSTEM_RADIUS;
 			pointLight.decay = 1 / SOL_SYSTEM_RADIUS;
 			ECS::Get().AddComponent(sunID, pointLight);
+
+			AtmosphereDesc atmosphereDesc({
+				Math::Vec3f(0.5f, 0.7f, 1.0f),
+				6.5f,
+				0.0002f,
+				&ECS::Get().GetComponent<Sphere>(earthID)->m_sphereMesh
+			});
+
+			Atmosphere atmosphere(atmosphereDesc);
+			ECS::Get().AddComponent(earthID, atmosphere);
 
 			InitializeCircularOrbit(mercuryID, sunID, 0.0);
 			InitializeCircularOrbit(venusID, sunID, 0.0);

@@ -5,6 +5,7 @@
 #include <Application/Resource/Components/Rigidbody/Acceleration.h>
 #include <Application/Resource/Components/Mesh/Mesh.h>
 #include <Application/Resource/Components/Mesh/GridMesh/GridMesh.h>
+#include <Application/Resource/Components/Effects/Atmosphere.h>
 
 namespace Nyx
 {

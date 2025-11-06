@@ -59,7 +59,7 @@ inline QWidget* addEditor(QFormLayout* form, const char* name, int& value, int m
 inline QWidget* addEditor(QFormLayout* form, const char* name, float& value, double min = -1e9, double max = 1e9, double step = 0.1) 
 {
     auto* w = new QDoubleSpinBox;
-    w->setDecimals(1);
+    w->setDecimals(6);
     w->setRange(min, max);
     w->setSingleStep(step);
     w->setValue(value);
@@ -75,7 +75,7 @@ inline QWidget* addEditor(QFormLayout* form, const char* name, float& value, dou
 inline QWidget* addEditor(QFormLayout* form, const char* name, double& value, double min = -1e12, double max = 1e12, double step = 0.1) 
 {
     auto* w = new QDoubleSpinBox;
-    w->setDecimals(1);
+    w->setDecimals(6);
     w->setRange(min, max);
     w->setSingleStep(step);
     w->setValue(value);

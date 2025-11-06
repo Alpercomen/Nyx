@@ -56,7 +56,8 @@ void InspectorPanel::setSelectedEntity(EntityID id)
     m_selected = id;
     clearForm(m_form);
 
-    if (id == 0) {
+    if (id < NO_ID) 
+    {
         m_form->addRow(new QLabel("No selection"));
         return;
     }

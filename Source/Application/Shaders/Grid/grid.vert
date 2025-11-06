@@ -1,16 +1,16 @@
 #version 330 core
 
 // outputs
-out vec3 nearPoint;
-out vec3 farPoint;
-out mat4 fragView;
-out mat4 fragProj;
+out vec3  nearPoint;
+out vec3  farPoint;
+out mat4  fragView;
+out mat4  fragProj;
 out float near;
 out float far;
 
 // uniforms
-uniform mat4 uView;
-uniform mat4 uProj;
+uniform mat4  uView;
+uniform mat4  uProj;
 uniform float uNear;
 uniform float uFar;
 uniform vec3  uCameraPos;   // kept for the fragment stage
