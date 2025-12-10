@@ -1,8 +1,5 @@
 #pragma once
 #include <Application/Core/Core.h>
-#include <Application/Resource/Components/Transform/Transform.h>
+#include <Application/Resource/Components/Components.h>
 
-namespace Nyx
-{
-	Math::Vec3f LocalToWorld(const Math::Vec3f local, const Transform& transform);
-}
+Math::Vec3f LocalToWorld(const Math::Vec3f local, const Transform& transform);

@@ -12,14 +12,14 @@
 
 Camera::Camera()
 {
-    SetFront(Math::Vec3f(0.0f, 0.0f, -1.0f));
-    SetMovementSpeed(0.1);
+    SetFront(glm::vec3(0.0f, 0.0f, -1.0f));
+    SetMovementSpeed(3);
     SetMovementSpeedMultiplier(5.f);
     SetMouseSensitivity(0.1f);
     SetZoom(45.0f);
     SetYaw(-90.0f);
     SetPitch(0.0f);
-    SetWorldUp(Math::Vec3f(0.0f, 1.0f, 0.0f));
+    SetWorldUp(glm::vec3(0.0f, 1.0f, 0.0f));
 
     UpdateCameraVectors();
 
@@ -40,35 +40,23 @@ glm::mat4 Camera::GetViewMatrix()
         const EntityID& targetID = CameraService().Get().targetEntity;
 
         if (ECS::Get().HasComponent<Transform>(targetID))
-            FocusCamera(targetID);
-    }
-
-    return glm::lookAt(glm::vec3(0.0f), GetFront(), GetUp());
-}
-
-glm::mat4 Camera::GetProjectionMatrix() const
-{
-    return glm::perspective(glm::radians(GetZoom()), GetAspectRatio(), GetNearPlane(), GetFarPlane());
-}
-
-void Camera::FocusCamera(const EntityID& targetID)
-{
-    const auto& targetTransform = *ECS::Get().GetComponent<Transform>(targetID);
-    const Position& pos = targetTransform.position / METERS_PER_UNIT;
-    const Math::Vec3f& targetPos = pos.GetWorld();
+        {
+            auto& targetTransform = *ECS::Get().GetComponent<Transform>(targetID);
+            const Position& pos = targetTransform.position / METERS_PER_UNIT;
+            glm::vec3 targetPos = pos.GetWorld();
 
     float distance = CameraService().Get().distance;
     float yaw = CameraService().Get().yaw;
     float pitch = CameraService().Get().pitch;
 
-    // Spherical to Cartesian
-    Math::Vec3f direction;
-    direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-    direction.y = sin(glm::radians(pitch));
-    direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-    direction = glm::normalize(direction);
+            // Spherical to Cartesian
+            glm::vec3 direction;
+            direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+            direction.y = sin(glm::radians(pitch));
+            direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+            direction = glm::normalize(direction);
 
-    Math::Vec3f cameraPos = targetPos - direction * distance;
+            glm::vec3 cameraPos = targetPos - direction * distance;
 
     // Update camera's Transform
     GetPosition().SetWorld(cameraPos);
@@ -135,7 +123,7 @@ void Camera::ProcessMouseMovement(float xoffset, float yoffset, bool constrainPi
 
 void Camera::UpdateCameraVectors()
 {
-    Math::Vec3f front;
+    glm::vec3 front;
     front.x = cos(glm::radians(GetYaw())) * cos(glm::radians(GetPitch()));
     front.y = sin(glm::radians(GetPitch()));
     front.z = sin(glm::radians(GetYaw())) * cos(glm::radians(GetPitch()));

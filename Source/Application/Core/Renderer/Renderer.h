@@ -11,7 +11,6 @@
 #include <Application/Core/Services/Managers/EffectManager/Atmosphere/AtmosphereSystem.h>
 #include <Application/Resource/Material/ShaderProgram/ShaderProgram.h>
 #include <Application/Core/Services/Lighting/LightingSystem.h>
-#include <Application/Resource/Components/Components.h>
 
 
 namespace Nyx

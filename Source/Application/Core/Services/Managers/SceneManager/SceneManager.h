@@ -328,11 +328,7 @@ namespace Nyx
 			Velocity uranusAngularVelocity = LocalToWorld(Math::Vec3f(0.0, URANUS_ANGULAR_VELOCITY_RADIANS, 0.0), uranusTransform);
 			Velocity neptuneAngularVelocity = LocalToWorld(Math::Vec3f(0.0, NEPTUNE_ANGULAR_VELOCITY_RADIANS, 0.0), neptuneTransform);
 
-			EntityID cameraID = scenePtr->CreateCamera("Camera", Position{ Math::Vec3f(AU / METERS_PER_UNIT, 0.0f, 1.0) });
-			EntityID sunID = scenePtr->CreatePlanet("Sun", sunTransform, Rigidbody{ SUN_MASS }, sunDesc);
-			EntityID mercuryID = scenePtr->CreatePlanet("Mercury", mercuryTransform, Rigidbody{ MERCURY_MASS , mercuryAngularVelocity }, mercuryDesc);
-			EntityID venusID = scenePtr->CreatePlanet("Venus", venusTransform, Rigidbody{ VENUS_MASS, venusAngularVelocity }, venusDesc);
-			EntityID earthID = scenePtr->CreatePlanet("Earth", earthTransform, Rigidbody{ EARTH_MASS , earthAngularVelocity }, earthDesc);
+			EntityID cameraID = scenePtr->CreateCamera("Camera", Transform{ glm::vec3(AU / METERS_PER_UNIT, 0.0f, 10.0f) });
 			EntityID moonID = scenePtr->CreatePlanet("Moon", moonTransform, Rigidbody{ MOON_MASS }, moonDesc);
 			EntityID marsID = scenePtr->CreatePlanet("Mars", marsTransform, Rigidbody{ MARS_MASS, marsAngularVelocity }, marsDesc);
 			EntityID jupiterID = scenePtr->CreatePlanet("Jupiter", jupiterTransform, Rigidbody{ JUPITER_MASS, jupiterAngularVelocity }, jupiterDesc);
@@ -342,6 +338,7 @@ namespace Nyx
 
 			LightComponent pointLight;
 			pointLight.type = LightType::POINT;
+			pointLight.position = Position( Math::Vec3f(0.0, 0.0, 0.0) );
 			pointLight.color = Math::Vec3f(1.0, 1.0, 1.0);
 			pointLight.intensity = 1.0;
 			pointLight.range = SOL_SYSTEM_RADIUS;
