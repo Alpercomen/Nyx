@@ -1,17 +1,19 @@
-#version 330 core
+#version 450 core
 
-layout(location = 0) in vec3 aPosition;
+layout(location = 0) in vec3 aPosition;   // unit-sphere or atmosphere-sphere vertices
 
-uniform mat4 uModel;
+uniform mat4 uModel;   // model for the atmosphere shell
 uniform mat4 uView;
-uniform mat4 uProjection;
+uniform mat4 uProj;
 
-out vec3 vWorldPos;
-out vec3 vNormal;
+out VS_OUT 
+{
+    vec3 worldPos;
+} vs_out;
 
-void main() {
-    vec4 worldPos = uModel * vec4(aPosition, 1.0);
-    vWorldPos = worldPos.xyz;
-    vNormal = normalize(mat3(uModel) * aPosition); // local space normal -> world
-    gl_Position = uProjection * uView * worldPos;
+void main()
+{
+    vec4 world = uModel * vec4(aPosition, 1.0);
+    vs_out.worldPos = world.xyz;
+    gl_Position = uProj * uView * world;
 }

@@ -61,27 +61,27 @@ void InitializeCircularOrbit(EntityID satelliteID, EntityID attractorID, float32
     auto& satelliteRig = *ECS::Get().GetComponent<Rigidbody>(satelliteID);
     auto& attractorRig = *ECS::Get().GetComponent<Rigidbody>(attractorID);
 
-    Math::Vec3f direction = glm::normalize(attractorPos.GetWorld() - satellitePos.GetWorld());
+    glm::vec3 direction = glm::normalize(attractorPos.GetWorld() - satellitePos.GetWorld());
     float distanceMeters = glm::length(attractorPos.GetWorld() - satellitePos.GetWorld());
 
     // Correct orbital speed calculation (SI units)
     double orbitalSpeed = std::sqrt(G * attractorRig.mass / distanceMeters);
 
     // Compute tangential direction
-    Math::Vec3f up = Math::Vec3f(0, 1, 0);
+    glm::vec3 up = glm::vec3(0, 1, 0);
 
     if (std::abs(glm::dot(direction, up)) > 0.99f)
-        up = Math::Vec3f(1, 0, 0); // avoid near-parallel vectors
+        up = glm::vec3(1, 0, 0); // avoid near-parallel vectors
 
-    Math::Vec3f tangential = glm::normalize(glm::cross(direction, up));
-    Math::Vec3f satelliteVel = tangential * static_cast<float>(orbitalSpeed);
+    glm::vec3 tangential = glm::normalize(glm::cross(direction, up));
+    glm::vec3 satelliteVel = tangential * static_cast<float>(orbitalSpeed);
 
     // Apply to satellite
     satelliteRig.velocity.SetWorld(attractorRig.velocity.GetWorld() + satelliteVel);
 
     // Conservation of momentum: Apply opposite to attractor
-    Math::Vec3f momentum = satelliteVel * static_cast<float>(satelliteRig.mass);
-    Math::Vec3f attractorDeltaVel = -momentum / static_cast<float>(attractorRig.mass);
+    glm::vec3 momentum = satelliteVel * static_cast<float>(satelliteRig.mass);
+    glm::vec3 attractorDeltaVel = -momentum / static_cast<float>(attractorRig.mass);
     attractorRig.velocity.SetWorld(attractorRig.velocity.GetWorld() + attractorDeltaVel);
 
     spdlog::info("Initialized orbit:");
@@ -127,8 +127,12 @@ void Attract(EntityID& cameraID)
             double dist = sqrt(distSq);
             Math::Vec3d dir = delta / dist;
 
-            // Newton’s law of universal gravitation
-            double force = (G * aBody.mass * bBody.mass) / distSq;
+		Math::Vec3d diff = glm::vec3(dx, dy, dz);
+		float distance = glm::length(diff);
+		Math::Vec3d unitVector = glm::normalize(diff);
+
+		float Gforce = (G * objRigidbody.mass * obj2Rigidbody.mass) / (distance * distance);
+		float acc = Gforce / obj2Rigidbody.mass;
 
             // accelerations
             Math::Vec3f accA = dir * (force / aBody.mass);
@@ -184,5 +188,5 @@ void ApplyTidalLock(Transform& Ta, Transform& Tb, Rigidbody& Ra, EntityID& camer
     Math::Quatf qWorld = glm::normalize(glm::quat_cast(basis));
 
     Ta.rotation.SetQuaternion(qWorld);
-    Ra.angularVelocity.SetWorld(Math::Vec3f(0.0f));
+    Ra.angularVelocity.SetWorld(glm::vec3(0.0f));
 }

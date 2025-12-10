@@ -8,7 +8,12 @@ namespace Nyx
 	struct AtmosphereDesc
 	{
 		Math::Vec3f scatteringColor = { 0.5f, 0.7f, 1.0f };
-		float intensity = 0.25f;
+		float densityFalloff = 1.5f;
+		float edgeStrength = 2.2f;
+		float centerStrength = 0.35f;
+		float edgePower = 3.0f;
+		float centerPower = 3.0f;
+		float exposure = 3.0f;
 		float atmosphereThickness = 100.0f;
 		Mesh* atmosphereMesh = nullptr;
 	};

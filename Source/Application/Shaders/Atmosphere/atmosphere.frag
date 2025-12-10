@@ -1,24 +1,33 @@
-#version 330 core
+#version 450 core
 
-in vec3 vWorldPos;
-in vec3 vNormal;
+in VS_OUT {
+    vec3 worldPos;
+} fs_in;
 
 out vec4 FragColor;
 
-uniform vec3 uCameraPos;
-uniform vec3 uPlanetCenter;
+uniform vec3  uCameraPos;
+uniform vec3  uPlanetCenter;
+
 uniform float uPlanetRadius;
 uniform float uAtmosphereRadius;
-uniform vec3 uScatteringColor;
-uniform float uScatteringStrength;
 
-// === Lighting ===
-#define MAX_DIRECTIONAL_LIGHTS 4
+// Scattering tint (Rayleigh-optimized)
+uniform vec3  uScatteringColor = vec3(0.42, 0.63, 1.0);
+
+// Artistic controls
+uniform float uDensityFalloff = 1.5;
+uniform float uEdgeStrength   = 2.2;
+uniform float uCenterStrength = 0.35;
+uniform float uEdgePower      = 3.0;
+uniform float uCenterPower    = 3.0;
+uniform float uExposure       = 1.0;
+
+// ------------------------------------------------------------
+// Multiple LIGHT SOURCES (matches your engine)
+// ------------------------------------------------------------
+#define MAX_DIRECTIONAL_LIGHTS 8
 #define MAX_POINT_LIGHTS 16
-
-// === Light System ===
-uniform int uDirLightCount;
-uniform int uPointLightCount;
 
 struct DirectionalLight {
     vec3 direction;
@@ -34,81 +43,82 @@ struct PointLight {
     float decay;
 };
 
+uniform int uDirLightCount;
 uniform DirectionalLight uDirectionalLights[MAX_DIRECTIONAL_LIGHTS];
+
+uniform int uPointLightCount;
 uniform PointLight uPointLights[MAX_POINT_LIGHTS];
+// ------------------------------------------------------------
 
-const float PI = 3.14159265359;
+float saturate(float x) { return clamp(x, 0.0, 1.0); }
 
-float RayleighPhase(float cosTheta) 
+void main()
 {
-    return 3.0 / (16.0 * PI) * (1.0 + cosTheta * cosTheta);
-}
+    vec3 toCenter = fs_in.worldPos - uPlanetCenter;
+    float dist = length(toCenter);
+    vec3 normal = toCenter / dist;
 
-float Attenuate(float dist, float range, float decay) 
-{
-    return pow(clamp(1.0 - dist / range, 0.0, 1.0), decay);
-}
+    vec3 viewDir = normalize(uCameraPos - fs_in.worldPos);
 
-void main() {
-    vec3 viewDir = normalize(vWorldPos - uCameraPos);
-    vec3 normal = normalize(vWorldPos - uPlanetCenter);
+    float NdotV = saturate(dot(normal, -viewDir));
 
-    // Compute how deep into the atmosphere this pixel is
-    float shellDist = length(vWorldPos - uPlanetCenter);
-    float heightRatio = clamp((shellDist - uPlanetRadius) / (uAtmosphereRadius - uPlanetRadius), 0.0, 1.0);
+    float height = dist - uPlanetRadius;
+    float shell = max(uAtmosphereRadius - uPlanetRadius, 0.001);
+    float h = saturate(height / shell);
 
-    vec3 tint = vec3(0.0);
+    float horizonTerm = pow(1.0 - NdotV, uEdgePower);
+    float radialDensity = exp(-h * uDensityFalloff);
+    float edgeScatter = horizonTerm * radialDensity;
 
-    // Directional Lights
-    for (int i = 0; i < uDirLightCount; ++i) 
+    float centerTerm = pow(NdotV, uCenterPower) * (1.0 - h);
+    float centerScatter = centerTerm;
+
+    // ------------------------------------------------------------
+    //        LIGHTING: MULTIPLE DIRECATIONAL + POINT LIGHTS
+    // ------------------------------------------------------------
+    float totalLight = 0.0;
+
+    // ---- Directional Lights ----
+    for (int i = 0; i < uDirLightCount; i++)
     {
-        vec3 lightDir = normalize(-uDirectionalLights[i].direction);
-        float cosTheta = dot(viewDir, lightDir);
-        float rayleigh = RayleighPhase(cosTheta);
+        vec3 L = normalize(-uDirectionalLights[i].direction);
 
-        float NdotL = max(dot(normal, lightDir), 0.0);
-        vec3 lightColor = uDirectionalLights[i].color * uDirectionalLights[i].intensity;
+        float NdotL = dot(normal, L);
+        float lf = smoothstep(0.0, 0.2, NdotL);
 
-        tint += rayleigh * lightColor * NdotL;
+        totalLight += lf * uDirectionalLights[i].intensity;
     }
 
-    // Point Lights
-    for (int i = 0; i < uPointLightCount; ++i) 
+    // ---- Point Lights -----
+    for (int i = 0; i < uPointLightCount; i++)
     {
-        vec3 lightVec = uPointLights[i].position - vWorldPos;
-        float dist = length(lightVec);
-        vec3 lightDir = normalize(lightVec);
-        float cosTheta = dot(viewDir, lightDir);
-        float rayleigh = RayleighPhase(cosTheta);
-        float NdotL = max(dot(normal, lightDir), 0.0);
+        vec3 L = normalize(uPointLights[i].position - fs_in.worldPos);
 
-        float atten = Attenuate(dist, uPointLights[i].range, uPointLights[i].decay);
-        vec3 lightColor = uPointLights[i].color * uPointLights[i].intensity * atten;
+        float distToLight = length(uPointLights[i].position - fs_in.worldPos);
+        float attenuation = pow(saturate(1.0 - distToLight / uPointLights[i].range),
+                                uPointLights[i].decay);
 
-        tint += rayleigh * lightColor * NdotL;
+        float NdotL = dot(normal, L);
+        float lf = smoothstep(0.0, 0.2, NdotL);
+
+        totalLight += lf * attenuation * uPointLights[i].intensity;
     }
 
-    // === Day-side camera-facing glow ===
-    for (int i = 0; i < uDirLightCount; ++i) 
-    {
-        vec3 lightDir = normalize(-uDirectionalLights[i].direction);
-        vec3 lightColor = uDirectionalLights[i].color * uDirectionalLights[i].intensity;
+    totalLight = saturate(totalLight);
 
-        float NdotL = max(dot(normal, lightDir), 0.0);       // Lit side
-        float VdotN = max(dot(normal, -viewDir), 0.0);       // Facing camera
-        float softness = pow(VdotN, 2.0);
+    float scatter = (edgeScatter * uEdgeStrength + centerScatter * uCenterStrength) * totalLight;
 
-        vec3 surfaceGlow = lightColor * NdotL * softness;
+    scatter = saturate(scatter);
 
-        tint += surfaceGlow * uScatteringColor * 0.5;
-    }
+    vec3 color = uScatteringColor * scatter;
+    color = vec3(1.0) - exp(-color * uExposure);
 
-    vec3 finalColor = tint * uScatteringColor * uScatteringStrength;
-    finalColor = clamp(finalColor, 0.0, 1.0);
+    float alpha = scatter;
+    float outerFade = saturate(1.0 - h);
+    alpha *= outerFade;
 
-    // Let intensity scale alpha directly
-    float baseAlpha = pow(heightRatio, 0.8);
-    float alpha = baseAlpha * clamp(uScatteringStrength * 0.1, 0.0, 1.0); // Clamp for sanity
+    if (alpha < 0.001)
+        discard;
 
-    FragColor = vec4(finalColor, alpha);
+    FragColor = vec4(color, alpha);
 }

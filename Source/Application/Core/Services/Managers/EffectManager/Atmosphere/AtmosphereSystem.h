@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <Application/Core/Core.h>
 #include <Application/Resource/Components/Components.h>
@@ -19,7 +19,8 @@ namespace Nyx {
                 auto pos = transform->position / METERS_PER_UNIT;
                 auto sca = transform->scale / METERS_PER_UNIT;
 
-                float radius = sca.getRadius();
+                const float radius = sca.getRadius();
+                const float outerRadius = radius + atmosphereDesc.atmosphereThickness;
 
                 const auto& mesh = atmosphereDesc.atmosphereMesh;
                 if (!mesh) 
@@ -29,33 +30,27 @@ namespace Nyx {
                 uint32 shaderID = mat.GetShader().GetID();
 
                 // Standard camera uniforms
-                GL::Get()->glUniformMatrix4fv(
-                    GL::Get()->glGetUniformLocation(shaderID, "uView"),
-                    1, GL_FALSE, glm::value_ptr(camera.GetViewMatrix())
-                );
-
-                GL::Get()->glUniformMatrix4fv(
-                    GL::Get()->glGetUniformLocation(shaderID, "uProjection"),
-                    1, GL_FALSE, glm::value_ptr(camera.GetProjectionMatrix())
-                );
+                GL::Get()->glUniformMatrix4fv(GL::Get()->glGetUniformLocation(shaderID, "uView"), 1, GL_FALSE, glm::value_ptr(camera.GetViewMatrix()));
+                GL::Get()->glUniformMatrix4fv(GL::Get()->glGetUniformLocation(shaderID, "uProj"), 1, GL_FALSE, glm::value_ptr(camera.GetProjectionMatrix()));
 
                 // Per-instance uniforms
                 Position cameraPos = camera.GetPosition();
-                glm::vec3 center = Math::Vec3f(pos.GetWorld() - cameraPos.GetWorld());
+                glm::vec3 center = pos.GetWorld() - cameraPos.GetWorld();
                 glm::mat4 model = glm::translate(glm::mat4(1.0f), center);
-                model = glm::scale(model, glm::vec3(radius + atmosphereDesc.atmosphereThickness));
+                model = glm::scale(model, glm::vec3(outerRadius));
 
-                GL::Get()->glUniformMatrix4fv(
-                    GL::Get()->glGetUniformLocation(shaderID, "uModel"),
-                    1, GL_FALSE, glm::value_ptr(model)
-                );
-
-                GL::Get()->glUniform3fv(GL::Get()->glGetUniformLocation(shaderID, "uCameraPos"), 1, glm::value_ptr(camera.GetPosition().GetWorld()));
+                GL::Get()->glUniform3fv(GL::Get()->glGetUniformLocation(shaderID, "uCameraPos"), 1, glm::value_ptr(glm::vec3(0.0f)));
                 GL::Get()->glUniform3fv(GL::Get()->glGetUniformLocation(shaderID, "uPlanetCenter"), 1, glm::value_ptr(center));
+                GL::Get()->glUniformMatrix4fv(GL::Get()->glGetUniformLocation(shaderID, "uModel"), 1, GL_FALSE, glm::value_ptr(model));
                 GL::Get()->glUniform1f(GL::Get()->glGetUniformLocation(shaderID, "uPlanetRadius"), radius);
-                GL::Get()->glUniform1f(GL::Get()->glGetUniformLocation(shaderID, "uAtmosphereRadius"), radius + atmosphereDesc.atmosphereThickness);
+                GL::Get()->glUniform1f(GL::Get()->glGetUniformLocation(shaderID, "uAtmosphereRadius"), outerRadius);
                 GL::Get()->glUniform3fv(GL::Get()->glGetUniformLocation(shaderID, "uScatteringColor"), 1, glm::value_ptr(atmosphereDesc.scatteringColor));
-                GL::Get()->glUniform1f(GL::Get()->glGetUniformLocation(shaderID, "uScatteringStrength"), atmosphereDesc.intensity);
+                GL::Get()->glUniform1f(GL::Get()->glGetUniformLocation(shaderID, "uDensityFalloff"), atmosphereDesc.densityFalloff);
+                GL::Get()->glUniform1f(GL::Get()->glGetUniformLocation(shaderID, "uEdgeStrength"), atmosphereDesc.edgeStrength);
+                GL::Get()->glUniform1f(GL::Get()->glGetUniformLocation(shaderID, "uCenterStrength"), atmosphereDesc.centerStrength);
+                GL::Get()->glUniform1f(GL::Get()->glGetUniformLocation(shaderID, "uEdgePower"), atmosphereDesc.edgePower);
+                GL::Get()->glUniform1f(GL::Get()->glGetUniformLocation(shaderID, "uCenterPower"), atmosphereDesc.centerPower);
+                GL::Get()->glUniform1f(GL::Get()->glGetUniformLocation(shaderID, "uExposure"), atmosphereDesc.exposure);
 
                 // Upload lights
                 LightingSystem::Get().UploadToShader(shaderID);

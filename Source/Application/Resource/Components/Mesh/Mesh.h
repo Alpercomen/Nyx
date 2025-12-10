@@ -34,7 +34,7 @@ namespace Nyx
     // Stores the attributes of a circle
     struct SphereDesc {
     public:
-        int32 res = 200;
+        int32 res = 50;
         Texture* texture = nullptr;
         Math::Vec3f baseColor = Math::Vec3f(1.00, 1.00, 1.00);
         Math::Vec3f emissiveColor = Math::Vec3f(0.00, 0.00, 0.00);
@@ -166,12 +166,12 @@ namespace Nyx
                     float theta = (1.0f - u) * glm::two_pi<float>(); // longitude [0, 2PI]
                     float phi = v * glm::pi<float>();       // latitude  [0, PI]
 
-                    Math::Vec3f pos;
+                    glm::vec3 pos;
                     pos.x = sinf(phi) * cosf(theta);
                     pos.y = cosf(phi);
                     pos.z = sinf(phi) * sinf(theta);
 
-                    Math::Vec3f norm = glm::normalize(pos);
+                    glm::vec3 norm = glm::normalize(pos);
 
                     vertices.push_back(pos.x);
                     vertices.push_back(pos.y);
