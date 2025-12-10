@@ -76,9 +76,29 @@ void RegisterComponents()
             AtmosphereDesc& atmosphereDesc = a.m_atmosphereDesc;
 
             addEditorVec3(form, "Scatter Color", atmosphereDesc.scatteringColor);
-            addEditor(form, "Intensity", atmosphereDesc.intensity);
             addEditor(form, "Thickness", atmosphereDesc.atmosphereThickness);
+            addEditor(form, "Density Falloff", atmosphereDesc.densityFalloff);
+            addEditor(form, "Edge Strength", atmosphereDesc.edgeStrength);
+            addEditor(form, "Edge Power", atmosphereDesc.edgePower);
+            addEditor(form, "Center Strength", atmosphereDesc.centerStrength);
+            addEditor(form, "Center Power", atmosphereDesc.centerPower);
+            addEditor(form, "Exposure", atmosphereDesc.exposure);
 
             return &a;
+        });
+
+    ComponentRegistry::Get().registerComponent<LightComponent>("Light",
+        [](EntityID id, QFormLayout* form, QWidget*) -> void* {
+            if (!ECS::Get().HasComponent<LightComponent>(id))
+                return nullptr;
+
+            auto& l = *ECS::Get().GetComponent<LightComponent>(id);
+
+            addEditorVec3(form, "Light Color", l.color);
+            addEditor(form, "Intensity", l.intensity);
+            addEditor(form, "Range", l.range);
+            addEditor(form, "Decay", l.decay);
+
+            return &l;
         });
 }

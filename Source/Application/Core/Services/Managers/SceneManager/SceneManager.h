@@ -349,14 +349,18 @@ namespace Nyx
 			ECS::Get().AddComponent(sunID, pointLight);
 
 			AtmosphereDesc atmosphereDesc({
-				Math::Vec3f(0.5f, 0.7f, 1.0f),
-				6.5f,
-				0.0002f,
+				Math::Vec3f(0.3f, 0.6f, 0.8f),
+				0.5f,
+				1.2f,
+				0.0f,
+				4.0f,
+				70.0f,
+				1.0f,
+				0.0001f,
 				&ECS::Get().GetComponent<Sphere>(earthID)->m_sphereMesh
 			});
 
-			Atmosphere atmosphere(atmosphereDesc);
-			ECS::Get().AddComponent(earthID, atmosphere);
+			ECS::Get().AddComponent(earthID, Atmosphere{ atmosphereDesc });
 
 			InitializeCircularOrbit(mercuryID, sunID, 0.0);
 			InitializeCircularOrbit(venusID, sunID, 0.0);

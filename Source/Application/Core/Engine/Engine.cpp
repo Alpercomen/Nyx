@@ -22,7 +22,7 @@ namespace Nyx
 
         GL::Get()->glGenRenderbuffers(1, &depth);
         GL::Get()->glBindRenderbuffer(GL_RENDERBUFFER, depth);
-        GL::Get()->glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, w, h);
+        GL::Get()->glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH32F_STENCIL8, w, h);
 
         GL::Get()->glGenFramebuffers(1, &fbo);
         GL::Get()->glBindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -70,6 +70,7 @@ namespace Nyx
         GL::Get()->glBindFramebuffer(GL_FRAMEBUFFER, m_sceneFBO);
         GL::Get()->glViewport(0, 0, m_sceneTexWidth, m_sceneTexHeight);
         GL::Get()->glClearColor(0, 0, 0, 1);
+        GL::Get()->glDepthMask(GL_TRUE);
         GL::Get()->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         Physics::Update(scene.GetActiveCameraID());
