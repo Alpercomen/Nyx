@@ -82,7 +82,7 @@ glm::mat4 Camera::GetViewMatrix() const
     Transform& transform = *ECS::Get().GetComponent<Transform>(id);
     Position& pos = transform.position;
 
-    return glm::lookAt(pos.GetWorld(), pos.GetWorld() + GetFront(), GetUp());
+    return glm::lookAt(Math::Vec3f(0.0), GetFront(), GetUp());
 }
 
 glm::mat4 Camera::GetProjectionMatrix() const

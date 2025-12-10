@@ -11,6 +11,7 @@ uniform mat4 uView;
 uniform mat4 uProj;
 uniform float uNear;
 uniform float uFar;
+uniform vec3 uCameraPos;
 
 vec3 gridPlane[4] = vec3[](
     vec3(-1.0, -1.0, 0.0), // bottom-left

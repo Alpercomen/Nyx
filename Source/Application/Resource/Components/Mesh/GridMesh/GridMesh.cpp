@@ -10,12 +10,13 @@ GridMesh::GridMesh()
 
 }
 
-void GridMesh::DrawGrid(const Camera& camera) const
+void GridMesh::DrawGrid(const Camera& camera, const Transform& cameraTransform) const
 {
     m_shader.Use();
 
     Math::Mat4f view = camera.GetViewMatrix();
     Math::Mat4f projection = camera.GetProjectionMatrix();
+    Math::Vec3f cameraPos = cameraTransform.position.GetWorld();
 
     GLuint uView = glGetUniformLocation(m_shader.GetID(), "uView");
     glUniformMatrix4fv(uView, 1, GL_FALSE, glm::value_ptr(view));
@@ -28,6 +29,9 @@ void GridMesh::DrawGrid(const Camera& camera) const
 
     GLuint uFar = glGetUniformLocation(m_shader.GetID(), "uFar");
     glUniform1f(uFar, camera.GetFarPlane());
+
+    GLuint uCameraPos = glGetUniformLocation(m_shader.GetID(), "uCameraPos");
+    glUniform3fv(uCameraPos, 1, glm::value_ptr(cameraPos));
 
     ImmediatePipeline::Get().Begin();
     ImmediatePipeline::Get().UseGrid();

@@ -28,18 +28,19 @@ namespace Nyx
         void DrawScene(Scene& scene)
         {
             const Camera& camera = *ECS::Get().GetComponent<Camera>(scene.GetActiveCameraID());
+            const Transform& transform = *ECS::Get().GetComponent<Transform>(scene.GetActiveCameraID());
 
             if (m_gridEnabled)
             {
-                m_grid.DrawGrid(camera);
+                m_grid.DrawGrid(camera, transform);
             }
 
-            LightingSystem::Get().GatherLights();
+            LightingSystem::Get().GatherLights(transform);
 
             for (size_t i = 0; i < scene.GetSceneObjectSize(); ++i)
             {
                 const auto& object = scene.GetSceneObject(i);
-                object->Draw(camera);
+                object->Draw(camera, transform);
             }
         }
 

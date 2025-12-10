@@ -33,7 +33,7 @@ namespace Nyx
 			return m_entityID;
 		}
 
-		void Draw(const Camera& camera)
+		void Draw(const Camera& camera, const Transform& cameraTransform)
 		{
 			const auto& transform = ECS::Get().GetComponent<Transform>(m_entityID);
 			if (!transform)
@@ -44,7 +44,10 @@ namespace Nyx
 			auto sca = transform->scale / METERS_PER_UNIT;
 			auto rot = transform->rotation;
 
-			Math::Mat4f model = glm::translate(Math::Mat4f(1.0f), pos.GetWorld()) * rot.ToMatrix() * sca.ToMatrix();
+			const Position& cameraPos = cameraTransform.position;
+			Math::Vec3f relPos = Math::Vec3f(pos.GetWorld() - cameraPos.GetWorld());
+
+			Math::Mat4f model = glm::translate(Math::Mat4f(1.0f), relPos) * rot.ToMatrix() * sca.ToMatrix();
 			Math::Mat4f view = camera.GetViewMatrix();
 			Math::Mat4f projection = camera.GetProjectionMatrix();
 

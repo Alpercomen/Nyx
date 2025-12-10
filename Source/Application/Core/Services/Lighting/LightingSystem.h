@@ -12,7 +12,7 @@ namespace Nyx
 		Vector<LightComponent*> directionalLights;
 		Vector<LightComponent*> pointLights;
 
-		void GatherLights()
+		void GatherLights(const Transform& cameraTransform)
 		{
 			directionalLights.clear();
 			pointLights.clear();
@@ -32,7 +32,11 @@ namespace Nyx
 						continue;
 
 					const Transform& transform = *ECS::Get().GetComponent<Transform>(entityID);
+					const Position& cameraPos = cameraTransform.position;
+
 					light->position = transform.position / METERS_PER_UNIT;
+					light->position.SetWorld(light->position.GetWorld() - cameraPos.GetWorld());
+
 					pointLights.push_back(light);
 					break;
 				}
