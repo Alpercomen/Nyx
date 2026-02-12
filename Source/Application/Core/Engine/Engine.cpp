@@ -34,7 +34,7 @@ namespace Nyx {
         // Create renderbuffer for depth
         glGenRenderbuffers(1, &m_sceneDepthRBO);
         glBindRenderbuffer(GL_RENDERBUFFER, m_sceneDepthRBO);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, m_sceneTexWidth, m_sceneTexHeight);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH32F_STENCIL8, m_sceneTexWidth, m_sceneTexHeight);
 
         // Create framebuffer
         glGenFramebuffers(1, &m_sceneFBO);
