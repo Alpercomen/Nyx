@@ -11,6 +11,7 @@ uniform mat4 uProj;
 out vec2 vUV;
 out vec3 vNormal;
 out vec3 vFragPos;
+out float vFragDepth; 
 
 void main()
 {
@@ -23,4 +24,6 @@ void main()
     vNormal = mat3(transpose(inverse(uModel))) * aNormal;
 
     gl_Position = uProj * uView * worldPos;
+
+    vFragDepth = 1.0 + gl_Position.w;
 }

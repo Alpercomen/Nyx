@@ -73,4 +73,26 @@ namespace Nyx {
 		using uType = std::underlying_type_t<T>;
 		return static_cast<uType>(a) == static_cast<uType>(b);
 	}
+
+	template <typename T>
+	constexpr static std::enable_if_t<std::is_enum_v<T>, void>
+	SetFlag(T& value, T flag)
+	{
+		using uType = std::underlying_type_t<T>;
+		value = static_cast<T>(
+			static_cast<uType>(value) |
+			static_cast<uType>(flag)
+		);
+	}
+
+	template <typename T>
+	constexpr static std::enable_if_t<std::is_enum_v<T>, void>
+	ClearFlag(T& value, T flag)
+	{
+		using uType = std::underlying_type_t<T>;
+		value = static_cast<T>(
+			static_cast<uType>(value) &
+			~static_cast<uType>(flag)
+		);
+	}
 }

@@ -10,34 +10,42 @@ namespace Nyx {
     class Scale {
     public:
         // Constructors
-        Scale() : m_scale(1.0f, 1.0f, 1.0f) {}
+        Scale() : value(1.0f, 1.0f, 1.0f) {}
 
         explicit Scale(float uniform)
-            : m_scale(uniform, uniform, uniform) {
+            : value(uniform, uniform, uniform) {
         }
 
         Scale(float x, float y, float z)
-            : m_scale(x, y, z) {
-        }
+            : value(x, y, z) {}
 
         // Set new scale
-        void set(float x, float y, float z) {
-            m_scale = Math::Vec3f(x, y, z);
+        void set(float x, float y, float z) 
+        {
+            value = Math::Vec3f(x, y, z);
         }
 
         // Set uniform scale
-        void setUniform(float value) {
-            m_scale = Math::Vec3f(value);
+        void setUniform(float uniform) 
+        {
+            value = Math::Vec3f(uniform);
         }
 
         // Return 4x4 scaling matrix
-        Math::Mat4f ToMatrix() const {
-            return glm::scale(Math::Mat4f(1.0f), m_scale);
+        Math::Mat4f ToMatrix() const 
+        {
+            return glm::scale(Math::Mat4f(1.0f), value);
         }
 
         // Return current scale vector
-        Math::Vec3f get() const {
-            return m_scale;
+        Math::Vec3f& get()
+        {
+            return value;
+        }
+
+        float getRadius() const
+        {
+            return std::max(std::max(value.x, value.y), value.z);
         }
 
         /*
@@ -46,48 +54,48 @@ namespace Nyx {
 
         // Scalar multiplication
         Scale operator*(float scalar) const {
-            Math::Vec3f scaled = this->m_scale * scalar;
+            Math::Vec3f scaled = this->value * scalar;
             return Scale(scaled.x, scaled.y, scaled.z);
         }
 
         Scale operator/(float scalar) const {
-            Math::Vec3f scaled = this->m_scale / scalar;
+            Math::Vec3f scaled = this->value / scalar;
             return Scale(scaled.x, scaled.y, scaled.z);
         }
 
         Scale operator+(float scalar) const {
-            Math::Vec3f scaled = this->m_scale + scalar;
+            Math::Vec3f scaled = this->value + scalar;
             return Scale(scaled.x, scaled.y, scaled.z);
         }
 
         Scale operator-(float scalar) const {
-            Math::Vec3f scaled = this->m_scale - scalar;
+            Math::Vec3f scaled = this->value - scalar;
             return Scale(scaled.x, scaled.y, scaled.z);
         }
 
         // In-place
         Scale& operator*=(float scalar) {
-            m_scale *= scalar;
+            value *= scalar;
             return *this;
         }
 
         Scale& operator/=(float scalar) {
-            m_scale /= scalar;
+            value /= scalar;
             return *this;
         }
 
         Scale& operator+=(float scalar) {
-            m_scale += Math::Vec3f(scalar);
+            m_scale += glm::vec3(scalar);
             return *this;
         }
 
         Scale& operator-=(float scalar) {
-            m_scale -= Math::Vec3f(scalar);
+            m_scale -= glm::vec3(scalar);
             return *this;
         }
 
     private:
-        Math::Vec3f m_scale;
+        Math::Vec3f value;
     };
 
 }

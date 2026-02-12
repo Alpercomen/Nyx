@@ -61,27 +61,27 @@ void InitializeCircularOrbit(EntityID satelliteID, EntityID attractorID, float32
     auto& satelliteRig = *ECS::Get().GetComponent<Rigidbody>(satelliteID);
     auto& attractorRig = *ECS::Get().GetComponent<Rigidbody>(attractorID);
 
-    Math::Vec3f direction = glm::normalize(attractorPos.GetWorld() - satellitePos.GetWorld());
+    glm::vec3 direction = glm::normalize(attractorPos.GetWorld() - satellitePos.GetWorld());
     float distanceMeters = glm::length(attractorPos.GetWorld() - satellitePos.GetWorld());
 
     // Correct orbital speed calculation (SI units)
     double orbitalSpeed = std::sqrt(G * attractorRig.mass / distanceMeters);
 
     // Compute tangential direction
-    Math::Vec3f up = Math::Vec3f(0, 1, 0);
+    glm::vec3 up = glm::vec3(0, 1, 0);
 
     if (std::abs(glm::dot(direction, up)) > 0.99f)
-        up = Math::Vec3f(1, 0, 0); // avoid near-parallel vectors
+        up = glm::vec3(1, 0, 0); // avoid near-parallel vectors
 
-    Math::Vec3f tangential = glm::normalize(glm::cross(direction, up));
-    Math::Vec3f satelliteVel = tangential * static_cast<float>(orbitalSpeed);
+    glm::vec3 tangential = glm::normalize(glm::cross(direction, up));
+    glm::vec3 satelliteVel = tangential * static_cast<float>(orbitalSpeed);
 
     // Apply to satellite
     satelliteRig.velocity.SetWorld(attractorRig.velocity.GetWorld() + satelliteVel);
 
     // Conservation of momentum: Apply opposite to attractor
-    Math::Vec3f momentum = satelliteVel * static_cast<float>(satelliteRig.mass);
-    Math::Vec3f attractorDeltaVel = -momentum / static_cast<float>(attractorRig.mass);
+    glm::vec3 momentum = satelliteVel * static_cast<float>(satelliteRig.mass);
+    glm::vec3 attractorDeltaVel = -momentum / static_cast<float>(attractorRig.mass);
     attractorRig.velocity.SetWorld(attractorRig.velocity.GetWorld() + attractorDeltaVel);
 
     spdlog::info("Initialized orbit:");
@@ -89,62 +89,86 @@ void InitializeCircularOrbit(EntityID satelliteID, EntityID attractorID, float32
     spdlog::info(" - Attractor vel = ({:.6f}, {:.6f}, {:.6f})", attractorDeltaVel.x, attractorDeltaVel.y, attractorDeltaVel.z);
 }
 
-void Attract(const EntityID& objID)
+void Attract(EntityID& cameraID)
 {
-	if (!ECS::Get().HasComponent<Rigidbody>(objID) || !ECS::Get().HasComponent<Transform>(objID))
-		return;
+    auto& ids = ECS::Get().GetAllComponentIDs<Rigidbody>();
 
-    auto sphereIDs = ECS::Get().GetAllComponentIDs<Sphere>();
+    for (auto id : ids)
+    {
+        auto& rb = *ECS::Get().GetComponent<Rigidbody>(id);
+        rb.acceleration = Math::Vec3f(0.0);
+    }
 
-	for (size_t i = 0; i < sphereIDs.size(); ++i)
-	{
-        const EntityID& id = sphereIDs[i];
-		if (objID == id)
-			continue;
-
-        if (!ECS::Get().HasComponent<Rigidbody>(id) || !ECS::Get().HasComponent<Transform>(id))
+    // --- compute pairwise accelerations ---
+    for (size_t i = 0; i < ids.size(); ++i)
+    {
+        const EntityID& aID = ids[i];
+        if (!ECS::Get().HasComponent<Rigidbody>(aID) || !ECS::Get().HasComponent<Transform>(aID))
             continue;
 
-        auto& objTransform  = *ECS::Get().GetComponent<Transform>(objID);
-        auto& objRigidbody  = *ECS::Get().GetComponent<Rigidbody>(objID);
+        auto& aBody = *ECS::Get().GetComponent<Rigidbody>(aID);
+        auto& aTransform = *ECS::Get().GetComponent<Transform>(aID);
 
-		auto& obj2Transform  = *ECS::Get().GetComponent<Transform>(id);
-		auto& obj2Rigidbody  = *ECS::Get().GetComponent<Rigidbody>(id);
+        const Math::Vec3d posA = aTransform.position.GetWorld();
 
-		double dx = objTransform.position.GetWorld().x - obj2Transform.position.GetWorld().x;
-		double dy = objTransform.position.GetWorld().y - obj2Transform.position.GetWorld().y;
-		double dz = objTransform.position.GetWorld().z - obj2Transform.position.GetWorld().z;
+        for (size_t j = i + 1; j < ids.size(); ++j)
+        {
+            const EntityID& bID = ids[j];
+            if (!ECS::Get().HasComponent<Rigidbody>(bID) || !ECS::Get().HasComponent<Transform>(bID))
+                continue;
 
-		Math::Vec3d diff = Math::Vec3f(dx, dy, dz);
+            auto& bBody = *ECS::Get().GetComponent<Rigidbody>(bID);
+            auto& bTransform = *ECS::Get().GetComponent<Transform>(bID);
+
+            const Math::Vec3d posB = bTransform.position.GetWorld();
+
+            Math::Vec3d delta = posB - posA;
+            double distSq = glm::dot(delta, delta) + 1e-6;  // prevent div/0
+            double dist = sqrt(distSq);
+            Math::Vec3d dir = delta / dist;
+
+		Math::Vec3d diff = glm::vec3(dx, dy, dz);
 		float distance = glm::length(diff);
 		Math::Vec3d unitVector = glm::normalize(diff);
 
 		float Gforce = (G * objRigidbody.mass * obj2Rigidbody.mass) / (distance * distance);
 		float acc = Gforce / obj2Rigidbody.mass;
 
-        Math::Vec3d accVec(acc * unitVector.x, acc * unitVector.y, acc * unitVector.z);
-		Acceleration attraction(accVec);
+            // accelerations
+            Math::Vec3f accA = dir * (force / aBody.mass);
+            Math::Vec3f accB = -dir * (force / bBody.mass);
 
-        obj2Rigidbody.acceleration = attraction;
-        obj2Rigidbody.velocity.Accelerate(attraction);
+            aBody.acceleration += accA;
+            bBody.acceleration += accB;
 
-        // If object is tidally locked to another object
-        if (ECS::Get().HasComponent<TidallyLocked>(objID))
-        {
-            const auto& lockedEntityId = ECS::Get().GetComponent<TidallyLocked>(objID)->lockedEntity;
+            // Check if A is tidally locked to B
+            if (ECS::Get().HasComponent<TidallyLocked>(aID))
+            {
+                const auto& lockedEntityId = ECS::Get().GetComponent<TidallyLocked>(aID)->lockedEntity;
+                if (lockedEntityId == bID)
+                    ApplyTidalLock(aTransform, bTransform, aBody, cameraID);
+            }
 
-            if (lockedEntityId == id)
-                ApplyTidalLock(objTransform, obj2Transform, objRigidbody);
+            // Check if B is tidally locked to A
+            if (ECS::Get().HasComponent<TidallyLocked>(bID))
+            {
+                const auto& lockedEntityId = ECS::Get().GetComponent<TidallyLocked>(bID)->lockedEntity;
+                if (lockedEntityId == aID)
+                    ApplyTidalLock(bTransform, aTransform, bBody, cameraID);
+            }
         }
-
-	}
+    }
 }
 
 // Make Ta tidally locked towards Tb
-void ApplyTidalLock(Transform& Ta, Transform& Tb, Rigidbody& Ra)
+void ApplyTidalLock(Transform& Ta, Transform& Tb, Rigidbody& Ra, EntityID& cameraID)
 {
-    const Math::Vec3f& Pa = Ta.position.GetWorld();
-    const Math::Vec3f& Pb = Tb.position.GetWorld();
+    Camera& camera = *ECS::Get().GetComponent<Camera>(cameraID);
+
+    const Math::Vec3f& Pc = camera.GetPosition().GetWorld();
+
+    const Math::Vec3f& Pa = Ta.position.GetWorld() - Pc;
+    const Math::Vec3f& Pb = Tb.position.GetWorld() - Pc;
 
     Math::Vec3f dir = Pb - Pa;
     if (glm::length2(dir) < 1e-12f)
@@ -164,5 +188,5 @@ void ApplyTidalLock(Transform& Ta, Transform& Tb, Rigidbody& Ra)
     Math::Quatf qWorld = glm::normalize(glm::quat_cast(basis));
 
     Ta.rotation.SetQuaternion(qWorld);
-    Ra.angularVelocity.SetWorld(Math::Vec3f(0.0f));
+    Ra.angularVelocity.SetWorld(glm::vec3(0.0f));
 }

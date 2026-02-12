@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.20)
-
 include(FetchContent)
 
 # Make URL variable
@@ -12,8 +10,9 @@ FetchContent_Declare(
         glm
 		EXCLUDE_FROM_ALL
 		GIT_REPOSITORY	${GLM_URL}
-		GIT_TAG bf71a834948186f4097caa076cd2663c69a10e1e #refs/tags/1.0.1
+		GIT_TAG 1.0.1
         GIT_SHALLOW TRUE
+		GIT_PROGRESS   TRUE
 )
 
 set(GLM_TEST_ENABLE OFF CACHE BOOL "" FORCE)

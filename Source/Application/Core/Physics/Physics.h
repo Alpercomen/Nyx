@@ -4,52 +4,55 @@
 #include <Application/Constants/Constants.h>
 #include <Application/Resource/Components/Components.h>
 #include <Application/Core/Services/Managers/EntityManager/EntityManager.h>
+#include <Application/Core/Services/Managers/SceneManager/SceneManager.h>
 #include <Application/Utils/SpaceUtils/SpaceUtils.h>
+
+using namespace Nyx;
 
 namespace Physics
 {
     // Apply angular velocity to a transform quaternion
     void IntegrateAngularVelocity(Transform& tr, Rigidbody& rb, float dt)
     {
-        Math::Vec3f w = rb.angularVelocity.GetWorld();
+        glm::vec3 w = rb.angularVelocity.GetWorld();
         float wlen = glm::length(w);
-        if (wlen > 1e-8f)
+        if (wlen > 0.0f)
         {
-            Math::Vec3f axis = w / wlen;
+            glm::vec3 axis = w / wlen;
             glm::quat dq = glm::angleAxis(wlen * dt, axis);
             tr.rotation.SetQuaternion(glm::normalize(dq * tr.rotation.GetQuaternion()));
         }
     }
 
-    void Iterate(const EntityID& objID, float deltaTime)
+    void Integrate(float deltaTime)
     {
         const float dt = deltaTime * TIME_SCALE;
 
-        Transform& transform = *ECS::Get().GetComponent<Transform>(objID);
-        Rigidbody& rigidbody = *ECS::Get().GetComponent<Rigidbody>(objID);
-
-        Position& pos = transform.position;
-        Velocity& vel = rigidbody.velocity;
-
-        Math::Vec3f next = pos.GetWorld() + vel.GetWorld() * deltaTime * TIME_SCALE;
-        pos.SetWorld(next);
-
-        // Apply rotation
-        IntegrateAngularVelocity(transform, rigidbody, dt);
-    }
-
-	void Update(float deltaTime)
-	{
-        const auto& sphereIDs = ECS::Get().GetAllComponentIDs<Sphere>();
-
-        for (size_t i = 0; i < sphereIDs.size(); ++i)
+        auto& ids = ECS::Get().GetAllComponentIDs<Rigidbody>();
+        for (const EntityID& id : ids)
         {
-            const EntityID& id = sphereIDs[i];
-            if (!ECS::Get().HasComponent<Transform>(id) || !ECS::Get().HasComponent<Rigidbody>(id))
+            if (!ECS::Get().HasComponent<Rigidbody>(id) || !ECS::Get().HasComponent<Transform>(id))
                 continue;
 
-            Attract(id);
-            Iterate(id, deltaTime);
+            auto& rb = *ECS::Get().GetComponent<Rigidbody>(id);
+            auto& tr = *ECS::Get().GetComponent<Transform>(id);
+
+            Math::Vec3f vel = rb.velocity.GetWorld();
+            Math::Vec3f pos = tr.position.GetWorld();
+
+            vel += rb.acceleration.GetWorld() * dt;
+            pos += vel * dt;
+
+        glm::vec3 next = pos.GetWorld() + vel.GetWorld() * deltaTime * TIME_SCALE;
+        pos.SetWorld(next);
+
+            IntegrateAngularVelocity(tr, rb, dt);
         }
+    }
+
+	void Update(EntityID cameraID)
+	{
+        Attract(cameraID);
+        Integrate(DELTA_TIME);
 	}
 }

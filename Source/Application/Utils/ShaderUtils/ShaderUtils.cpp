@@ -1,6 +1,9 @@
+#pragma once
 #include "ShaderUtils.h"
 
-#include <spdlog/spdlog.h>
+#include <Application/Core/Services/Managers/RenderManager/OpenGL.h>
+
+using namespace Nyx;
 
 static String ReadFile(const String& filePath)
 {
@@ -18,18 +21,18 @@ static String ReadFile(const String& filePath)
 
 static uint32 CompileShader(GLenum type, const String& source)
 {
-	uint32 shader = glCreateShader(type);
+	uint32 shader = GL::Get()->glCreateShader(type);
 	const char* src = source.c_str();
-	glShaderSource(shader, 1, &src, nullptr);
-	glCompileShader(shader);
+	GL::Get()->glShaderSource(shader, 1, &src, nullptr);
+	GL::Get()->glCompileShader(shader);
 
 	// Error handling
 	GLint success;
-	glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+	GL::Get()->glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
 	if (!success)
 	{
 		char infoLog[512];
-		glGetShaderInfoLog(shader, 512, nullptr, infoLog);
+		GL::Get()->glGetShaderInfoLog(shader, 512, nullptr, infoLog);
 		spdlog::critical("Shader compilation failed: {}", infoLog);
 	}
 
@@ -44,23 +47,23 @@ uint32 CreateShaderProgram(const String& vertexPath, const String& fragmentPath)
 	uint32 vertexShader = CompileShader(GL_VERTEX_SHADER, vertexSource);
 	uint32 fragmentShader = CompileShader(GL_FRAGMENT_SHADER, fragmentSource);
 
-	uint32 program = glCreateProgram();
-	glAttachShader(program, vertexShader);
-	glAttachShader(program, fragmentShader);
-	glLinkProgram(program);
+	uint32 program = GL::Get()->glCreateProgram();
+	GL::Get()->glAttachShader(program, vertexShader);
+	GL::Get()->glAttachShader(program, fragmentShader);
+	GL::Get()->glLinkProgram(program);
 
 	// Error handling
 	GLint success;
-	glGetProgramiv(program, GL_LINK_STATUS, &success);
+	GL::Get()->glGetProgramiv(program, GL_LINK_STATUS, &success);
 	if (!success)
 	{
 		char infoLog[512];
-		glGetProgramInfoLog(program, 512, nullptr, infoLog);
+		GL::Get()->glGetProgramInfoLog(program, 512, nullptr, infoLog);
 		spdlog::critical("Shader linking failed: {}", infoLog);
 	}
 
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
+	GL::Get()->glDeleteShader(vertexShader);
+	GL::Get()->glDeleteShader(fragmentShader);
 
 	return program;
 }

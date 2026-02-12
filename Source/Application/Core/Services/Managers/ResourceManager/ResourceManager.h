@@ -2,6 +2,7 @@
 
 #include <Application/Core/Core.h>
 #include <Application/Constants/Constants.h>
+#include <Application/Core/Services/Managers/RenderManager/OpenGL.h>
 #include <Application/Resource/Material/ShaderProgram/ShaderProgram.h>
 #include <Application/Resource/Material/Texture/Texture.h>
 
