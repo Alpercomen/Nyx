@@ -2,8 +2,6 @@
 
 **Nyx** is a real-time 3D simulation engine built in C++ that can visually represents any stellar system with physically plausible motion, lighting, and atmospheric effects. Designed with modularity and extensibility in mind, Nyx offers an interactive editor for exploring planetary systems, tweaking parameters, and simulating orbital dynamics.
 
-> Whether you're a graphics enthusiast, systems engineer, or C++ dev looking to dive into real-time rendering, Nyx is an ideal playground for both learning and building on top of.
-
 ---
 
 ## Features
