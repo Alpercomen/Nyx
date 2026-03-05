@@ -16,11 +16,11 @@ namespace Nyx
 	public: 
 		LightType type;
 		Math::Vec3f color;
-		float intensity;
+		float64 intensity;
 
 		Position position;
 		Math::Vec3f direction;
-		float range;
-		float decay;
+		float64 range;
+		float64 decay;
 	};
 }

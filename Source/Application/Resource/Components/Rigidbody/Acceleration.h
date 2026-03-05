@@ -9,11 +9,11 @@ public:
 	// CTOR
 	Acceleration()
 	{
-		m_world = Math::Vec3f();
-		m_normalized = Math::Vec3f();
+		m_world = Math::Vec3d();
+		m_normalized = Math::Vec3d();
 	}
 
-	Acceleration(Math::Vec3f acceleration, bool normal = false)
+	Acceleration(Math::Vec3d acceleration, bool normal = false)
 	{
 		normal ? SetNormal(acceleration) : SetWorld(acceleration);
 	}
@@ -21,11 +21,11 @@ public:
 	~Acceleration() = default;
 
 	// Getters
-	const Math::Vec3f& GetWorld() const { return m_world; }
-	const Math::Vec3f& GetNormal() const { return m_normalized; }
+	const Math::Vec3d& GetWorld() const { return m_world; }
+	const Math::Vec3d& GetNormal() const { return m_normalized; }
 
 	// Setters
-	void SetWorld(const Math::Vec3f& acceleration)
+	void SetWorld(const Math::Vec3d& acceleration)
 	{
 		m_world = acceleration;
 
@@ -34,7 +34,7 @@ public:
 		m_normalized.z = acceleration.z / METERS_PER_UNIT;
 	}
 
-	void SetNormal(const Math::Vec3f& acceleration)
+	void SetNormal(const Math::Vec3d& acceleration)
 	{
 		m_world.x = acceleration.x * METERS_PER_UNIT;
 		m_world.y = acceleration.y * METERS_PER_UNIT;
@@ -44,6 +44,6 @@ public:
 	}
 
 private:
-	Math::Vec3f m_world;
-	Math::Vec3f m_normalized;
+	Math::Vec3d m_world;
+	Math::Vec3d m_normalized;
 };

@@ -12,80 +12,80 @@ namespace Nyx {
     class Rotation {
     public:
         // Constructors
-        Rotation() : m_rotation(glm::quat_identity<float, glm::qualifier::defaultp>()) {}
+        Rotation() : m_rotation(glm::quat_identity<double, glm::qualifier::defaultp>()) {}
 
-        explicit Rotation(const Math::Quatf& q)
+        explicit Rotation(const Math::Quatd& q)
             : m_rotation(glm::normalize(q)) {
         }
 
-        Rotation(float pitch, float yaw, float roll) {
+        Rotation(double pitch, double yaw, double roll) {
             SetFromEuler(pitch, yaw, roll);
         }
 
         // Set rotation from Euler angles (pitch, yaw, roll)
-        void SetFromEuler(float pitch, float yaw, float roll) {
-            m_rotation = Math::Quatf(Math::Vec3f(pitch, yaw, roll));
+        void SetFromEuler(double pitch, double yaw, double roll) {
+            m_rotation = Math::Quatd(Math::Vec3d(pitch, yaw, roll));
         }
 
         // Set rotation from quaternion
-        void SetQuaternion(const Math::Quatf& q) {
+        void SetQuaternion(const Math::Quatd& q) {
             m_rotation = glm::normalize(q);
         }
 
         // Convert to 4x4 rotation matrix
-        Math::Mat4f ToMatrix() const {
+        Math::Mat4d ToMatrix() const {
             return glm::toMat4(m_rotation);
         }
 
         // Access quaternion
-        Math::Quatf GetQuaternion() const {
+        Math::Quatd GetQuaternion() const {
             return m_rotation;
         }
 
         // Return Euler angles in radians
-        Math::Vec3f GetEulerAngles() const {
+        Math::Vec3d GetEulerAngles() const {
             return glm::eulerAngles(m_rotation);
         }
 
         // Rotate around world-space axis by angle (radians)
-        void Rotate(const Math::Vec3d& axis, float angleRadians) {
-            Math::Quatf delta = glm::angleAxis(angleRadians, glm::normalize(Math::Vec3f(axis)));
+        void Rotate(const Math::Vec3d& axis, double angleRadians) {
+            Math::Quatd delta = glm::angleAxis(angleRadians, glm::normalize(Math::Vec3d(axis)));
             m_rotation = glm::normalize(delta * m_rotation);
         }
 
         // Rotate around local pitch/yaw/roll (in radians)
-        void RotateLocal(float yaw, float pitch, float roll) {
-            Math::Quatf delta = Math::Quatf(Math::Vec3f(pitch, yaw, roll));
+        void RotateLocal(double yaw, double pitch, double roll) {
+            Math::Quatd delta = Math::Quatd(Math::Vec3d(pitch, yaw, roll));
             m_rotation = glm::normalize(m_rotation * delta);
         }
 
         // Get the forward vector (Z-)
-        Math::Vec3f GetForward() const {
-            return glm::rotate(m_rotation, Math::Vec3f(0.0f, 0.0f, -1.0f));
+        Math::Vec3d GetForward() const {
+            return glm::rotate(m_rotation, Math::Vec3d(0.0f, 0.0f, -1.0f));
         }
 
         // Get the up vector (Y+)
-        Math::Vec3f GetUp() const {
-            return glm::rotate(m_rotation, Math::Vec3f(0.0f, 1.0f, 0.0f));
+        Math::Vec3d GetUp() const {
+            return glm::rotate(m_rotation, Math::Vec3d(0.0f, 1.0f, 0.0f));
         }
 
         // Get the right vector (X+)
-        Math::Vec3f GetRight() const {
-            return glm::rotate(m_rotation, Math::Vec3f(1.0f, 0.0f, 0.0f));
+        Math::Vec3d GetRight() const {
+            return glm::rotate(m_rotation, Math::Vec3d(1.0f, 0.0f, 0.0f));
         }
 
         /*
             OPERATOR OVERLOAD
         */
 
-        Rotation operator*(float scalar) const {
+        Rotation operator*(double scalar) const {
             auto euler = glm::eulerAngles(this->m_rotation) * scalar;
             Rotation result;
             result.SetFromEuler(euler.x, euler.y, euler.z);
             return result;
         }
 
-        Rotation operator/(float scalar) const {
+        Rotation operator/(double scalar) const {
             auto euler = glm::eulerAngles(this->m_rotation) / scalar;
             Rotation result;
             result.SetFromEuler(euler.x, euler.y, euler.z);
@@ -93,7 +93,7 @@ namespace Nyx {
         }
 
     private:
-        Math::Quatf m_rotation;
+        Math::Quatd m_rotation;
     };
 
 }

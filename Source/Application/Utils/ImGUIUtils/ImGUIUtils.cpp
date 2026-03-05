@@ -66,10 +66,14 @@ ImVec2 ImGUIUtils::DrawGameWindow(Engine* engine)
 
 void ImGUIUtils::DrawSimulationControl(Engine* engine)
 {
+    float32 temp = TIME_SCALE;
+
     ImGui::Begin("Simulation Control");
-    ImGui::SliderFloat("Time Scale", &TIME_SCALE, 0.0f, 50000.0f, "%.8f", ImGuiSliderFlags_Logarithmic);
+    ImGui::SliderFloat("Time Scale", &temp, 0.0f, 50000.0f, "%.8f", ImGuiSliderFlags_Logarithmic);
     ImGui::Checkbox("Show Grid", &engine->GetRenderer().m_gridEnabled);
     ImGui::End();
+
+    TIME_SCALE = temp;
 }
 
 void ImGUIUtils::DrawHierarchy()

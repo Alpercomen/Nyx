@@ -45,13 +45,11 @@ namespace Nyx
 			auto rot = transform->rotation;
 
 			const Position& cameraPos = cameraTransform.position;
-			Math::Vec3f relPos = Math::Vec3f(pos.GetWorld() - cameraPos.GetWorld());
+			Math::Vec3d relPos = Math::Vec3f(pos.GetWorld() - cameraPos.GetWorld());
 
-			Math::Mat4f model = glm::translate(Math::Mat4f(1.0f), relPos) * rot.ToMatrix() * sca.ToMatrix();
+			Math::Mat4f model = glm::translate(Math::Mat4d(1.0), relPos) * rot.ToMatrix() * sca.ToMatrix();
 			Math::Mat4f view = camera.GetViewMatrix();
 			Math::Mat4f projection = camera.GetProjectionMatrix();
-
-			Math::Mat4f mvp = projection * view * model;
 
 			if (ECS::Get().HasComponent<Sphere>(m_entityID))
 			{
@@ -317,16 +315,16 @@ namespace Nyx
 			Transform uranusTransform = Transform{ uranusPosition, uranusRotation, uranusSize };
 			Transform neptuneTransform = Transform{ neptunePosition, neptuneRotation, neptuneSize };
 
-			Velocity earthAngularVelocity = LocalToWorld(Math::Vec3f(0.0, EARTH_ANGULAR_VELOCITY_RADIANS, 0.0), earthTransform);
-			Velocity mercuryAngularVelocity = LocalToWorld(Math::Vec3f(0.0, MERCURY_ANGULAR_VELOCITY_RADIANS, 0.0), mercuryTransform);
-			Velocity venusAngularVelocity = LocalToWorld(Math::Vec3f(0.0, VENUS_ANGULAR_VELOCITY_RADIANS, 0.0), venusTransform);
-			Velocity marsAngularVelocity = LocalToWorld(Math::Vec3f(0.0, MARS_ANGULAR_VELOCITY_RADIANS, 0.0), marsTransform);
-			Velocity jupiterAngularVelocity = LocalToWorld(Math::Vec3f(0.0, JUPITER_ANGULAR_VELOCITY_RADIANS, 0.0), jupiterTransform);
-			Velocity saturnAngularVelocity = LocalToWorld(Math::Vec3f(0.0, SATURN_ANGULAR_VELOCITY_RADIANS, 0.0), saturnTransform);
-			Velocity uranusAngularVelocity = LocalToWorld(Math::Vec3f(0.0, URANUS_ANGULAR_VELOCITY_RADIANS, 0.0), uranusTransform);
-			Velocity neptuneAngularVelocity = LocalToWorld(Math::Vec3f(0.0, NEPTUNE_ANGULAR_VELOCITY_RADIANS, 0.0), neptuneTransform);
+			Velocity earthAngularVelocity = LocalToWorld(Math::Vec3d(0.0, EARTH_ANGULAR_VELOCITY_RADIANS, 0.0), earthTransform);
+			Velocity mercuryAngularVelocity = LocalToWorld(Math::Vec3d(0.0, MERCURY_ANGULAR_VELOCITY_RADIANS, 0.0), mercuryTransform);
+			Velocity venusAngularVelocity = LocalToWorld(Math::Vec3d(0.0, VENUS_ANGULAR_VELOCITY_RADIANS, 0.0), venusTransform);
+			Velocity marsAngularVelocity = LocalToWorld(Math::Vec3d(0.0, MARS_ANGULAR_VELOCITY_RADIANS, 0.0), marsTransform);
+			Velocity jupiterAngularVelocity = LocalToWorld(Math::Vec3d(0.0, JUPITER_ANGULAR_VELOCITY_RADIANS, 0.0), jupiterTransform);
+			Velocity saturnAngularVelocity = LocalToWorld(Math::Vec3d(0.0, SATURN_ANGULAR_VELOCITY_RADIANS, 0.0), saturnTransform);
+			Velocity uranusAngularVelocity = LocalToWorld(Math::Vec3d(0.0, URANUS_ANGULAR_VELOCITY_RADIANS, 0.0), uranusTransform);
+			Velocity neptuneAngularVelocity = LocalToWorld(Math::Vec3d(0.0, NEPTUNE_ANGULAR_VELOCITY_RADIANS, 0.0), neptuneTransform);
 
-			EntityID cameraID = scenePtr->CreateCamera("Camera", Transform{ Math::Vec3f(AU / METERS_PER_UNIT, 0.0f, 10.0f) });
+			EntityID cameraID = scenePtr->CreateCamera("Camera", Transform{ Math::Vec3d(AU / METERS_PER_UNIT, 0.0f, 10.0f) });
 			EntityID sunID = scenePtr->CreatePlanet("Sun", sunTransform, Rigidbody{ SUN_MASS }, sunDesc);
 			EntityID mercuryID = scenePtr->CreatePlanet("Mercury", mercuryTransform, Rigidbody{ MERCURY_MASS , mercuryAngularVelocity }, mercuryDesc);
 			EntityID venusID = scenePtr->CreatePlanet("Venus", venusTransform, Rigidbody{ VENUS_MASS, venusAngularVelocity }, venusDesc);

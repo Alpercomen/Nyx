@@ -67,7 +67,7 @@ namespace Nyx
 				const auto* l = pointLights[i];
 				String base = "uPointLights[" + std::to_string(i) + "]";
 
-				glUniform3fv(glGetUniformLocation(shaderID, (base + ".position").c_str()), 1, glm::value_ptr(l->position.GetWorld()));
+				glUniform3fv(glGetUniformLocation(shaderID, (base + ".position").c_str()), 1, glm::value_ptr(static_cast<Math::Vec3f>(l->position.GetWorld())));
 				glUniform3fv(glGetUniformLocation(shaderID, (base + ".color").c_str()), 1, glm::value_ptr(l->color));
 				glUniform1f(glGetUniformLocation(shaderID, (base + ".intensity").c_str()), l->intensity);
 				glUniform1f(glGetUniformLocation(shaderID, (base + ".range").c_str()), l->range);

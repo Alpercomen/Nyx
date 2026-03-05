@@ -4,5 +4,5 @@
 
 namespace Nyx
 {
-	Math::Vec3f LocalToWorld(const Math::Vec3f local, const Transform& transform);
+	Math::Vec3d LocalToWorld(const Math::Vec3d local, const Transform& transform);
 }

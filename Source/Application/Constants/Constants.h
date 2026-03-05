@@ -1,8 +1,10 @@
 #pragma once
+#include <Application/Core/Core.h>
+
 /*===========================================================
     TIME & SIMULATION
 ===========================================================*/
-extern float TIME_SCALE;
+extern float64 TIME_SCALE;
 
 #define DELTA_TIME                     0.01666666666666666666666666666667
 

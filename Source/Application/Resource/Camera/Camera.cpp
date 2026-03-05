@@ -82,7 +82,7 @@ glm::mat4 Camera::GetViewMatrix() const
     Transform& transform = *ECS::Get().GetComponent<Transform>(id);
     Position& pos = transform.position;
 
-    return glm::lookAt(Math::Vec3f(0.0), GetFront(), GetUp());
+    return glm::lookAt(Math::Vec3d(0.0), GetFront(), GetUp());
 }
 
 glm::mat4 Camera::GetProjectionMatrix() const
@@ -90,7 +90,7 @@ glm::mat4 Camera::GetProjectionMatrix() const
     return glm::perspective(glm::radians(GetZoom()), GetAspectRatio(), GetNearPlane(), GetFarPlane());
 }
 
-void Camera::ProcessKeyboardMovement(Camera_Movement direction, float deltaTime)
+void Camera::ProcessKeyboardMovement(Camera_Movement direction, float64 deltaTime)
 {
     auto& cameraIDs = ECS::Get().GetAllComponentIDs<Camera>();
 
@@ -102,14 +102,15 @@ void Camera::ProcessKeyboardMovement(Camera_Movement direction, float deltaTime)
     if (!ECS::Get().HasComponent<Transform>(id) || !ECS::Get().HasComponent<Name>(id))
         return;
 
-    float velocity = GetMovementSpeed() * deltaTime;
+    float64 velocity = GetMovementSpeed() * deltaTime;
 
     auto& transform = *ECS::Get().GetComponent<Transform>(id);
 
     auto& pos = transform.position;
     auto& name = ECS::Get().GetComponent<Name>(id)->name;
 
-    switch (direction) {
+    switch (direction)
+    {
         case FORWARD:
             spdlog::info("{} move forward input detected by {:03.6f} unit.", name, velocity);
             pos.SetWorld(pos.GetWorld() + GetFront() * velocity);
@@ -137,7 +138,7 @@ void Camera::ProcessKeyboardMovement(Camera_Movement direction, float deltaTime)
     }
 }
 
-void Camera::ProcessMouseMovement(float xoffset, float yoffset, bool constrainPitch)
+void Camera::ProcessMouseMovement(float64 xoffset, float64 yoffset, bool constrainPitch)
 {
     xoffset *= GetMouseSensitivity();
     yoffset *= GetMouseSensitivity();
