@@ -10,7 +10,7 @@
 #include <Application/Core/Services/Input/InputDispatcher.h>
 #include <Application/Core/Services/Input/InputEvent.h>
 #include <Application/Core/Services/Input/InputQueue.h>
-#include <Application/Core/Services/CameraService/CameraService.h>
+#include <Application/Core/Services/Camera/CameraService.h>
 #include <Application/Resource/Components/Components.h>
 
 Camera::Camera()

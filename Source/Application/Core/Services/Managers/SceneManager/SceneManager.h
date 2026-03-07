@@ -344,6 +344,9 @@ namespace Nyx
 			pointLight.decay = 1 / SOL_SYSTEM_RADIUS;
 			ECS::Get().AddComponent(sunID, pointLight);
 
+			AtmosphereComponent earthAtmosphere;
+			ECS::Get().AddComponent(earthID, earthAtmosphere);
+
 			InitializeCircularOrbit(mercuryID, sunID, 0.0);
 			InitializeCircularOrbit(venusID, sunID, 0.0);
 			InitializeCircularOrbit(earthID, sunID, 0.0);

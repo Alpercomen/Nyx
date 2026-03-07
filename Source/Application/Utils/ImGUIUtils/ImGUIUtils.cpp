@@ -4,7 +4,7 @@
 #include <spdlog/spdlog.h>
 #include <Application/Utils/ImGUIUtils/ImGUIUtils.h>
 #include <Application/Core/Services/Editor/Editor.h>
-#include <Application/Core/Services/CameraService/CameraService.h>
+#include <Application/Core/Services/Camera/CameraService.h>
 
 void ImGUIUtils::Initialize(void* window)
 {
@@ -155,6 +155,33 @@ void ImGUIUtils::DrawInspector()
             ImGui::Text("Vel: %.2f km/h", glm::length(velVec));
             ImGui::Text("Acc: %.2f km/h2", glm::length(accVec));
             ImGui::Text("Angular Vel: %.10f km/h", glm::length(angularVel));
+        }
+
+        if (ECS::Get().HasComponent<AtmosphereComponent>(id))
+        {
+            ImGui::Separator();
+            auto& atmosphere = *ECS::Get().GetComponent<AtmosphereComponent>(id);
+
+            ImGui::PushID(&atmosphere);
+
+            float color[3] = { atmosphere.color.x, atmosphere.color.y, atmosphere.color.z };
+
+            if (ImGui::ColorPicker3("Color", color,
+                ImGuiColorEditFlags_DisplayRGB |
+                ImGuiColorEditFlags_Float |
+                ImGuiColorEditFlags_HDR))
+            {
+                atmosphere.color.x = color[0];
+                atmosphere.color.y = color[1];
+                atmosphere.color.z = color[2];
+            }
+
+            ImGui::DragFloat("Thickness", &atmosphere.thickness, 0.0005f, 0.0f, 0.5f, "%.5f");
+            ImGui::DragFloat("Intensity", &atmosphere.intensity, 0.1f, 0.0f, 10000.0f, "%.3f");
+            ImGui::DragFloat("Rim Power", &atmosphere.rimPower, 0.05f, 0.0f, 32.0f, "%.3f");
+            ImGui::DragFloat("Light Power", &atmosphere.lightPower, 0.05f, 0.0f, 32.0f, "%.3f");
+
+            ImGui::PopID();
         }
     }
     ImGui::End();

@@ -9,7 +9,7 @@
 #include <Application/Utils/ImGUIUtils/ImGUIUtils.h>
 #include <Application/Resource/Components/Components.h>
 #include <Application/Core/Services/Managers/EntityManager/EntityManager.h>
-#include <Application/Core/Services/CameraService/CameraService.h>
+#include <Application/Core/Services/Camera/CameraService.h>
 
 namespace Nyx
 {

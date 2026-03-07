@@ -11,6 +11,7 @@
 #include <Application/Resource/Material/ShaderProgram/ShaderProgram.h>
 #include <Application/Core/Services/Lighting/LightingSystem.h>
 #include <Application/Resource/Components/Components.h>
+#include <Application/Core/Services/Atmosphere/AtmosphereSystem.h>
 
 
 namespace Nyx
@@ -22,7 +23,7 @@ namespace Nyx
 
         Renderer()
         {
-            
+            AtmosphereSystem::Get().Initialize();
         }
 
         void DrawScene(Scene& scene)
@@ -42,6 +43,8 @@ namespace Nyx
                 const auto& object = scene.GetSceneObject(i);
                 object->Draw(camera, transform);
             }
+
+            AtmosphereSystem::Get().DrawAtmosphere(camera, transform);
         }
 
     private:

@@ -17,7 +17,7 @@ namespace Nyx
 			m_texture(texture) 
 		{}
 
-		void Bind()
+		void Bind() const
 		{
 			m_shader.Use();
 

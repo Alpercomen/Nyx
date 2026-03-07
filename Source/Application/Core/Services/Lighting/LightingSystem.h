@@ -46,10 +46,10 @@ namespace Nyx
 
 		void UploadToShader(uint32 shaderID)
 		{
-			int count = std::min((int)directionalLights.size(), MAX_DIRECTIONAL_LIGHTS);
+			int32 count = std::min((int32)directionalLights.size(), MAX_DIRECTIONAL_LIGHTS);
 			glUniform1i(glGetUniformLocation(shaderID, "uDirLightCount"), count);
 
-			for (int i = 0; i < count; ++i)
+			for (int32 i = 0; i < count; ++i)
 			{
 				const auto* l = directionalLights[i];
 				String base = "uDirectionalLights[" + std::to_string(i) + "]";
@@ -59,10 +59,10 @@ namespace Nyx
 				glUniform1f(glGetUniformLocation(shaderID, (base + ".intensity").c_str()), l->intensity);
 			}
 
-			count = std::min((int)pointLights.size(), MAX_POINT_LIGHTS);
+			count = std::min((int32)pointLights.size(), MAX_POINT_LIGHTS);
 			glUniform1i(glGetUniformLocation(shaderID, "uPointLightCount"), count);
 
-			for (int i = 0; i < count; ++i)
+			for (int32 i = 0; i < count; ++i)
 			{
 				const auto* l = pointLights[i];
 				String base = "uPointLights[" + std::to_string(i) + "]";
