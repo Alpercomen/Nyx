@@ -28,13 +28,13 @@ struct CameraDesc
     float64 Yaw = -90.0;
     float64 Pitch = 0.0;
 
-    float64 MovementSpeed = METERS_PER_UNIT * 100;
+    float64 MovementSpeed = METERS_PER_UNIT;
     float64 MovementSpeedMultiplier = 3.5;
     float64 MouseSensitivity = 0.1;
     float64 Zoom = 45.0;
     float64 AspectRatio = 1.7777;
 
-    float64 NearPlane = 0.01;
+    float64 NearPlane = 0.0001;
     float64 FarPlane = 1000;
 };
 

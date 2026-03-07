@@ -14,7 +14,7 @@ extern float64 TIME_SCALE;
 #define G                              6.67430e-11            // Gravitational constant
 #define AU                             1.496e+11              // Astronomical Unit (m)
 #define SOL_SYSTEM_RADIUS              299.2e11               // Simulation bounding radius
-#define METERS_PER_UNIT                10000000.0
+#define METERS_PER_UNIT                1.0e9
 #define METER_PER_KILOMETER            1000.0
 
 /*===========================================================

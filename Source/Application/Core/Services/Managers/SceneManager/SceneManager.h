@@ -324,7 +324,7 @@ namespace Nyx
 			Velocity uranusAngularVelocity = LocalToWorld(Math::Vec3d(0.0, URANUS_ANGULAR_VELOCITY_RADIANS, 0.0), uranusTransform);
 			Velocity neptuneAngularVelocity = LocalToWorld(Math::Vec3d(0.0, NEPTUNE_ANGULAR_VELOCITY_RADIANS, 0.0), neptuneTransform);
 
-			EntityID cameraID = scenePtr->CreateCamera("Camera", Transform{ Math::Vec3d(AU / METERS_PER_UNIT, 0.0f, 10.0f) });
+			EntityID cameraID = scenePtr->CreateCamera("Camera", Transform{ Math::Vec3d(AU / METERS_PER_UNIT, 0.0f, 0.1f) });
 			EntityID sunID = scenePtr->CreatePlanet("Sun", sunTransform, Rigidbody{ SUN_MASS }, sunDesc);
 			EntityID mercuryID = scenePtr->CreatePlanet("Mercury", mercuryTransform, Rigidbody{ MERCURY_MASS , mercuryAngularVelocity }, mercuryDesc);
 			EntityID venusID = scenePtr->CreatePlanet("Venus", venusTransform, Rigidbody{ VENUS_MASS, venusAngularVelocity }, venusDesc);
