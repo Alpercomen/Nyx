@@ -17,12 +17,12 @@
 #include <Application/Resource/Components/Transform/Position.h>
 #include <Application/Resource/Components/Rigidbody/Velocity.h>
 #include <Application/Resource/Components/Rigidbody/Acceleration.h>
-#include <Application/Core/Physics/Meter.h>
-#include <Application/Resource/Camera/Camera.h>
-#include <Application/Resource/Material/Material.h>
+#include <Application/Resource/Components/Camera/Camera.h>
+#include <Application/Resource/Components/Material/Material.h>
 #include <Application/Resource/Buffers/VAO.h>
 #include <Application/Resource/Buffers/VBO.h>
 #include <Application/Resource/Buffers/EBO.h>
+#include <Application/Core/Physics/Meter.h>
 
 namespace Nyx
 {

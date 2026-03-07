@@ -1,7 +1,7 @@
 #pragma once
 
-#include <Application/Resource/Material/ShaderProgram/ShaderProgram.h>
-#include <Application/Resource/Material/Texture/Texture.h>
+#include <Application/Resource/Components/Material/Shader/Shader.h>
+#include <Application/Resource/Components/Material/Texture/Texture.h>
 
 namespace Nyx
 {

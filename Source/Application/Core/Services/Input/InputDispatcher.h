@@ -1,7 +1,7 @@
 #pragma once
 #include <Application/Core/Core.h>
 #include <Application/Core/Services/Input/InputEvent.h>
-#include <Application/Resource/Camera/Camera.h>
+#include <Application/Resource/Components/Camera/Camera.h>
 
 namespace Nyx {
 	// CRTP (Curiously Recursive Templated Programming)

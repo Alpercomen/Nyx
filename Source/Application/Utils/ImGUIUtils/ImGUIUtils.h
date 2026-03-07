@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Application/Resource/Camera/Camera.h>
+#include <Application/Resource/Components/Camera/Camera.h>
 #include <Application/Core/Engine/Engine.h>
 #include <Application/Resource/Components/Components.h>
 

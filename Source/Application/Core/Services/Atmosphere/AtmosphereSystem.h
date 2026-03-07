@@ -2,9 +2,9 @@
 
 #include <Application/Core/Core.h>
 #include <Application/Core/Services/Managers/ResourceManager/ResourceManager.h>
-#include <Application/Resource/Camera/Camera.h>
+#include <Application/Resource/Components/Camera/Camera.h>
 #include <Application/Resource/Components/Components.h>
-#include <Application/Resource/Material/Material.h>
+#include <Application/Resource/Components/Material/Material.h>
 
 namespace Nyx
 {

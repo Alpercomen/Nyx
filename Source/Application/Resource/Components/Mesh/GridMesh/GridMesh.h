@@ -2,7 +2,7 @@
 
 #include <Application/Resource/Components/Components.h>
 #include <Application/Resource/Components/Mesh/Mesh.h>
-#include <Application/Resource/Material/ShaderProgram/ShaderProgram.h>
+#include <Application/Resource/Components/Material/Shader/Shader.h>
 
 #include <Application/Core/Services/ResourceLocator/ResourceLocator.h>
 #include <Application/Core/Services/Pipeline/Immediate/Immediate.h>
