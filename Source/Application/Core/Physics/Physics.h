@@ -3,7 +3,7 @@
 
 #include <Application/Constants/Constants.h>
 #include <Application/Resource/Components/Components.h>
-#include <Application/Core/Services/Managers/EntityManager/EntityManager.h>
+#include <Application/Services/Managers/EntityManager/EntityManager.h>
 #include <Application/Utils/SpaceUtils/SpaceUtils.h>
 
 namespace Physics
@@ -40,16 +40,10 @@ namespace Physics
 
 	void Update(float64 deltaTime)
 	{
-        const auto& sphereIDs = ECS::Get().GetAllComponentIDs<Sphere>();
-
-        for (size_t i = 0; i < sphereIDs.size(); ++i)
+        for (EntityID entityID : ECS::Get().View<Transform, Rigidbody>())
         {
-            const EntityID& id = sphereIDs[i];
-            if (!ECS::Get().HasComponent<Transform>(id) || !ECS::Get().HasComponent<Rigidbody>(id))
-                continue;
-
-            Attract(id);
-            Iterate(id, deltaTime);
+            Attract(entityID);
+            Iterate(entityID, deltaTime);
         }
 	}
 }

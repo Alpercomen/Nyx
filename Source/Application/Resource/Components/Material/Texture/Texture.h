@@ -8,6 +8,8 @@ namespace Nyx
 	{
 	public:
 		Texture(const String& path, bool flipVertically = true);
+		Texture(const uint8* bytes, uint32 size, bool flipVertically = true);
+		Texture(const uint8* pixels, uint32 width, uint32 height, uint32 channels);
 		~Texture();
 
 		void Bind(uint32 slot = 0) const;

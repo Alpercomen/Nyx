@@ -16,6 +16,15 @@ extern float64 TIME_SCALE;
 #define SOL_SYSTEM_RADIUS              299.2e11               // Simulation bounding radius
 #define METERS_PER_UNIT                1.0e9
 #define METER_PER_KILOMETER            1000.0
+#define CAMERA_DEFAULT_MINIMUM_ZOOM    10.0
+#define CAMERA_DEFAULT_MAXIMUM_ZOOM    1000.0
+#define CAMERA_DEFAULT_NEAR_PLANE      0.0001
+#define CAMERA_DEFAULT_FAR_PLANE       1000.0
+#define CAMERA_FOCUS_NEAR_PLANE        0.000001
+#define CAMERA_FOCUS_FAR_PLANE         100.0
+#define CAMERA_FOCUS_RADIUS            10000.0
+#define CAMERA_MINIMUM_ZOOM_MULTIPLIER 0.75
+#define CAMERA_MAXIMUM_ZOOM_MULTIPLIER 1000.0
 
 /*===========================================================
     SPECIAL CONSTANTS / FLAGS
@@ -31,7 +40,7 @@ extern float64 TIME_SCALE;
 #define MAX_SPOT_LIGHTS                8
 
 /*===========================================================
-    STAR: SUN4
+    STAR: SUN
 ===========================================================*/
 #define SUN_RADIUS                     1391000000.0
 #define SUN_MASS                       1.989e30
@@ -133,3 +142,16 @@ extern float64 TIME_SCALE;
 #define NEPTUNE_MASS                   1.024e26
 #define NEPTUNE_SUN_DISTANCE           4.49506e12
 #define NEPTUNE_ANGULAR_VELOCITY_RADIANS 1.083e-4
+
+/*===========================================================
+    International Space Station (ISS)
+===========================================================*/
+#define ISS_MASS 419725
+#define ISS_SOLAR_ARRAY_LENGTH 109
+#define ISS_MODULE_LENGTH 51
+#define ISS_TRUSS_LENGTH 94
+#define ISS_LONGITUDE_SOLAR_ARRAY 73
+#define ISS_INCLINATION 51.6
+#define ISS_PERIGEE_DISTANCE 6741000
+#define ISS_APOGEE_DISTANCE 6831000
+#define ISS_SPEED 7600

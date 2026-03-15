@@ -8,8 +8,8 @@
 #include <Application/Constants/Constants.h>
 #include <Application/Utils/ImGUIUtils/ImGUIUtils.h>
 #include <Application/Resource/Components/Components.h>
-#include <Application/Core/Services/Managers/EntityManager/EntityManager.h>
-#include <Application/Core/Services/Camera/CameraService.h>
+#include <Application/Services/Managers/EntityManager/EntityManager.h>
+#include <Application/Services/Camera/CameraService.h>
 
 namespace Nyx
 {
@@ -83,41 +83,42 @@ namespace Nyx
             if (GetMouseMode() != MouseMode::HIDDEN)
                 return;
 
-            double xPos = event.m_eventList.mouseX;
-            double yPos = event.m_eventList.mouseY;
+            float64 xPos = event.m_eventList.mouseX;
+            float64 yPos = event.m_eventList.mouseY;
 
             if (firstMouse)
             {
-                lastX = (float)xPos;
-                lastY = (float)yPos;
+                lastX = (float64)xPos;
+                lastY = (float64)yPos;
                 firstMouse = false;
             }
 
-            float xoffset = (float)xPos - lastX;
-            float yoffset = lastY - (float)yPos; // reversed y
+            float64 xoffset = (float64)xPos - lastX;
+            float64 yoffset = lastY - (float64)yPos;
 
-            if (CameraService().Get().enabled) {
+            if (CameraService::Get().enabled)
+            {
                 if (firstMouse)
                 {
-                    lastX = (float)xPos;
-                    lastY = (float)yPos;
+                    lastX = (float64)xPos;
+                    lastY = (float64)yPos;
                     firstMouse = false;
                 }
 
-                float xoffset = (float)xPos - lastX;
-                float yoffset = lastY - (float)yPos;
+                float64 xoffset = (float)xPos - lastX;
+                float64 yoffset = lastY - (float)yPos;
 
-                lastX = (float)xPos;
-                lastY = (float)yPos;
+                lastX = (float64)xPos;
+                lastY = (float64)yPos;
 
-                CameraService().Get().yaw += xoffset * 0.1f;
-                CameraService().Get().pitch += yoffset * 0.1f;
-                CameraService().Get().pitch = glm::clamp(CameraService().Get().pitch, -89.0f, 89.0f);
+                CameraService::Get().yaw += xoffset * 0.1f;
+                CameraService::Get().pitch += yoffset * 0.1f;
+                CameraService::Get().pitch = glm::clamp(CameraService::Get().pitch, -89.0, 89.0);
                 return;
             }
 
-            lastX = (float)xPos;
-            lastY = (float)yPos;
+            lastX = (float64)xPos;
+            lastY = (float64)yPos;
 
             camera.ProcessMouseMovement(xoffset, yoffset);
         });
@@ -140,21 +141,19 @@ namespace Nyx
             if (GetMouseMode() != MouseMode::HIDDEN)
                 return;
 
-            float scroll = event.m_eventList.scrollDelta;
+            float64 scroll = event.m_eventList.scrollDelta;
 
-            if (CameraService().Get().enabled) {
-                CameraService().Get().distance *= (1.0f - scroll * 0.1f);
-
-                const float& minimumDistance = CameraService().Get().minimumDistance;
-                CameraService().Get().distance = glm::clamp(CameraService().Get().distance, minimumDistance, minimumDistance * 1000);
+            if (CameraService::Get().enabled)
+            {
+                CameraService::Get().distance *= (1.0f - scroll * 0.1f);
                 return;
             }
 
-            float currentSpeed = camera.GetMovementSpeed();
-            float step = currentSpeed * 0.1f;
-            float newSpeed = currentSpeed + scroll * step;
+            float64 currentSpeed = camera.GetMovementSpeed();
+            float64 step = currentSpeed * 0.1f;
+            float64 newSpeed = currentSpeed + scroll * step;
 
-            newSpeed = glm::clamp(newSpeed, 0.001f, 1000.0f);
+            newSpeed = glm::clamp(newSpeed, 0.001, 1000.0);
             camera.SetMovementSpeed(newSpeed);
 
             spdlog::info("Camera speed updated: {:.3f}", newSpeed);
@@ -386,7 +385,7 @@ namespace Nyx
 
     void BasicWindow::SetWindowMode(WindowMode newMode)
     {
-        // Soon...
+        // TODO: Soon...
     }
 }
 

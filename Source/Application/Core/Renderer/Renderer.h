@@ -6,12 +6,12 @@
 #include <Application/Resource/Components/Components.h>
 #include <Application/Resource/Components/Camera/Camera.h>
 #include <Application/Core/Physics/Meter.h>
-#include <Application/Core/Services/Managers/EntityManager/EntityManager.h>
-#include <Application/Core/Services/Managers/SceneManager/SceneManager.h>
+#include <Application/Services/Managers/EntityManager/EntityManager.h>
+#include <Application/Services/Managers/SceneManager/SceneManager.h>
 #include <Application/Resource/Components/Material/Shader/Shader.h>
-#include <Application/Core/Services/Lighting/LightingSystem.h>
+#include <Application/Services/Lighting/LightingSystem.h>
 #include <Application/Resource/Components/Components.h>
-#include <Application/Core/Services/Atmosphere/AtmosphereSystem.h>
+#include <Application/Services/Atmosphere/AtmosphereSystem.h>
 
 
 namespace Nyx

@@ -8,11 +8,11 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include <Application/Core/Services/Managers/EntityManager/EntityManager.h>
-#include <Application/Core/Services/Managers/ResourceManager/ResourceManager.h>
-#include <Application/Core/Services/Pipeline/Immediate/Immediate.h>
-#include <Application/Core/Services/ResourceLocator/ResourceLocator.h>
-#include <Application/Core/Services/Lighting/LightingSystem.h>
+#include <Application/Services/Managers/EntityManager/EntityManager.h>
+#include <Application/Services/Managers/ResourceManager/ResourceManager.h>
+#include <Application/Services/Pipeline/Immediate/Immediate.h>
+#include <Application/Services/ResourceLocator/ResourceLocator.h>
+#include <Application/Services/Lighting/LightingSystem.h>
 
 #include <Application/Resource/Components/Transform/Position.h>
 #include <Application/Resource/Components/Rigidbody/Velocity.h>
@@ -22,6 +22,7 @@
 #include <Application/Resource/Buffers/VAO.h>
 #include <Application/Resource/Buffers/VBO.h>
 #include <Application/Resource/Buffers/EBO.h>
+#include <Application/Resource/Buffers/Vertex.h>
 #include <Application/Core/Physics/Meter.h>
 
 namespace Nyx
@@ -31,6 +32,167 @@ namespace Nyx
         VAO vao;
         VBO vbo;
         EBO ebo;
+    };
+
+    struct MeshSection
+    {
+        uint32 indexOffset = 0;
+        uint32 indexCount = 0;
+        uint32 materialIndex = 0;
+    };
+
+    struct ModelMaterial
+    {
+        Texture* texture = nullptr;
+        Math::Vec3f baseColor = { 1.0f, 1.0f, 1.0f };
+    };
+
+    class Model
+    {
+    public:
+        Model()
+        {
+            Shader shader = ResourceManager::GetShader(
+                "ModelShader",
+                R"(Nyx\Source\Application\Shaders\Model\model.vert)",
+                R"(Nyx\Source\Application\Shaders\Model\model.frag)"
+            );
+
+            m_material = MakeShared<Material>(shader);
+        }
+
+        ~Model() = default;
+
+        void UploadToGpu()
+        {
+            if (m_vertices.empty() || m_indices.empty())
+                return;
+
+            if (!m_mesh)
+                m_mesh = MakeShared<Mesh>();
+
+            glGenVertexArrays(1, &m_mesh->vao.m_data);
+            glBindVertexArray(m_mesh->vao.m_data);
+
+            glGenBuffers(1, &m_mesh->vbo.m_data);
+            glBindBuffer(GL_ARRAY_BUFFER, m_mesh->vbo.m_data);
+            glBufferData(GL_ARRAY_BUFFER, m_vertices.size() * sizeof(Vertex), m_vertices.data(), GL_STATIC_DRAW);
+
+            glGenBuffers(1, &m_mesh->ebo.m_data);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_mesh->ebo.m_data);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER,m_indices.size() * sizeof(uint32),m_indices.data(),GL_STATIC_DRAW);
+
+            m_mesh->ebo.m_indexCount = static_cast<uint32>(m_indices.size());
+            constexpr GLsizei stride = sizeof(Vertex);
+
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)offsetof(Vertex, position));
+
+            glEnableVertexAttribArray(1);
+            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)offsetof(Vertex, normal));
+
+            glEnableVertexAttribArray(2);
+            glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, stride, (void*)offsetof(Vertex, tangent));
+
+            glEnableVertexAttribArray(3);
+            glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, stride, (void*)offsetof(Vertex, texCoord));
+        }
+
+        void DrawModel(Math::Mat4f& model, Math::Mat4f& view, Math::Mat4f& projection)
+        {
+            if (!m_material)
+                return;
+
+            m_material->Bind();
+            
+            uint32 shaderID = m_material->GetShader().GetID();
+            Math::Vec3f color(1.0f, 1.0f, 1.0f);
+
+            GLuint modelLoc = glGetUniformLocation(shaderID, "uModel");
+            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+            GLuint viewLoc = glGetUniformLocation(shaderID, "uView");
+            glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+
+            GLuint projLoc = glGetUniformLocation(shaderID, "uProj"); 
+            glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+            GLuint baseColorLoc = glGetUniformLocation(shaderID, "uBaseColor");
+            glUniform3fv(baseColorLoc, 1, glm::value_ptr(color));
+
+            glBindVertexArray(m_mesh->vao.m_data);
+
+            ImmediatePipeline::Get().Begin();
+            ImmediatePipeline::Get().UseModel();
+            
+            for (const auto& section : m_sections)
+            {
+                const ModelMaterial* mat = nullptr;
+
+                if (section.materialIndex < m_materials.size())
+                    mat = &m_materials[section.materialIndex];
+
+                Math::Vec3f baseColor = { 1.0f, 1.0f, 1.0f };
+                bool useTexture = false;
+
+                if (mat)
+                {
+                    baseColor = mat->baseColor;
+
+                    if (mat->texture)
+                    {
+                        mat->texture->Bind(0);
+                        useTexture = true;
+                    }
+                }
+
+                GLuint baseColorLoc = glGetUniformLocation(shaderID, "uBaseColor");
+                glUniform3fv(baseColorLoc, 1, glm::value_ptr(baseColor));
+
+                GLuint hasTextureLoc = glGetUniformLocation(shaderID, "uHasTexture");
+                glUniform1i(hasTextureLoc, useTexture ? 1 : 0);
+
+                if (useTexture)
+                {
+                    GLuint textureLoc = glGetUniformLocation(shaderID, "uTexture");
+                    glUniform1i(textureLoc, 0);
+                }
+
+                glDrawElements(GL_TRIANGLES,section.indexCount,GL_UNSIGNED_INT,(void*)(section.indexOffset * sizeof(uint32))
+                );
+            }
+
+            ImmediatePipeline::Get().End();
+
+            glBindVertexArray(0);
+
+        }
+
+        Vector<Vertex>& GetVertices() { return m_vertices; }
+        Vector<uint32>& GetIndices() { return m_indices; }
+        Vector<MeshSection>& GetSections() { return m_sections; }
+        Vector<ModelMaterial>& GetMaterials() { return m_materials; }
+        SharedPtr<Mesh> GetMesh() { return m_mesh; }
+
+        void SetName(const String& inName) { m_name = inName; }
+        const String& GetName() const { return m_name; }
+
+        void SetMaterial(SharedPtr<Material> inShader) { m_material = inShader; }
+        SharedPtr<Material> GetMaterial() const { return m_material; }
+
+        void SetMesh(SharedPtr<Mesh> inMesh) { m_mesh = inMesh; }
+        SharedPtr<Mesh> GetMesh() const { return m_mesh; }
+
+    private:
+        String m_name;
+        Vector<Vertex> m_vertices;
+        Vector<uint32> m_indices;
+
+        Vector<MeshSection> m_sections;
+        Vector<ModelMaterial> m_materials;
+
+        SharedPtr<Mesh> m_mesh = nullptr;
+        SharedPtr<Material> m_material = nullptr;
     };
 
     // Stores the attributes of a circle
@@ -128,6 +290,8 @@ namespace Nyx
             ImmediatePipeline::Get().UseSphere();
             glDrawElements(GL_TRIANGLES, m_sphereMesh.ebo.m_indexCount, GL_UNSIGNED_INT, 0);
             ImmediatePipeline::Get().End();
+
+            glBindVertexArray(0);
 
         }
 

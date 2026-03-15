@@ -7,10 +7,10 @@
 #include <Application/Core/Core.h>
 #include <Application/Window/Window.h>
 #include <Application/Constants/Constants.h>
-#include <Application/Core/Services/Input/InputDispatcher.h>
-#include <Application/Core/Services/Input/InputEvent.h>
-#include <Application/Core/Services/Input/InputQueue.h>
-#include <Application/Core/Services/Camera/CameraService.h>
+#include <Application/Services/Input/InputDispatcher.h>
+#include <Application/Services/Input/InputEvent.h>
+#include <Application/Services/Input/InputQueue.h>
+#include <Application/Services/Camera/CameraService.h>
 #include <Application/Resource/Components/Components.h>
 
 Camera::Camera()
@@ -43,41 +43,57 @@ glm::mat4 Camera::GetViewMatrix() const
     if (!ECS::Get().HasComponent<Transform>(id))
         return Math::Mat4d(0.0);
 
-    // Called every frame inside your render/update loop if follow is enabled
-    if (CameraService().Get().enabled)
+    auto& camera = *ECS::Get().GetComponent<Camera>(id);
+
+    if (CameraService::Get().enabled)
     {
-        const EntityID& targetID = CameraService().Get().targetEntity;
+        const EntityID& targetID = CameraService::Get().targetEntity;
 
         if (ECS::Get().HasComponent<Transform>(targetID))
         {
             auto& targetTransform = *ECS::Get().GetComponent<Transform>(targetID);
             const Position& pos = targetTransform.position / METERS_PER_UNIT;
-            Math::Vec3f targetPos = pos.GetWorld();
+            Math::Vec3d targetPos = pos.GetWorld();
 
-            float distance = CameraService().Get().distance;
-            float yaw = CameraService().Get().yaw;
-            float pitch = CameraService().Get().pitch;
+            const float64 size = glm::length(targetTransform.scale.get()) / METERS_PER_UNIT;
+            const float64 focusRadius = CameraService::Get().focusRadius / METERS_PER_UNIT;
 
-            // Spherical to Cartesian
-            Math::Vec3f direction;
+            CameraService::Get().minimumDistance = size * CAMERA_MINIMUM_ZOOM_MULTIPLIER;
+            CameraService::Get().maximumDistance = size * CAMERA_MAXIMUM_ZOOM_MULTIPLIER;
+
+            CameraService::Get().distance = glm::clamp(
+                CameraService::Get().distance,
+                CameraService::Get().minimumDistance,
+                CameraService::Get().maximumDistance
+            );
+
+            float64 distance = CameraService::Get().distance;
+            float64 yaw = CameraService::Get().yaw;
+            float64 pitch = CameraService::Get().pitch;
+
+            Math::Vec3d direction;
             direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
             direction.y = sin(glm::radians(pitch));
             direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
             direction = glm::normalize(direction);
 
-            Math::Vec3f cameraPos = targetPos - direction * distance;
+            if (size <= focusRadius)
+                CameraService::Get().focusEnabled = true;
+            else
+                CameraService::Get().focusEnabled = false;
 
-            // Now update camera's Transform
+            Math::Vec3d cameraPos = targetPos - direction * distance;
+
             auto& cameraTransform = *ECS::Get().GetComponent<Transform>(id);
             cameraTransform.position.SetWorld(cameraPos);
 
-            // Update camera direction
-            auto& camera = *ECS::Get().GetComponent<Camera>(id);
             camera.SetFront(glm::normalize(targetPos - cameraPos));
             camera.SetRight(glm::normalize(glm::cross(camera.GetFront(), camera.GetWorldUp())));
             camera.SetUp(glm::cross(camera.GetRight(), camera.GetFront()));
         }
     }
+
+    camera.UpdateTrackingClipPlanes(CameraService::Get().focusEnabled);
 
     Transform& transform = *ECS::Get().GetComponent<Transform>(id);
     Position& pos = transform.position;

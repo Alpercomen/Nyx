@@ -4,7 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <Application/Core/Services/Managers/EntityManager/EntityManager.h>
+#include <Application/Services/Managers/EntityManager/EntityManager.h>
 
 using namespace Nyx;
 
@@ -34,8 +34,8 @@ struct CameraDesc
     float64 Zoom = 45.0;
     float64 AspectRatio = 1.7777;
 
-    float64 NearPlane = 0.0001;
-    float64 FarPlane = 1000;
+    float64 NearPlane = CAMERA_DEFAULT_NEAR_PLANE;
+    float64 FarPlane = CAMERA_DEFAULT_FAR_PLANE;
 };
 
 class Camera
@@ -83,6 +83,20 @@ public:
     void ProcessKeyboardMovement(Camera_Movement direction, float64 deltaTime);
     void ProcessMouseMovement(float64 xoffset, float64 yoffset, bool constrainPitch = true);
     void UpdateCameraVectors();
+
+    void UpdateTrackingClipPlanes(bool focusMode)
+    {
+        if (focusMode)
+        {
+            SetNearPlane(CAMERA_FOCUS_NEAR_PLANE);
+            SetFarPlane(CAMERA_FOCUS_FAR_PLANE);
+        }
+        else
+        {
+            SetNearPlane(CAMERA_DEFAULT_NEAR_PLANE);
+            SetFarPlane(CAMERA_DEFAULT_FAR_PLANE);
+        }
+    }
 
 private:
     CameraDesc m_cameraDesc;

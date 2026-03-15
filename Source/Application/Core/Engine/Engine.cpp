@@ -10,8 +10,8 @@
 #include <backends/imgui_impl_opengl3.h>
 
 #include <Application/Core/Engine/Engine.h>
-#include <Application/Core/Services/Input/InputDispatcher.h>
-#include <Application/Core/Services/Managers/SceneManager/SceneManager.h>
+#include <Application/Services/Input/InputDispatcher.h>
+#include <Application/Services/Managers/SceneManager/SceneManager.h>
 
 #include <Application/Utils/SpaceUtils/SpaceUtils.h>
 #include <Application/Utils/ImGUIUtils/ImGUIUtils.h>

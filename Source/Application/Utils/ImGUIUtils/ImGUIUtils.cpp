@@ -3,8 +3,8 @@
 
 #include <spdlog/spdlog.h>
 #include <Application/Utils/ImGUIUtils/ImGUIUtils.h>
-#include <Application/Core/Services/Editor/Editor.h>
-#include <Application/Core/Services/Camera/CameraService.h>
+#include <Application/Services/Editor/Editor.h>
+#include <Application/Services/Camera/CameraService.h>
 
 void ImGUIUtils::Initialize(void* window)
 {
@@ -115,17 +115,27 @@ void ImGUIUtils::DrawInspector()
 
             if (hasCamera == false)
             {
-                if (CameraService().Get().enabled && CameraService().Get().targetEntity == id && ImGui::Button("Stop Following"))
-                    CameraService().Get().enabled = false;
-
-                if (CameraService().Get().enabled == false && ImGui::Button("Track"))
+                if (CameraService::Get().enabled && CameraService::Get().targetEntity == id && ImGui::Button("Stop Following"))
                 {
-                    CameraService().Get().enabled = true;
-                    CameraService().Get().targetEntity = id;
-                    CameraService().Get().distance = (glm::length(sca) / METERS_PER_UNIT) * 2;
-                    CameraService().Get().minimumDistance = CameraService().Get().distance / 2;
-                    CameraService().Get().yaw = 0.0f;
-                    CameraService().Get().pitch = 0.0f;
+                    CameraService::Get().enabled = false;
+                    CameraService::Get().focusEnabled = false;
+                }
+
+                if (CameraService::Get().enabled == false && ImGui::Button("Track"))
+                {
+                    CameraService::Get().enabled = true;
+                    CameraService::Get().targetEntity = id;
+
+                    const double targetSize = glm::length(sca) / METERS_PER_UNIT;
+                    const double visualSize = glm::max(targetSize, 1.0);
+
+                    if (visualSize <= CameraService::Get().focusRadius)
+                        CameraService::Get().focusEnabled = true;
+                    else
+                        CameraService::Get().focusEnabled = false;
+
+                    CameraService::Get().yaw = 0.0;
+                    CameraService::Get().pitch = 0.0;
                 }
             }
 

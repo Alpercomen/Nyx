@@ -26,8 +26,9 @@ double RotationDegreeToLinearVelocity(float degreesPerSecond, float radiusMeters
     return (radiansPerSecond * radiusMeters) / METERS_PER_UNIT;
 }
 
-void InitializeCircularOrbit(EntityID satelliteID, EntityID attractorID, float32 inclination, bool isTidallyLocked) {
-    // Ensure required components
+void InitializeCircularOrbit(EntityID satelliteID, EntityID attractorID, float32 inclination, bool isTidallyLocked)
+{
+    // Ensure required components exist
     if (!ECS::Get().HasComponent<Transform>(satelliteID) ||
         !ECS::Get().HasComponent<Transform>(attractorID) ||
         !ECS::Get().HasComponent<Rigidbody>(satelliteID) ||
@@ -54,39 +55,54 @@ void InitializeCircularOrbit(EntityID satelliteID, EntityID attractorID, float32
         }
     }
 
-
     auto& satellitePos = ECS::Get().GetComponent<Transform>(satelliteID)->position;
     auto& attractorPos = ECS::Get().GetComponent<Transform>(attractorID)->position;
 
     auto& satelliteRig = *ECS::Get().GetComponent<Rigidbody>(satelliteID);
     auto& attractorRig = *ECS::Get().GetComponent<Rigidbody>(attractorID);
 
-    Math::Vec3d direction = glm::normalize(attractorPos.GetWorld() - satellitePos.GetWorld());
-    float64 distanceMeters = glm::length(attractorPos.GetWorld() - satellitePos.GetWorld());
+    Math::Vec3d r = satellitePos.GetWorld() - attractorPos.GetWorld();
+    float64 radius = glm::length(r);
 
-    // Correct orbital speed calculation (SI units)
-    float64 orbitalSpeed = std::sqrt(G * attractorRig.mass / distanceMeters);
+    if (radius <= 0.0)
+    {
+        spdlog::error("Cannot initialize orbit: satellite and attractor are at the same position.");
+        return;
+    }
 
-    // Compute tangential direction
-    Math::Vec3d up = Math::Vec3d(0, 1, 0);
+    Math::Vec3d rHat = glm::normalize(r);
+    Math::Vec3d orbitNormal(0.0, 1.0, 0.0);
 
-    if (std::abs(glm::dot(direction, up)) > 0.99f)
-        up = Math::Vec3d(1, 0, 0); // avoid near-parallel vectors
+    if (std::abs(inclination) > 0.0001f)
+    {
+        glm::dmat4 rot = glm::rotate(glm::dmat4(1.0), glm::radians(static_cast<float64>(inclination)), glm::dvec3(1.0, 0.0, 0.0));
+        glm::dvec4 rotated = rot * glm::dvec4(orbitNormal.x, orbitNormal.y, orbitNormal.z, 0.0);
+        orbitNormal = glm::normalize(Math::Vec3d(rotated.x, rotated.y, rotated.z));
+    }
 
-    Math::Vec3d tangential = glm::normalize(glm::cross(direction, up));
-    Math::Vec3d satelliteVel = tangential * static_cast<float64>(orbitalSpeed);
+    Math::Vec3d tangent = glm::cross(orbitNormal, rHat);
+    float64 tangentLength = glm::length(tangent);
 
-    // Apply to satellite
-    satelliteRig.velocity.SetWorld(attractorRig.velocity.GetWorld() + satelliteVel);
+    if (tangentLength <= 0.0)
+    {
+        spdlog::error("Cannot initialize orbit: tangent vector has zero length.");
+        return;
+    }
 
-    // Conservation of momentum: Apply opposite to attractor
-    Math::Vec3d momentum = satelliteVel * static_cast<float64>(satelliteRig.mass);
-    Math::Vec3d attractorDeltaVel = -momentum / static_cast<float64>(attractorRig.mass);
-    attractorRig.velocity.SetWorld(attractorRig.velocity.GetWorld() + attractorDeltaVel);
+    tangent = tangent / tangentLength;
 
-    spdlog::info("Initialized orbit:");
-    spdlog::info(" - Satellite vel = ({:.2f}, {:.2f}, {:.2f})", satelliteVel.x, satelliteVel.y, satelliteVel.z);
-    spdlog::info(" - Attractor vel = ({:.6f}, {:.6f}, {:.6f})", attractorDeltaVel.x, attractorDeltaVel.y, attractorDeltaVel.z);
+    const float64 mu = G * static_cast<float64>(attractorRig.mass);
+    const float64 orbitalSpeed = std::sqrt(mu / radius);
+
+    Math::Vec3d satelliteVel = attractorRig.velocity.GetWorld() + tangent * orbitalSpeed;
+    satelliteRig.velocity.SetWorld(satelliteVel);
+
+    spdlog::info("Initialized circular orbit:");
+    spdlog::info(" - Radius: {:.3f} m", radius);
+    spdlog::info(" - Inclination: {:.3f} deg", inclination);
+    spdlog::info(" - Orbital speed: {:.6f} m/s", orbitalSpeed);
+    spdlog::info(" - Relative tangent: ({:.6f}, {:.6f}, {:.6f})", tangent.x, tangent.y, tangent.z);
+    spdlog::info(" - Satellite world velocity: ({:.6f}, {:.6f}, {:.6f})", satelliteVel.x, satelliteVel.y, satelliteVel.z);
 }
 
 void Attract(const EntityID& objID)
@@ -96,20 +112,20 @@ void Attract(const EntityID& objID)
 
     auto sphereIDs = ECS::Get().GetAllComponentIDs<Sphere>();
 
-	for (size_t i = 0; i < sphereIDs.size(); ++i)
+	for (EntityID id : ECS::Get().View<Transform, Rigidbody>())
 	{
-        const EntityID& id = sphereIDs[i];
 		if (objID == id)
 			continue;
-
-        if (!ECS::Get().HasComponent<Rigidbody>(id) || !ECS::Get().HasComponent<Transform>(id))
-            continue;
 
         auto& objTransform  = *ECS::Get().GetComponent<Transform>(objID);
         auto& objRigidbody  = *ECS::Get().GetComponent<Rigidbody>(objID);
 
 		auto& obj2Transform  = *ECS::Get().GetComponent<Transform>(id);
 		auto& obj2Rigidbody  = *ECS::Get().GetComponent<Rigidbody>(id);
+
+        // DEBUG
+        auto& objName = *ECS::Get().GetComponent<Name>(objID);
+        auto& obj2Name = *ECS::Get().GetComponent<Name>(id);
 
 		double dx = objTransform.position.GetWorld().x - obj2Transform.position.GetWorld().x;
 		double dy = objTransform.position.GetWorld().y - obj2Transform.position.GetWorld().y;
@@ -137,6 +153,7 @@ void Attract(const EntityID& objID)
                 ApplyTidalLock(objTransform, obj2Transform, objRigidbody);
         }
 
+        Math::Vec3d vel = obj2Rigidbody.velocity.GetWorld();
 	}
 }
 

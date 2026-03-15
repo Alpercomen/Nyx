@@ -9,7 +9,7 @@ namespace Nyx
 	{
 	public:
 		Material() : Material(Shader(), Math::Vec3f(0.8, 0.8, 0.8), Math::Vec3f(0.0, 0.0, 0.0), 0.0) {};
-		Material (Shader shader, Math::Vec3f baseColor, Math::Vec3f emissiveColor, float32 emissiveStrength, Texture* texture = nullptr) : 
+		Material (Shader shader, Math::Vec3f baseColor = Math::Vec3f(1.0f, 1.0f, 1.0f), Math::Vec3f emissiveColor = Math::Vec3f(1.0f, 1.0f, 1.0f), float32 emissiveStrength = 1.0f, Texture* texture = nullptr) :
 			m_shader(shader), 
 			m_baseColor(baseColor), 
 			m_emissiveColor(emissiveColor),

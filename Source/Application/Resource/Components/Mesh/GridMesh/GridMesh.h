@@ -1,21 +1,19 @@
 #pragma once
 
 #include <Application/Resource/Components/Components.h>
-#include <Application/Resource/Components/Mesh/Mesh.h>
-#include <Application/Resource/Components/Material/Shader/Shader.h>
+#include <Application/Services/Managers/ResourceManager/ResourceManager.h>
 
-#include <Application/Core/Services/ResourceLocator/ResourceLocator.h>
-#include <Application/Core/Services/Pipeline/Immediate/Immediate.h>
-#include <Application/Core/Services/Managers/ResourceManager/ResourceManager.h>
+namespace Nyx
+{
+    class GridMesh {
+    public:
+        GridMesh();
 
-class GridMesh {
-public:
-    GridMesh();
+        void DrawGrid(const Camera& camera, const Transform& cameraTransform) const;
 
-    void DrawGrid(const Camera& camera, const Transform& cameraTransform) const;
-
-private:
-    Vector<Math::Vec3f> m_vertices;
-    Mesh m_mesh;
-    Shader m_shader;
-};
+    private:
+        Vector<Math::Vec3f> m_vertices;
+        VAO m_vao;
+        Shader m_shader;
+    };
+}
