@@ -372,6 +372,10 @@ namespace Nyx
 			AtmosphereComponent earthAtmosphere;
 			ECS::Get().AddComponent(earthID, earthAtmosphere);
 
+			AtmosphereComponent marsAtmosphere;
+			marsAtmosphere.color = { 0.829f, 0.392f, 0.392f };
+			ECS::Get().AddComponent(marsID, marsAtmosphere);
+
 			InitializeCircularOrbit(mercuryID, sunID, 0.0);
 			InitializeCircularOrbit(venusID, sunID, 0.0);
 			InitializeCircularOrbit(earthID, sunID, 0.0);

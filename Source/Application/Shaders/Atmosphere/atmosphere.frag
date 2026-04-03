@@ -25,10 +25,12 @@ out vec4 FragColor;
 
 uniform vec3 uCameraPos;
 uniform vec3 uAtmoColor;
-uniform float uAtmoIntensity;
-uniform float uRimPower;        // try 3.0 - 6.0
-uniform float uLightSoftness;   // try 0.2 - 0.6
-uniform float uAlphaMultiplier; // try 0.15 - 0.5
+
+uniform float uHaloIntensity;   // start 1.0
+uniform float uHaloAlpha;       // start 0.35
+uniform float uRimStart;        // start 0.80
+uniform float uRimEnd;          // start 1.00
+uniform float uLightSoftness;   // start 0.25
 
 uniform int uDirLightCount;
 uniform int uPointLightCount;
@@ -47,8 +49,6 @@ vec3 ComputeLighting(vec3 N, vec3 worldPos)
     for (int i = 0; i < uDirLightCount; ++i)
     {
         vec3 L = normalize(-uDirectionalLights[i].direction);
-
-        // Soft day-side contribution
         float lit = smoothstep(-uLightSoftness, 1.0, dot(N, L));
         result += uDirectionalLights[i].color * lit * uDirectionalLights[i].intensity;
     }
@@ -76,19 +76,19 @@ void main()
     vec3 N = normalize(vNormalW);
     vec3 V = normalize(uCameraPos - vWorldPos);
 
-    // Strong only near the limb
-    float rim = 1.0 - Saturate(dot(N, V));
-    rim = pow(rim, uRimPower);
+    // Important: use abs so back/front orientation does not break the rim
+    float ndotv = abs(dot(N, V));
+    float fresnel = 1.0 - Saturate(ndotv);
 
-    // Light only on the lit side, but softly
+    // Narrow band only near the atmosphere-shell silhouette
+    float haloMask = smoothstep(uRimStart, uRimEnd, fresnel);
+
+    // Keep lighting on the true outward normal
     vec3 lightAccum = ComputeLighting(N, vWorldPos);
+    float lightMask = Saturate(max(max(lightAccum.r, lightAccum.g), lightAccum.b));
 
-    // Atmosphere color
-    vec3 color = uAtmoColor * lightAccum * rim * uAtmoIntensity;
-
-    // Alpha from rim, not from full color brightness
-    float alpha = rim * uAlphaMultiplier;
-    alpha *= Saturate(max(max(lightAccum.r, lightAccum.g), lightAccum.b));
+    vec3 color = uAtmoColor * lightAccum * haloMask * uHaloIntensity;
+    float alpha = haloMask * lightMask * uHaloAlpha;
 
     FragColor = vec4(color, alpha);
 }
