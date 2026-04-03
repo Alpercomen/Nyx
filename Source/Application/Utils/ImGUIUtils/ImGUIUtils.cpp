@@ -186,10 +186,12 @@ void ImGUIUtils::DrawInspector()
                 atmosphere.color.z = color[2];
             }
 
-            ImGui::DragFloat("Thickness", &atmosphere.thickness, 0.0005f, 0.0f, 0.5f, "%.5f");
+            ImGui::DragFloat("Radius", &atmosphere.atmosphereRadius, 0.0005f, 0.0f, 0.5f, "%.5f");
             ImGui::DragFloat("Intensity", &atmosphere.intensity, 0.1f, 0.0f, 10000.0f, "%.3f");
-            ImGui::DragFloat("Rim Power", &atmosphere.rimPower, 0.05f, 0.0f, 32.0f, "%.3f");
-            ImGui::DragFloat("Light Power", &atmosphere.lightPower, 0.05f, 0.0f, 32.0f, "%.3f");
+            ImGui::DragFloat("Rim Power", &atmosphere.rimPower, 0.05f, 0.0f, 100.0f, "%.3f");
+            ImGui::DragFloat("Inner Amount", &atmosphere.innerAmount, 0.05f, 0.0f, 100.0f, "%.3f");
+            ImGui::DragFloat("Light Softness", &atmosphere.lightSoftness, 0.05f, 0.0f, 100.0f, "%.3f");
+            ImGui::DragFloat("Alpha Multiplier", &atmosphere.alphaMultiplier, 0.05f, 0.0f, 100.0f, "%.3f");
 
             ImGui::PopID();
         }

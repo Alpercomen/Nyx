@@ -48,16 +48,23 @@ namespace Nyx
 
                 const Position& cameraPos = cameraTransform.position;
                 Math::Vec3d relPos = Math::Vec3d(pos.GetWorld() - cameraPos.GetWorld());
+				Math::Vec3f relPosFloat = relPos;
                 Math::Mat4f model = glm::translate(Math::Mat4d(1.0), relPos) * rot.ToMatrix() * sca.ToMatrix();
 
-                model = glm::scale(model, glm::vec3(1.0f + atmo.thickness));
+                model = glm::scale(model, glm::vec3(1.0f + atmo.atmosphereRadius));
                 glUniformMatrix4fv(glGetUniformLocation(shaderID, "uModel"), 1, GL_FALSE, glm::value_ptr(model));
 
                 // Atmosphere params
+				glUniform3fv(glGetUniformLocation(shaderID, "uPlanetCenter"), 1, glm::value_ptr(relPosFloat));
+				glUniform1f(glGetUniformLocation(shaderID, "uPlanetRadius"), sca.get().length());
+				glUniform1f(glGetUniformLocation(shaderID, "uAtmosphereRadius"), sca.get().length() + atmo.atmosphereRadius);
+
                 glUniform3fv(glGetUniformLocation(shaderID, "uAtmoColor"), 1, glm::value_ptr(atmo.color));
                 glUniform1f(glGetUniformLocation(shaderID, "uAtmoIntensity"), atmo.intensity);
-                glUniform1f(glGetUniformLocation(shaderID, "uRimPower"), atmo.rimPower);
-                glUniform1f(glGetUniformLocation(shaderID, "uLightPower"), atmo.lightPower);
+
+				glUniform1f(glGetUniformLocation(shaderID, "uRimPower"), atmo.rimPower);
+                glUniform1f(glGetUniformLocation(shaderID, "uLightSoftness"), atmo.lightSoftness);
+				glUniform1f(glGetUniformLocation(shaderID, "uAlphaMultiplier"), atmo.alphaMultiplier);
 
 				glBindVertexArray(sphere.m_sphereMesh.vao.m_data);
 

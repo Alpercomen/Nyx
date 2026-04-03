@@ -123,10 +123,6 @@ void Attract(const EntityID& objID)
 		auto& obj2Transform  = *ECS::Get().GetComponent<Transform>(id);
 		auto& obj2Rigidbody  = *ECS::Get().GetComponent<Rigidbody>(id);
 
-        // DEBUG
-        auto& objName = *ECS::Get().GetComponent<Name>(objID);
-        auto& obj2Name = *ECS::Get().GetComponent<Name>(id);
-
 		double dx = objTransform.position.GetWorld().x - obj2Transform.position.GetWorld().x;
 		double dy = objTransform.position.GetWorld().y - obj2Transform.position.GetWorld().y;
 		double dz = objTransform.position.GetWorld().z - obj2Transform.position.GetWorld().z;
@@ -135,6 +131,7 @@ void Attract(const EntityID& objID)
 		float distance = glm::length(diff);
 		Math::Vec3d unitVector = glm::normalize(diff);
 
+        // F = ( G * m1 * m2 ) / d^2
 		float Gforce = (G * objRigidbody.mass * obj2Rigidbody.mass) / (distance * distance);
 		float acc = Gforce / obj2Rigidbody.mass;
 
