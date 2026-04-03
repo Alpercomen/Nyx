@@ -69,7 +69,7 @@ void ImGUIUtils::DrawSimulationControl(Engine* engine)
     float32 temp = TIME_SCALE;
 
     ImGui::Begin("Simulation Control");
-    ImGui::SliderFloat("Time Scale", &temp, 0.0f, 500.0f, "%.8f", ImGuiSliderFlags_Logarithmic);
+    ImGui::SliderFloat("Time Scale", &temp, 0.0f, 3000.0f, "%.8f", ImGuiSliderFlags_Logarithmic);
     ImGui::Checkbox("Show Grid", &engine->GetRenderer().m_gridEnabled);
     ImGui::End();
 

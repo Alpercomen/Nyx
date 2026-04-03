@@ -7,12 +7,12 @@ namespace Nyx
     class AtmosphereComponent
     {
     public:
-        Math::Vec3f color = { 0.119f, 0.305f, 0.977f };
-        float32 radius = 0.014f;
-        float32 haloIntensity = 2.925f;
-        float32 haloAlpha = 0.449f;
-        float32 rimStart = 1.014f;
-        float32 rimEnd = 0.72f;
+        Math::Vec3f color = { 0.455f, 0.602f, 1.000f };
+        float32 radius = 0.025f;
+        float32 haloIntensity = 1.000f;
+        float32 haloAlpha = 0.554f;
+        float32 rimStart = 0.989f;
+        float32 rimEnd = 0.692f;
         float32 lightSoftness = 0.25f;
     };
 }
