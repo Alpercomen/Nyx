@@ -4,6 +4,7 @@
 #include <Application/Resource/Components/Components.h>
 #include <Application/Resource/Components/Transform/Transform.h>
 #include <Application/Core/Core.h>
+#include <Application/Core/Physics/Types.h>
 
 double GravitationalForce(double mu, double r);
 
@@ -16,3 +17,11 @@ void InitializeCircularOrbit(EntityID satelliteID, EntityID attractorID, float32
 void Attract(const EntityID& objID);
 
 void ApplyTidalLock(Transform& Ta, Transform& Tb, Rigidbody& Ra);
+
+void ComputeStrongestAttractors(Vector<SimBody>& bodies);
+
+void ComputeSOIRadii(Vector<SimBody>& bodies);
+
+EntityID ComputeStrongestAttractorID(const Vector<SimBody>& bodies, int32 selfIndex);
+
+EntityID ComputeOrbitalParentID(const Vector<SimBody>& bodies, int32 selfIndex);

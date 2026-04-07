@@ -24,6 +24,16 @@ namespace ImGUIUtils
 
 	void DrawHierarchy();
 
+	void DrawName(EntityID& id);
+
+	void DrawTransform(EntityID& id);
+
+	void DrawRigidbody(EntityID& id);
+
+	void DrawAtmosphereComponent(EntityID& id);
+
+	void DrawOrbitalParameters(EntityID& id);
+
 	void DrawInspector();
 
 	void DrawWindow(Engine* enginePtr, Scene* scenePtr);

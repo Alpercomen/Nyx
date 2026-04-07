@@ -5,57 +5,63 @@
 
 #include <Application/Constants/Constants.h>
 #include <Application/Resource/Components/Rigidbody/Acceleration.h>
+#include <Application/Services/SimulationControl/SimulationControl.h>
 
-class Velocity {
-public:
-	// CTOR
-	Velocity()
+
+namespace Nyx
+{
+	class Velocity
 	{
-		m_world = Math::Vec3d();
-		m_normalized = Math::Vec3d();
-	}
+	public:
+		// CTOR
+		Velocity()
+		{
+			m_world = Math::Vec3d();
+			m_normalized = Math::Vec3d();
+		}
 
-	Velocity(Math::Vec3d velocity, bool normal = false)
-	{
-		normal ? SetNormal(velocity) : SetWorld(velocity);
-	}
+		Velocity(Math::Vec3d velocity, bool normal = false)
+		{
+			normal ? SetNormal(velocity) : SetWorld(velocity);
+		}
 
-	~Velocity() = default;
+		~Velocity() = default;
 
-	// Getters
-	const Math::Vec3d& GetWorld() const { return m_world; }
-	const Math::Vec3d& GetNormal() const { return m_normalized; }
+		// Getters
+		const Math::Vec3d& GetWorld() const { return m_world; }
+		const Math::Vec3d& GetNormal() const { return m_normalized; }
 
-	// Setters
-	void SetWorld(const Math::Vec3d& velocity)
-	{
-		m_world = velocity;
+		// Setters
+		void SetWorld(const Math::Vec3d& velocity)
+		{
+			m_world = velocity;
 
-		m_normalized.x = velocity.x / METERS_PER_UNIT;
-		m_normalized.y = velocity.y / METERS_PER_UNIT;
-		m_normalized.z = velocity.z / METERS_PER_UNIT;
-	}
+			m_normalized.x = velocity.x / METERS_PER_UNIT;
+			m_normalized.y = velocity.y / METERS_PER_UNIT;
+			m_normalized.z = velocity.z / METERS_PER_UNIT;
+		}
 
-	void SetNormal(const Math::Vec3d& velocity)
-	{
-		m_world.x = velocity.x * METERS_PER_UNIT;
-		m_world.y = velocity.y * METERS_PER_UNIT;
-		m_world.z = velocity.z * METERS_PER_UNIT;
+		void SetNormal(const Math::Vec3d& velocity)
+		{
+			m_world.x = velocity.x * METERS_PER_UNIT;
+			m_world.y = velocity.y * METERS_PER_UNIT;
+			m_world.z = velocity.z * METERS_PER_UNIT;
 
-		m_normalized = velocity;
-	}
+			m_normalized = velocity;
+		}
 
-	void Accelerate(Acceleration& acceleration)
-	{
-		// Physics update in meters
-		double nextX = GetWorld().x + acceleration.GetWorld().x * DELTA_TIME * TIME_SCALE;
-		double nextY = GetWorld().y + acceleration.GetWorld().y * DELTA_TIME * TIME_SCALE;
-		double nextZ = GetWorld().z + acceleration.GetWorld().z * DELTA_TIME * TIME_SCALE;
+		void Accelerate(Acceleration& acceleration)
+		{
+			// Physics update in meters
+			double nextX = GetWorld().x + acceleration.GetWorld().x * DELTA_TIME * SimulationControls::Get().GetTimeDesired();
+			double nextY = GetWorld().y + acceleration.GetWorld().y * DELTA_TIME * SimulationControls::Get().GetTimeDesired();
+			double nextZ = GetWorld().z + acceleration.GetWorld().z * DELTA_TIME * SimulationControls::Get().GetTimeDesired();
 
-		SetWorld(Math::Vec3d(nextX, nextY, nextZ));
-	}
+			SetWorld(Math::Vec3d(nextX, nextY, nextZ));
+		}
 
-private:
-	Math::Vec3d m_world;
-	Math::Vec3d m_normalized;
-};
+	private:
+		Math::Vec3d m_world;
+		Math::Vec3d m_normalized;
+	};
+}

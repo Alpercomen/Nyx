@@ -29,30 +29,19 @@ double RotationDegreeToLinearVelocity(float degreesPerSecond, float radiusMeters
 void InitializeCircularOrbit(EntityID satelliteID, EntityID attractorID, float32 inclination, bool isTidallyLocked)
 {
     // Ensure required components exist
-    if (!ECS::Get().HasComponent<Transform>(satelliteID) ||
-        !ECS::Get().HasComponent<Transform>(attractorID) ||
-        !ECS::Get().HasComponent<Rigidbody>(satelliteID) ||
-        !ECS::Get().HasComponent<Rigidbody>(attractorID))
+    if (!ECS::Get().HasComponent<Transform>(satelliteID) || !ECS::Get().HasComponent<Rigidbody>(satelliteID) ||
+        !ECS::Get().HasComponent<Transform>(attractorID) || !ECS::Get().HasComponent<Rigidbody>(attractorID))
     {
         spdlog::error("Missing required components to initialize orbit.");
         return;
     }
 
-    if (ECS::Get().HasComponent<Name>(satelliteID) &&
-        ECS::Get().HasComponent<Name>(attractorID))
+    if (ECS::Get().HasComponent<Name>(satelliteID) && ECS::Get().HasComponent<Name>(attractorID))
     {
         const Name& satelliteName = *ECS::Get().GetComponent<Name>(satelliteID);
         const Name& attractorName = *ECS::Get().GetComponent<Name>(attractorID);
 
-        if (isTidallyLocked)
-        {
-            ECS::Get().AddComponent(satelliteID, TidallyLocked{ attractorID });
-            spdlog::info("{} is set to be tidally locked around the orbit of {}", satelliteName.name, attractorName.name);
-        }
-        else
-        {
-            spdlog::info("{} is set to orbit around {}", satelliteName.name, attractorName.name);
-        }
+        spdlog::info("{} is set to orbit around {}", satelliteName.name, attractorName.name);
     }
 
     auto& satellitePos = ECS::Get().GetComponent<Transform>(satelliteID)->position;
@@ -179,4 +168,119 @@ void ApplyTidalLock(Transform& Ta, Transform& Tb, Rigidbody& Ra)
 
     Ta.rotation.SetQuaternion(qWorld);
     Ra.angularVelocity.SetWorld(Math::Vec3d(0.0f));
+}
+
+void ComputeStrongestAttractors(Vector<SimBody>& bodies)
+{
+    for (int32 i = 0; i < static_cast<int32>(bodies.size()); ++i)
+        bodies[i].strongestAttractorID = ComputeStrongestAttractorID(bodies, i);
+}
+
+void ComputeSOIRadii(Vector<SimBody>& bodies)
+{
+    for (int32 i = 0; i < static_cast<int32>(bodies.size()); ++i)
+    {
+        SimBody& body = bodies[i];
+        body.soiRadius = 0.0;
+
+        if (!body.active || body.mass <= 0.0)
+            continue;
+
+        if (body.strongestAttractorID == NO_ID)
+            continue;
+
+        int32 parentIndex = -1;
+        for (int32 j = 0; j < static_cast<int32>(bodies.size()); ++j)
+        {
+            if (bodies[j].id == body.strongestAttractorID)
+            {
+                parentIndex = j;
+                break;
+            }
+        }
+
+        if (parentIndex < 0)
+            continue;
+
+        const SimBody& parent = bodies[parentIndex];
+        if (!parent.active || parent.mass <= 0.0)
+            continue;
+
+        const float64 a = glm::length(body.position - parent.position);
+        if (a <= 1e-6)
+            continue;
+
+        body.soiRadius = a * std::pow(body.mass / parent.mass, 2.0 / 5.0);
+    }
+}
+
+EntityID ComputeStrongestAttractorID(const Vector<SimBody>& bodies, int32 selfIndex)
+{
+    const SimBody& self = bodies[selfIndex];
+
+    EntityID bestID = NO_ID;
+    float64 bestAccelSq = -1.0;
+
+    if (!self.active || self.mass <= 0.0)
+        return NO_ID;
+
+    for (int32 i = 0; i < static_cast<int32>(bodies.size()); ++i)
+    {
+        if (i == selfIndex || !bodies[i].active || bodies[i].mass <= 0.0)
+            continue;
+
+        const SimBody& other = bodies[i];
+
+        Math::Vec3d r = other.position - self.position;
+        float64 distSq = glm::dot(r, r) + other.softening * other.softening;
+
+        if (distSq < 1e-18)
+            continue;
+
+        float64 invDist = 1.0 / std::sqrt(distSq);
+        float64 invDist3 = invDist * invDist * invDist;
+
+        Math::Vec3d accel = r * (G * other.mass * invDist3);
+        float64 accelSq = glm::dot(accel, accel);
+
+        if (accelSq > bestAccelSq)
+        {
+            bestAccelSq = accelSq;
+            bestID = other.id;
+        }
+    }
+
+    return bestID;
+}
+
+EntityID ComputeOrbitalParentID(const Vector<SimBody>& bodies, int32 selfIndex)
+{
+    const SimBody& self = bodies[selfIndex];
+
+    EntityID bestID = NO_ID;
+    float64 bestDistance = std::numeric_limits<float64>::infinity();
+
+    for (int32 i = 0; i < static_cast<int32>(bodies.size()); ++i)
+    {
+        if (i == selfIndex || !bodies[i].active || bodies[i].mass <= 0.0)
+            continue;
+
+        const SimBody& candidate = bodies[i];
+
+        if (candidate.mass <= self.mass)
+            continue;
+
+        if (candidate.soiRadius <= 0.0)
+            continue;
+
+        const float64 r = glm::length(self.position - candidate.position);
+
+        if (r < candidate.soiRadius && r < bestDistance)
+        {
+            bestDistance = r;
+            bestID = candidate.id;
+        }
+    }
+
+    return bestID;
 }

@@ -5,45 +5,33 @@
 #include <Application/Resource/Components/Components.h>
 #include <Application/Services/Managers/EntityManager/EntityManager.h>
 #include <Application/Utils/SpaceUtils/SpaceUtils.h>
+#include <Application/Core/Physics/Types.h>
+#include <Application/Core/Physics/Syncback.h>
+#include <Application/Core/Physics/Integrator.h>
+#include <Application/Services/Solver/NBodyGravitySolver.h>
 
 namespace Physics
 {
-    // Apply angular velocity to a transform quaternion
-    void IntegrateAngularVelocity(Transform& tr, Rigidbody& rb, float64 dt)
+    inline void Update(float64 deltaTime)
     {
-        Math::Vec3d w = rb.angularVelocity.GetWorld();
-        float64 wlen = glm::length(w);
-        if (wlen > 1e-8f)
-        {
-            Math::Vec3d axis = w / wlen;
-            Math::Quatd dq = glm::angleAxis(wlen * dt, axis);
-            tr.rotation.SetQuaternion(glm::normalize(dq * tr.rotation.GetQuaternion()));
-        }
+        if (!SimulationControls::Get().GetIsPlaying())
+            return;
+
+        PhysicsWorld world;
+        world.baseTimeStep = 1.0;
+
+        Nyx::GatherBodiesFromECS(world);
+
+        if (world.bodies.empty())
+            return;
+
+        Nyx::NBodyGravitySolver solver;
+        Nyx::InitializeAttractors(world);
+        Nyx::InitializeAccelerations(world, solver);
+
+        const float64 frameDt = deltaTime * static_cast<float64>(SimulationControls::Get().GetTimeDesired());
+
+        Nyx::AdvanceBlockTimesteps(world.bodies, solver, frameDt, world.baseTimeStep);
+        Nyx::SyncBodiesToECS(world, frameDt);
     }
-
-    void Iterate(const EntityID& objID, float64 deltaTime)
-    {
-        const float64 dt = deltaTime * TIME_SCALE;
-
-        Transform& transform = *ECS::Get().GetComponent<Transform>(objID);
-        Rigidbody& rigidbody = *ECS::Get().GetComponent<Rigidbody>(objID);
-
-        Position& pos = transform.position;
-        Velocity& vel = rigidbody.velocity;
-
-        Math::Vec3d next = pos.GetWorld() + vel.GetWorld() * deltaTime * TIME_SCALE;
-        pos.SetWorld(next);
-
-        // Apply rotation
-        IntegrateAngularVelocity(transform, rigidbody, dt);
-    }
-
-	void Update(float64 deltaTime)
-	{
-        for (EntityID entityID : ECS::Get().View<Transform, Rigidbody>())
-        {
-            Attract(entityID);
-            Iterate(entityID, deltaTime);
-        }
-	}
 }

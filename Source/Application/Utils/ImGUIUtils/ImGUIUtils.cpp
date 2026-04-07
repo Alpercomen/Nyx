@@ -5,6 +5,7 @@
 #include <Application/Utils/ImGUIUtils/ImGUIUtils.h>
 #include <Application/Services/Editor/Editor.h>
 #include <Application/Services/Camera/CameraService.h>
+#include <Application/Services/SimulationControl/SimulationControl.h>
 
 void ImGUIUtils::Initialize(void* window)
 {
@@ -66,14 +67,32 @@ ImVec2 ImGUIUtils::DrawGameWindow(Engine* engine)
 
 void ImGUIUtils::DrawSimulationControl(Engine* engine)
 {
-    float32 temp = TIME_SCALE;
+    int32 desiredTime = SimulationControls::Get().GetTimeDesired();
 
     ImGui::Begin("Simulation Control");
-    ImGui::SliderFloat("Time Scale", &temp, 0.0f, 3000.0f, "%.8f", ImGuiSliderFlags_Logarithmic);
+
+    if (ImGui::Button("Play"))
+        SimulationControls::Get().SetIsPlaying(true);
+
+    ImGui::SameLine();
+
+    if (ImGui::Button("Stop"))
+        SimulationControls::Get().SetIsPlaying(false);
+
+    ImGui::SameLine();
+
+    if (ImGui::Button("Fast Forward x10"))
+        SimulationControls::Get().SetTimeDesired(desiredTime * 10);
+
+    ImGui::SameLine();
+
+    if (ImGui::Button("Fast Backward /10"))
+        SimulationControls::Get().SetTimeDesired(desiredTime / 10);
+
+    ImGui::Text("Playing: %s", SimulationControls::Get().GetIsPlaying() ? "Yes" : "No");
+    ImGui::Text("Desired Speed: %i", desiredTime);
     ImGui::Checkbox("Show Grid", &engine->GetRenderer().m_gridEnabled);
     ImGui::End();
-
-    TIME_SCALE = temp;
 }
 
 void ImGUIUtils::DrawHierarchy()
@@ -91,6 +110,153 @@ void ImGUIUtils::DrawHierarchy()
     ImGui::End();
 }
 
+void ImGUIUtils::DrawName(EntityID& id)
+{
+    if (ECS::Get().HasComponent<Name>(id))
+    {
+        String& name = ECS::Get().GetComponent<Name>(id)->name;
+
+        ImGui::Text("[%s]", name.data());
+    }
+}
+
+void ImGUIUtils::DrawTransform(EntityID& id)
+{
+    if (ECS::Get().HasComponent<Transform>(id))
+    {
+        auto& transform = *ECS::Get().GetComponent<Transform>(id);
+
+        const auto& pos = transform.position.GetWorld();
+        const auto& rot = transform.rotation.GetEulerAngles();
+        const auto& sca = transform.scale.get();
+
+        bool hasCamera = ECS::Get().HasComponent<Camera>(id);
+
+        if (hasCamera == false)
+        {
+            if (CameraService::Get().enabled && CameraService::Get().targetEntity == id && ImGui::Button("Stop Following"))
+            {
+                CameraService::Get().enabled = false;
+                CameraService::Get().focusEnabled = false;
+            }
+
+            if (CameraService::Get().enabled == false && ImGui::Button("Track"))
+            {
+                CameraService::Get().enabled = true;
+                CameraService::Get().targetEntity = id;
+
+                const double targetSize = glm::length(sca) / METERS_PER_UNIT;
+                const double visualSize = glm::max(targetSize, 1.0);
+
+                if (visualSize <= CameraService::Get().focusRadius)
+                    CameraService::Get().focusEnabled = true;
+                else
+                    CameraService::Get().focusEnabled = false;
+
+                CameraService::Get().yaw = 0.0;
+                CameraService::Get().pitch = 0.0;
+            }
+        }
+
+        ImGui::Text("Pos: (%.2f, %.2f, %.2f)", pos.x, pos.y, pos.z);
+        if (hasCamera)
+        {
+            const auto& camera = *ECS::Get().GetComponent<Camera>(id);
+            ImGui::Text("Yaw: %.2f", camera.GetYaw());
+            ImGui::Text("Pitch: %.2f", camera.GetPitch());
+        }
+        else
+        {
+            ImGui::Text("Rot: (%.2f, %.2f, %.2f)", glm::degrees(rot.x), glm::degrees(rot.y), glm::degrees(rot.z));
+            ImGui::Text("Sca: (%.2f, %.2f, %.2f)", sca.x, sca.y, sca.z);
+        }
+    }
+}
+
+void ImGUIUtils::DrawRigidbody(EntityID& id)
+{
+    if (ECS::Get().HasComponent<Rigidbody>(id))
+    {
+        ImGui::Separator();
+        const auto& rigidbody = *ECS::Get().GetComponent<Rigidbody>(id);
+
+        const auto& velVec = rigidbody.velocity.GetWorld();
+        const auto& accVec = rigidbody.acceleration.GetWorld();
+        const auto& angularVel = rigidbody.angularVelocity.GetWorld();
+
+        ImGui::Text("Vel: %.2f km/s", glm::length(velVec));
+        ImGui::Text("Acc: %.2f km/s2", glm::length(accVec));
+        ImGui::Text("Angular Vel: %.10f km/s", glm::length(angularVel));
+    }
+}
+
+void ImGUIUtils::DrawAtmosphereComponent(EntityID& id)
+{
+    if (ECS::Get().HasComponent<AtmosphereComponent>(id))
+    {
+        ImGui::Separator();
+        auto& atmosphere = *ECS::Get().GetComponent<AtmosphereComponent>(id);
+
+        ImGui::PushID(&atmosphere);
+
+        float32 color[3] = { atmosphere.color.x, atmosphere.color.y, atmosphere.color.z };
+
+        if (ImGui::ColorPicker3("Color", color,
+            ImGuiColorEditFlags_DisplayRGB |
+            ImGuiColorEditFlags_Float |
+            ImGuiColorEditFlags_HDR))
+        {
+            atmosphere.color.x = color[0];
+            atmosphere.color.y = color[1];
+            atmosphere.color.z = color[2];
+        }
+
+        ImGui::DragFloat("Radius", &atmosphere.radius, 0.0005f, 0.0f, 100.0f, "%.3f");
+        ImGui::DragFloat("Halo Intensity", &atmosphere.haloIntensity, 0.0005f, 0.0f, 100.0f, "%.3f");
+        ImGui::DragFloat("Halo Alpha", &atmosphere.haloAlpha, 0.0005f, 0.0f, 100.0f, "%.3f");
+        ImGui::DragFloat("Rim Start", &atmosphere.rimStart, 0.0005f, 0.0f, 100.0f, "%.3f");
+        ImGui::DragFloat("Rim End", &atmosphere.rimEnd, 0.0005f, 0.0f, 100.0f, "%.3f");
+        ImGui::DragFloat("Light Softness", &atmosphere.lightSoftness, 0.0005f, 0.0f, 100.0f, "%.3f");
+
+        ImGui::PopID();
+    }
+}
+
+void ImGUIUtils::DrawOrbitalParameters(EntityID& id)
+{
+    if (ECS::Get().HasComponent<Rigidbody>(id) && ECS::Get().HasComponent<Transform>(id))
+    {
+        ImGui::Separator();
+        const auto& rigidbody = *ECS::Get().GetComponent<Rigidbody>(id);
+        const auto& transform = *ECS::Get().GetComponent<Transform>(id);
+
+        const auto& orbitalParentID = rigidbody.orbitalParentID;
+
+        if (!ECS::Get().HasComponent<Rigidbody>(orbitalParentID) || !ECS::Get().HasComponent<Transform>(orbitalParentID))
+            return;
+
+        const auto& attractorTransform = *ECS::Get().GetComponent<Transform>(orbitalParentID);
+        const auto& attractorRigidbody = *ECS::Get().GetComponent<Rigidbody>(orbitalParentID);
+
+        const auto& relPos = attractorTransform.position.GetWorld() - transform.position.GetWorld();
+        const auto& relVel = attractorRigidbody.velocity.GetWorld() - rigidbody.velocity.GetWorld();
+        const auto& relAcc = attractorRigidbody.acceleration.GetWorld() - rigidbody.acceleration.GetWorld();
+
+
+        if (ECS::Get().HasComponent<Name>(orbitalParentID))
+        {
+            String& name = ECS::Get().GetComponent<Name>(orbitalParentID)->name;
+
+            ImGui::Text("Orbitting: [%s]", name.data());
+        }
+
+        ImGui::Text("Relative Pos: (%.2f, %.2f, %.2f)", relPos.x, relPos.y, relPos.z);
+        ImGui::Text("Relative Dist: %.2f km", glm::length(relPos) / METER_PER_KILOMETER);
+        ImGui::Text("Relative Vel: %.2f km/s", glm::length(relVel));
+        ImGui::Text("Relative Acc: %.2f km/s2", glm::length(relAcc));
+    }
+}
+
 void ImGUIUtils::DrawInspector()
 {
     Optional<EntityID>& selectedEntity = Editor::Get().selectedEntity;
@@ -99,102 +265,13 @@ void ImGUIUtils::DrawInspector()
     if (selectedEntity.has_value())
     {
         EntityID& id = selectedEntity.value();
-        String& name = ECS::Get().GetComponent<Name>(id)->name;
-
-        ImGui::Text("[%s]", name.data());
-
-        if (ECS::Get().HasComponent<Transform>(id))
-        {
-            auto& transform = *ECS::Get().GetComponent<Transform>(id);
-
-            const auto& pos = transform.position.GetWorld();
-            const auto& rot = transform.rotation.GetEulerAngles();
-            const auto& sca = transform.scale.get();
-
-            bool hasCamera = ECS::Get().HasComponent<Camera>(id);
-
-            if (hasCamera == false)
-            {
-                if (CameraService::Get().enabled && CameraService::Get().targetEntity == id && ImGui::Button("Stop Following"))
-                {
-                    CameraService::Get().enabled = false;
-                    CameraService::Get().focusEnabled = false;
-                }
-
-                if (CameraService::Get().enabled == false && ImGui::Button("Track"))
-                {
-                    CameraService::Get().enabled = true;
-                    CameraService::Get().targetEntity = id;
-
-                    const double targetSize = glm::length(sca) / METERS_PER_UNIT;
-                    const double visualSize = glm::max(targetSize, 1.0);
-
-                    if (visualSize <= CameraService::Get().focusRadius)
-                        CameraService::Get().focusEnabled = true;
-                    else
-                        CameraService::Get().focusEnabled = false;
-
-                    CameraService::Get().yaw = 0.0;
-                    CameraService::Get().pitch = 0.0;
-                }
-            }
-
-            ImGui::Text("Pos: (%.2f, %.2f, %.2f)", pos.x, pos.y, pos.z);
-            if (hasCamera)
-            {
-                const auto& camera = *ECS::Get().GetComponent<Camera>(id);
-                ImGui::Text("Yaw: %.2f", camera.GetYaw());
-                ImGui::Text("Pitch: %.2f", camera.GetPitch());
-            }
-            else
-            {
-                ImGui::Text("Rot: (%.2f, %.2f, %.2f)", glm::degrees(rot.x), glm::degrees(rot.y), glm::degrees(rot.z));
-                ImGui::Text("Sca: (%.2f, %.2f, %.2f)", sca.x, sca.y, sca.z);
-            }
-        }
-
-        if (ECS::Get().HasComponent<Rigidbody>(id))
-        {
-            ImGui::Separator();
-            const auto& rigidbody = *ECS::Get().GetComponent<Rigidbody>(id);
-
-            const auto& velVec = rigidbody.velocity.GetWorld();
-            const auto& accVec = rigidbody.acceleration.GetWorld();
-            const auto& angularVel = rigidbody.angularVelocity.GetWorld();
-
-            ImGui::Text("Vel: %.2f km/h", glm::length(velVec));
-            ImGui::Text("Acc: %.2f km/h2", glm::length(accVec));
-            ImGui::Text("Angular Vel: %.10f km/h", glm::length(angularVel));
-        }
-
-        if (ECS::Get().HasComponent<AtmosphereComponent>(id))
-        {
-            ImGui::Separator();
-            auto& atmosphere = *ECS::Get().GetComponent<AtmosphereComponent>(id);
-
-            ImGui::PushID(&atmosphere);
-
-            float color[3] = { atmosphere.color.x, atmosphere.color.y, atmosphere.color.z };
-
-            if (ImGui::ColorPicker3("Color", color,
-                ImGuiColorEditFlags_DisplayRGB |
-                ImGuiColorEditFlags_Float |
-                ImGuiColorEditFlags_HDR))
-            {
-                atmosphere.color.x = color[0];
-                atmosphere.color.y = color[1];
-                atmosphere.color.z = color[2];
-            }
-
-            ImGui::DragFloat("Radius", &atmosphere.radius, 0.0005f, 0.0f, 100.0f, "%.3f");
-            ImGui::DragFloat("Halo Intensity", &atmosphere.haloIntensity, 0.0005f, 0.0f, 100.0f, "%.3f");
-            ImGui::DragFloat("Halo Alpha", &atmosphere.haloAlpha, 0.0005f, 0.0f, 100.0f, "%.3f");
-            ImGui::DragFloat("Rim Start", &atmosphere.rimStart, 0.0005f, 0.0f, 100.0f, "%.3f");
-            ImGui::DragFloat("Rim End", &atmosphere.rimEnd, 0.0005f, 0.0f, 100.0f, "%.3f");
-            ImGui::DragFloat("Light Softness", &atmosphere.lightSoftness, 0.0005f, 0.0f, 100.0f, "%.3f");
-
-            ImGui::PopID();
-        }
+        
+        DrawName(id);
+        DrawTransform(id);
+        DrawRigidbody(id);
+        DrawOrbitalParameters(id);
+        DrawAtmosphereComponent(id);
+        
     }
     ImGui::End();
 }

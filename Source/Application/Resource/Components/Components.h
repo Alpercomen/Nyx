@@ -20,6 +20,8 @@ namespace Nyx
 		Velocity angularVelocity;
 		Velocity velocity;
 		Acceleration acceleration;
+
+		EntityID orbitalParentID;
 	};
 
 	struct TidallyLocked

@@ -2,13 +2,6 @@
 #include <Application/Core/Core.h>
 
 /*===========================================================
-    TIME & SIMULATION
-===========================================================*/
-extern float64 TIME_SCALE;
-
-#define DELTA_TIME                     0.01666666666666666666666666666667
-
-/*===========================================================
     UNIVERSAL CONSTANTS
 ===========================================================*/
 #define G                              6.67430e-11            // Gravitational constant
@@ -25,6 +18,8 @@ extern float64 TIME_SCALE;
 #define CAMERA_FOCUS_RADIUS            10000.0
 #define CAMERA_MINIMUM_ZOOM_MULTIPLIER 0.75
 #define CAMERA_MAXIMUM_ZOOM_MULTIPLIER 1000.0
+#define DELTA_TIME                     0.01666666666666666666666666666667
+#define TIME_LIMIT                     1000
 
 /*===========================================================
     SPECIAL CONSTANTS / FLAGS
