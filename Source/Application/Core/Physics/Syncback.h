@@ -38,7 +38,7 @@ namespace Nyx
             world.bodies[i].acceleration = solver.ComputeAcceleration(world.bodies, i, world.bodies[i].position);
     }
 
-    void InitializeAttractors(PhysicsWorld& world)
+    void ComputeOrbitalParents(PhysicsWorld& world)
     {
         ComputeStrongestAttractors(world.bodies);
         ComputeSOIRadii(world.bodies);

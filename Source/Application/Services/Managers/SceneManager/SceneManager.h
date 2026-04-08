@@ -301,7 +301,7 @@ namespace Nyx
 			Position saturnPosition(Math::Vec3f(SATURN_SUN_DISTANCE, 0.0, 0.0));
 			Position uranusPosition(Math::Vec3f(URANUS_SUN_DISTANCE, 0.0, 0.0));
 			Position neptunePosition(Math::Vec3f(NEPTUNE_SUN_DISTANCE, 0.0, 0.0));
-			Position issPosition(Math::Vec3f(AU - ISS_PERIGEE_DISTANCE, 0.0, 0.0));
+			Position issPosition(Math::Vec3f(AU - ISS_APPROX_DISTANCE, 0.0, 0.0));
 
 			Rotation sunRotation(0.0, 0.0, 0.0);
 			Rotation earthRotation(0.0, 0.0, glm::radians(EARTH_INCLINATION));
@@ -340,6 +340,8 @@ namespace Nyx
 			Transform issTransform = Transform{ issPosition , issRotation, issSize };
 
 			Velocity earthAngularVelocity = LocalToWorld(Math::Vec3d(0.0, EARTH_ANGULAR_VELOCITY_RADIANS, 0.0), earthTransform);
+			Velocity moonAngularVelocity = LocalToWorld(Math::Vec3d(0.0, MOON_ANGULAR_VELOCITY_RADIANS, 0.0), moonTransform);
+			Velocity issAngularVelocity = LocalToWorld(Math::Vec3d(ISS_ANGULAR_VELOCITY_RADIANS * std::sin(ISS_INCLINATION), ISS_ANGULAR_VELOCITY_RADIANS * std::cos(ISS_INCLINATION), 0.0), issTransform);
 			Velocity mercuryAngularVelocity = LocalToWorld(Math::Vec3d(0.0, MERCURY_ANGULAR_VELOCITY_RADIANS, 0.0), mercuryTransform);
 			Velocity venusAngularVelocity = LocalToWorld(Math::Vec3d(0.0, VENUS_ANGULAR_VELOCITY_RADIANS, 0.0), venusTransform);
 			Velocity marsAngularVelocity = LocalToWorld(Math::Vec3d(0.0, MARS_ANGULAR_VELOCITY_RADIANS, 0.0), marsTransform);
@@ -353,13 +355,13 @@ namespace Nyx
 			EntityID mercuryID = scenePtr->CreatePlanet("Mercury", mercuryTransform, Rigidbody{ MERCURY_MASS , mercuryAngularVelocity }, mercuryDesc);
 			EntityID venusID = scenePtr->CreatePlanet("Venus", venusTransform, Rigidbody{ VENUS_MASS, venusAngularVelocity }, venusDesc);
 			EntityID earthID = scenePtr->CreatePlanet("Earth", earthTransform, Rigidbody{ EARTH_MASS , earthAngularVelocity }, earthDesc);
-			EntityID moonID = scenePtr->CreatePlanet("Moon", moonTransform, Rigidbody{ MOON_MASS }, moonDesc);
+			EntityID moonID = scenePtr->CreatePlanet("Moon", moonTransform, Rigidbody{ MOON_MASS , moonAngularVelocity }, moonDesc);
 			EntityID marsID = scenePtr->CreatePlanet("Mars", marsTransform, Rigidbody{ MARS_MASS, marsAngularVelocity }, marsDesc);
 			EntityID jupiterID = scenePtr->CreatePlanet("Jupiter", jupiterTransform, Rigidbody{ JUPITER_MASS, jupiterAngularVelocity }, jupiterDesc);
 			EntityID saturnID = scenePtr->CreatePlanet("Saturn", saturnTransform, Rigidbody{ SATURN_MASS, saturnAngularVelocity }, saturnDesc);
 			EntityID uranusID = scenePtr->CreatePlanet("Uranus", uranusTransform, Rigidbody{ URANUS_MASS, uranusAngularVelocity }, uranusDesc);
 			EntityID neptuneID = scenePtr->CreatePlanet("Neptune", neptuneTransform, Rigidbody{ NEPTUNE_MASS, neptuneAngularVelocity }, neptuneDesc);
-			EntityID issID = scenePtr->CreateModel("ISS", issTransform, Rigidbody{ ISS_MASS }, "Nyx/Source/Assets/Models/ISS_stationary.glb");
+			EntityID issID = scenePtr->CreateModel("ISS", issTransform, Rigidbody{ ISS_MASS , issAngularVelocity }, "Nyx/Source/Assets/Models/ISS_stationary.glb");
 
 			LightComponent pointLight;
 			pointLight.type = LightType::POINT;
@@ -379,7 +381,7 @@ namespace Nyx
 			InitializeCircularOrbit(mercuryID, sunID, 0.0);
 			InitializeCircularOrbit(venusID, sunID, 0.0);
 			InitializeCircularOrbit(earthID, sunID, 0.0);
-			InitializeCircularOrbit(moonID, earthID, 0.0, true);
+			InitializeCircularOrbit(moonID, earthID, 0.0);
 			InitializeCircularOrbit(issID, earthID, ISS_INCLINATION);
 			InitializeCircularOrbit(marsID, sunID, 0.0);
 			InitializeCircularOrbit(jupiterID, sunID, 0.0);

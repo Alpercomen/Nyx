@@ -26,12 +26,21 @@ namespace Physics
             return;
 
         Nyx::NBodyGravitySolver solver;
-        Nyx::InitializeAttractors(world);
         Nyx::InitializeAccelerations(world, solver);
+        Nyx::ComputeOrbitalParents(world);
 
         const float64 frameDt = deltaTime * static_cast<float64>(SimulationControls::Get().GetTimeDesired());
 
         Nyx::AdvanceBlockTimesteps(world.bodies, solver, frameDt, world.baseTimeStep);
+
+        Nyx::ComputeOrbitalParents(world);
+        ComputeTimeStepParents(world.bodies);
         Nyx::SyncBodiesToECS(world, frameDt);
+
+        for (int32 i = 0; i < static_cast<int32>(world.bodies.size()); ++i)
+            std::cout << "Name: " << ECS::Get().GetComponent<Name>(world.bodies[i].id)->name
+            << " Debug Step Count: " << world.bodies[i].debugStepCount
+            << " Desired DT: " << world.bodies[i].desiredDt
+            << " Time level: " << world.bodies[i].timeLevel << std::endl;
     }
 }

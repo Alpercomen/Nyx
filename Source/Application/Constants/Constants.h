@@ -20,6 +20,10 @@
 #define CAMERA_MAXIMUM_ZOOM_MULTIPLIER 1000.0
 #define DELTA_TIME                     0.01666666666666666666666666666667
 #define TIME_LIMIT                     1000
+#define DESIRED_DT_MAX                 10.0
+#define DESIRED_DT_MIN                 0.02
+#define GLOBAL_DT_SCALE                0.5
+#define TIGHT_ORBIT_SCALE              0.5
 
 /*===========================================================
     SPECIAL CONSTANTS / FLAGS
@@ -82,6 +86,7 @@
 #define MOON_MEAN_RADIUS_RADIUS        1737400.0
 #define MOON_MASS                      7.342e22
 #define EARTH_MOON_DISTANCE            384400000.0
+#define MOON_ANGULAR_VELOCITY_RADIANS          2.6617e-6
 
 /*===========================================================
     MARS
@@ -148,5 +153,7 @@
 #define ISS_LONGITUDE_SOLAR_ARRAY 73
 #define ISS_INCLINATION 51.6
 #define ISS_PERIGEE_DISTANCE 6741000
+#define ISS_APPROX_DISTANCE 6786137
 #define ISS_APOGEE_DISTANCE 6831000
 #define ISS_SPEED 7600
+#define ISS_ANGULAR_VELOCITY_RADIANS 0.00112723094854316226711971416695

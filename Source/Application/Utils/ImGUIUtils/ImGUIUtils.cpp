@@ -252,6 +252,7 @@ void ImGUIUtils::DrawOrbitalParameters(EntityID& id)
 
         ImGui::Text("Relative Pos: (%.2f, %.2f, %.2f)", relPos.x, relPos.y, relPos.z);
         ImGui::Text("Relative Dist: %.2f km", glm::length(relPos) / METER_PER_KILOMETER);
+        ImGui::Text("Distance to surface: %.2f km", (glm::length(relPos) - attractorTransform.scale.get().x) / METER_PER_KILOMETER);
         ImGui::Text("Relative Vel: %.2f km/s", glm::length(relVel));
         ImGui::Text("Relative Acc: %.2f km/s2", glm::length(relAcc));
     }

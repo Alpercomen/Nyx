@@ -26,7 +26,7 @@ double RotationDegreeToLinearVelocity(float degreesPerSecond, float radiusMeters
     return (radiansPerSecond * radiusMeters) / METERS_PER_UNIT;
 }
 
-void InitializeCircularOrbit(EntityID satelliteID, EntityID attractorID, float32 inclination, bool isTidallyLocked)
+void InitializeCircularOrbit(EntityID satelliteID, EntityID attractorID, float32 inclination)
 {
     // Ensure required components exist
     if (!ECS::Get().HasComponent<Transform>(satelliteID) || !ECS::Get().HasComponent<Rigidbody>(satelliteID) ||
@@ -176,6 +176,12 @@ void ComputeStrongestAttractors(Vector<SimBody>& bodies)
         bodies[i].strongestAttractorID = ComputeStrongestAttractorID(bodies, i);
 }
 
+void ComputeTimeStepParents(Vector<SimBody>& bodies)
+{
+    for (int32 i = 0; i < static_cast<int32>(bodies.size()); ++i)
+        bodies[i].timestepParentID = ComputeTimeStepParentID(bodies, i);
+}
+
 void ComputeSOIRadii(Vector<SimBody>& bodies)
 {
     for (int32 i = 0; i < static_cast<int32>(bodies.size()); ++i)
@@ -212,6 +218,43 @@ void ComputeSOIRadii(Vector<SimBody>& bodies)
 
         body.soiRadius = a * std::pow(body.mass / parent.mass, 2.0 / 5.0);
     }
+}
+
+EntityID ComputeTimeStepParentID(const Vector<SimBody>& bodies, int32 selfIndex)
+{
+    const SimBody& self = bodies[selfIndex];
+
+    if (!self.active || self.mass <= 0.0)
+        return NO_ID;
+
+    EntityID bestID = NO_ID;
+    float64 bestTimeScale = std::numeric_limits<float64>::infinity();
+
+    for (int32 i = 0; i < static_cast<int32>(bodies.size()); ++i)
+    {
+        if (i == selfIndex || !bodies[i].active || bodies[i].mass <= 0.0)
+            continue;
+
+        const SimBody& candidate = bodies[i];
+
+        if (candidate.mass <= self.mass)
+            continue;
+
+        const float64 r = glm::length(self.position - candidate.position);
+        if (r <= 1e-6)
+            continue;
+
+        const float64 mu = G * candidate.mass;
+        const float64 timeScale = std::sqrt((r * r * r) / mu);
+
+        if (timeScale < bestTimeScale)
+        {
+            bestTimeScale = timeScale;
+            bestID = candidate.id;
+        }
+    }
+
+    return bestID;
 }
 
 EntityID ComputeStrongestAttractorID(const Vector<SimBody>& bodies, int32 selfIndex)
@@ -282,5 +325,8 @@ EntityID ComputeOrbitalParentID(const Vector<SimBody>& bodies, int32 selfIndex)
         }
     }
 
-    return bestID;
+    if (bestID != NO_ID)
+        return bestID;
+
+    return self.strongestAttractorID;
 }

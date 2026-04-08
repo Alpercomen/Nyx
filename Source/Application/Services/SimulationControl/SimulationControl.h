@@ -19,7 +19,7 @@ namespace Nyx
 	private:
 		bool8 isPlaying = false;
 		int32 minSpeed = 1;
-		int32 maxSpeed = 10000000;
+		int32 maxSpeed = 1000000;
 		int32 timeDesired = 1;
 	};
 
