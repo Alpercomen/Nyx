@@ -20,8 +20,8 @@
 #define CAMERA_MAXIMUM_ZOOM_MULTIPLIER 1000.0
 #define DELTA_TIME                     0.01666666666666666666666666666667
 #define TIME_LIMIT                     1000
-#define DESIRED_DT_MAX                 10.0
-#define DESIRED_DT_MIN                 0.02
+#define DESIRED_DT_MAX                 5.0
+#define DESIRED_DT_MIN                 0.01
 #define GLOBAL_DT_SCALE                0.5
 #define TIGHT_ORBIT_SCALE              0.5
 
@@ -155,4 +155,3 @@
 #define ISS_PERIGEE_DISTANCE 6741000
 #define ISS_APOGEE_DISTANCE 6831000
 #define ISS_SPEED 7600
-#define ISS_ANGULAR_VELOCITY_RADIANS 0.00112723094854316226711971416695

@@ -341,7 +341,6 @@ namespace Nyx
 
 			Velocity earthAngularVelocity = LocalToWorld(Math::Vec3d(0.0, EARTH_ANGULAR_VELOCITY_RADIANS, 0.0), earthTransform);
 			Velocity moonAngularVelocity = LocalToWorld(Math::Vec3d(0.0, MOON_ANGULAR_VELOCITY_RADIANS, 0.0), moonTransform);
-			Velocity issAngularVelocity = LocalToWorld(Math::Vec3d(ISS_ANGULAR_VELOCITY_RADIANS * std::sin(ISS_INCLINATION), ISS_ANGULAR_VELOCITY_RADIANS * std::cos(ISS_INCLINATION), 0.0), issTransform);
 			Velocity mercuryAngularVelocity = LocalToWorld(Math::Vec3d(0.0, MERCURY_ANGULAR_VELOCITY_RADIANS, 0.0), mercuryTransform);
 			Velocity venusAngularVelocity = LocalToWorld(Math::Vec3d(0.0, VENUS_ANGULAR_VELOCITY_RADIANS, 0.0), venusTransform);
 			Velocity marsAngularVelocity = LocalToWorld(Math::Vec3d(0.0, MARS_ANGULAR_VELOCITY_RADIANS, 0.0), marsTransform);
@@ -361,7 +360,7 @@ namespace Nyx
 			EntityID saturnID = scenePtr->CreatePlanet("Saturn", saturnTransform, Rigidbody{ SATURN_MASS, saturnAngularVelocity }, saturnDesc);
 			EntityID uranusID = scenePtr->CreatePlanet("Uranus", uranusTransform, Rigidbody{ URANUS_MASS, uranusAngularVelocity }, uranusDesc);
 			EntityID neptuneID = scenePtr->CreatePlanet("Neptune", neptuneTransform, Rigidbody{ NEPTUNE_MASS, neptuneAngularVelocity }, neptuneDesc);
-			EntityID issID = scenePtr->CreateModel("ISS", issTransform, Rigidbody{ ISS_MASS , issAngularVelocity }, "Nyx/Source/Assets/Models/ISS_stationary.glb");
+			EntityID issID = scenePtr->CreateModel("ISS", issTransform, Rigidbody{ ISS_MASS }, "Nyx/Source/Assets/Models/ISS_stationary.glb");
 
 			LightComponent pointLight;
 			pointLight.type = LightType::POINT;
@@ -377,6 +376,10 @@ namespace Nyx
 			AtmosphereComponent marsAtmosphere;
 			marsAtmosphere.color = { 0.901f, 0.674f, 0.674f };
 			ECS::Get().AddComponent(marsID, marsAtmosphere);
+
+			TidallyLocked issLock;
+			issLock.lockedEntity = earthID;
+			ECS::Get().AddComponent(issID, issLock);
 
 			InitializeCircularOrbit(mercuryID, sunID, 0.0);
 			InitializeCircularOrbit(venusID, sunID, 0.0);

@@ -24,7 +24,6 @@ namespace Nyx
         bool8 active = true;
 
         float64 desiredDt = 0.0;
-        int32 debugStepCount = 0;
     };
 
     struct PhysicsWorld

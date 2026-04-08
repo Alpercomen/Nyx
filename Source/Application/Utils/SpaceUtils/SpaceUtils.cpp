@@ -130,44 +130,84 @@ void Attract(const EntityID& objID)
         obj2Rigidbody.acceleration = attraction;
         obj2Rigidbody.velocity.Accelerate(attraction);
 
-        // If object is tidally locked to another object
-        if (ECS::Get().HasComponent<TidallyLocked>(objID))
-        {
-            const auto& lockedEntityId = ECS::Get().GetComponent<TidallyLocked>(objID)->lockedEntity;
-
-            if (lockedEntityId == id)
-                ApplyTidalLock(objTransform, obj2Transform, objRigidbody);
-        }
-
         Math::Vec3d vel = obj2Rigidbody.velocity.GetWorld();
 	}
 }
 
 // Make Ta tidally locked towards Tb
-void ApplyTidalLock(Transform& Ta, Transform& Tb, Rigidbody& Ra)
+void ApplyTidalLock(Transform& Ta, Transform& Tb, Rigidbody& Ra, Rigidbody& Rb)
 {
     const Math::Vec3d& Pa = Ta.position.GetWorld();
     const Math::Vec3d& Pb = Tb.position.GetWorld();
 
-    Math::Vec3d dir = Pb - Pa;
-    if (glm::length2(dir) < 1e-12f)
+    Math::Vec3d dirToTarget = Pb - Pa;
+    if (glm::length2(dirToTarget) < 1e-12)
         return;
 
-    dir = glm::normalize(dir);
+    dirToTarget = glm::normalize(dirToTarget);
 
-    Math::Vec3d up = Math::Vec3d(0, 1, 0);
-    if (glm::abs(glm::dot(up, dir)) > 0.99f)
-        up = Math::Vec3d(1, 0, 0);
+    Math::Vec3d y = -dirToTarget;
 
-    const Math::Vec3d x = -dir;
-    const Math::Vec3d z = -glm::normalize(glm::cross(up, x));
-    const Math::Vec3d y = glm::cross(z, x);
+    // Tangential relative velocity direction
+    Math::Vec3d vel = Rb.velocity.GetWorld() - Ra.velocity.GetWorld();
+    Math::Vec3d z = vel - glm::dot(vel, y) * y;
+
+    if (glm::length2(z) < 1e-12)
+    {
+        Math::Vec3d fallback(0.0, 0.0, 1.0);
+        if (glm::abs(glm::dot(fallback, y)) > 0.99)
+            fallback = Math::Vec3d(1.0, 0.0, 0.0);
+
+        z = fallback - glm::dot(fallback, y) * y;
+    }
+
+    z = -glm::normalize(z);
+
+    Math::Vec3d x = glm::normalize(glm::cross(y, z));
+    z = glm::normalize(glm::cross(x, y));
 
     const Math::Mat3f basis(x, y, z);
     Math::Quatf qWorld = glm::normalize(glm::quat_cast(basis));
 
     Ta.rotation.SetQuaternion(qWorld);
-    Ra.angularVelocity.SetWorld(Math::Vec3d(0.0f));
+    Ra.angularVelocity.SetWorld(Math::Vec3d(0.0));
+}
+
+void ApplyTidalLockWithVelocityFacing(Transform& Ta, Transform& Tb, Rigidbody& Ra)
+{
+    const Math::Vec3d& Pa = Ta.position.GetWorld();
+    const Math::Vec3d& Pb = Tb.position.GetWorld();
+
+    Math::Vec3d dirToTarget = Pb - Pa;
+    if (glm::length2(dirToTarget) < 1e-12)
+        return;
+
+    dirToTarget = glm::normalize(dirToTarget);
+
+    Math::Vec3d y = -dirToTarget;
+    Math::Vec3d vel = Ra.velocity.GetWorld();
+    Math::Vec3d z = vel - glm::dot(vel, y) * y;
+
+    if (glm::length2(z) < 1e-12)
+    {
+        Math::Vec3d fallback = Math::Vec3d(0, 0, 1);
+
+        if (glm::abs(glm::dot(fallback, y)) > 0.99)
+            fallback = Math::Vec3d(1, 0, 0);
+
+        z = fallback - glm::dot(fallback, y) * y;
+    }
+
+    z = glm::normalize(z);
+
+    Math::Vec3d x = glm::normalize(glm::cross(y, z));
+    z = glm::normalize(glm::cross(x, y));
+
+    const Math::Mat3f basis(x, y, z);
+    Math::Quatf qWorld = glm::normalize(glm::quat_cast(basis));
+
+    Ta.rotation.SetQuaternion(qWorld);
+    Ra.angularVelocity.SetWorld(Math::Vec3d(0.0));
 }
 
 void ComputeStrongestAttractors(Vector<SimBody>& bodies)

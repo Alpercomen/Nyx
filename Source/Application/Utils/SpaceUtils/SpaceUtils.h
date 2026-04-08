@@ -16,7 +16,7 @@ void InitializeCircularOrbit(EntityID satelliteID, EntityID attractorID, float32
 
 void Attract(const EntityID& objID);
 
-void ApplyTidalLock(Transform& Ta, Transform& Tb, Rigidbody& Ra);
+void ApplyTidalLock(Transform& Ta, Transform& Tb, Rigidbody& Ra, Rigidbody& Rb);
 
 void ComputeStrongestAttractors(Vector<SimBody>& bodies);
 

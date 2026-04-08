@@ -62,6 +62,7 @@ namespace Nyx
             rb->orbitalParentID = body.orbitalParentID;
 
             IntegrateAngularVelocity(*tr, *rb, angularDt);
+            IntegrateTidallyLocked(body.id);
         }
     }
 }
