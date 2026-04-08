@@ -301,7 +301,7 @@ namespace Nyx
 			Position saturnPosition(Math::Vec3f(SATURN_SUN_DISTANCE, 0.0, 0.0));
 			Position uranusPosition(Math::Vec3f(URANUS_SUN_DISTANCE, 0.0, 0.0));
 			Position neptunePosition(Math::Vec3f(NEPTUNE_SUN_DISTANCE, 0.0, 0.0));
-			Position issPosition(Math::Vec3f(AU - ISS_APPROX_DISTANCE, 0.0, 0.0));
+			Position issPosition(Math::Vec3f(AU - ISS_PERIGEE_DISTANCE, 0.0, 0.0));
 
 			Rotation sunRotation(0.0, 0.0, 0.0);
 			Rotation earthRotation(0.0, 0.0, glm::radians(EARTH_INCLINATION));
