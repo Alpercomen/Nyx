@@ -83,6 +83,7 @@ public:
     void ProcessKeyboardMovement(Camera_Movement direction, float64 deltaTime);
     void ProcessMouseMovement(float64 xoffset, float64 yoffset, bool constrainPitch = true);
     void UpdateCameraVectors();
+    void LockCamera(Camera& camera, const EntityID& id) const;
 
     void UpdateTrackingClipPlanes(bool focusMode)
     {

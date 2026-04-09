@@ -13,7 +13,6 @@ namespace Nyx
         body.position += body.velocity * dt;
         body.acceleration = solver.ComputeAcceleration(bodies, bodyIndex, body.position);
         body.velocity += 0.5 * body.acceleration * dt;
-        body.debugStepCount++;
     }
 
     inline int32 FindBodyIndexByID(const Vector<SimBody>& bodies, EntityID id)
@@ -101,7 +100,6 @@ namespace Nyx
         for (int32 i = 0; i < static_cast<int32>(bodies.size()); ++i)
         {
             SimBody& body = bodies[i];
-            body.debugStepCount = 0;
             body.desiredDt = ComputeDesiredDt(bodies, i);
 
             finestDt = std::min(finestDt, body.desiredDt);

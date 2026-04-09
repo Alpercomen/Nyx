@@ -12,6 +12,7 @@
 #include <Application/Services/Input/InputQueue.h>
 #include <Application/Services/Camera/CameraService.h>
 #include <Application/Resource/Components/Components.h>
+#include <Application/Services/Editor/Editor.h>
 
 Camera::Camera()
 {
@@ -45,53 +46,8 @@ glm::mat4 Camera::GetViewMatrix() const
 
     auto& camera = *ECS::Get().GetComponent<Camera>(id);
 
-    if (CameraService::Get().enabled)
-    {
-        const EntityID& targetID = CameraService::Get().targetEntity;
-
-        if (ECS::Get().HasComponent<Transform>(targetID))
-        {
-            auto& targetTransform = *ECS::Get().GetComponent<Transform>(targetID);
-            const Position& pos = targetTransform.position / METERS_PER_UNIT;
-            Math::Vec3d targetPos = pos.GetWorld();
-
-            const float64 size = glm::length(targetTransform.scale.get()) / METERS_PER_UNIT;
-            const float64 focusRadius = CameraService::Get().focusRadius / METERS_PER_UNIT;
-
-            CameraService::Get().minimumDistance = size * CAMERA_MINIMUM_ZOOM_MULTIPLIER;
-            CameraService::Get().maximumDistance = size * CAMERA_MAXIMUM_ZOOM_MULTIPLIER;
-
-            CameraService::Get().distance = glm::clamp(
-                CameraService::Get().distance,
-                CameraService::Get().minimumDistance,
-                CameraService::Get().maximumDistance
-            );
-
-            float64 distance = CameraService::Get().distance;
-            float64 yaw = CameraService::Get().yaw;
-            float64 pitch = CameraService::Get().pitch;
-
-            Math::Vec3d direction;
-            direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-            direction.y = sin(glm::radians(pitch));
-            direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-            direction = glm::normalize(direction);
-
-            if (size <= focusRadius)
-                CameraService::Get().focusEnabled = true;
-            else
-                CameraService::Get().focusEnabled = false;
-
-            Math::Vec3d cameraPos = targetPos - direction * distance;
-
-            auto& cameraTransform = *ECS::Get().GetComponent<Transform>(id);
-            cameraTransform.position.SetWorld(cameraPos);
-
-            camera.SetFront(glm::normalize(targetPos - cameraPos));
-            camera.SetRight(glm::normalize(glm::cross(camera.GetFront(), camera.GetWorldUp())));
-            camera.SetUp(glm::cross(camera.GetRight(), camera.GetFront()));
-        }
-    }
+    if (CameraService::Get().enabled && Editor::Get().selectedEntity.has_value())
+        LockCamera(camera, id);
 
     camera.UpdateTrackingClipPlanes(CameraService::Get().focusEnabled);
 
@@ -185,4 +141,99 @@ void Camera::UpdateCameraVectors()
 
     SetRight(glm::normalize(glm::cross(GetFront(), GetWorldUp())));
     SetUp(glm::normalize(glm::cross(GetRight(), GetFront())));
+}
+
+void Camera::LockCamera(Camera& camera, const EntityID& id) const
+{
+    const EntityID& targetID = CameraService::Get().targetEntity;
+
+    if (ECS::Get().HasComponent<Transform>(targetID))
+    {
+        auto& targetTransform = *ECS::Get().GetComponent<Transform>(targetID);
+        auto& cameraTransform = *ECS::Get().GetComponent<Transform>(id);
+
+        const Position& pos = targetTransform.position / METERS_PER_UNIT;
+        Math::Vec3d targetPos = pos.GetWorld();
+
+        const float64 size = glm::length(targetTransform.scale.get()) / METERS_PER_UNIT;
+        const float64 focusRadius = CameraService::Get().focusRadius / METERS_PER_UNIT;
+
+        CameraService::Get().minimumDistance = size * CAMERA_MINIMUM_ZOOM_MULTIPLIER;
+        CameraService::Get().maximumDistance = size * CAMERA_MAXIMUM_ZOOM_MULTIPLIER;
+
+        CameraService::Get().distance = glm::clamp(
+            CameraService::Get().distance,
+            CameraService::Get().minimumDistance,
+            CameraService::Get().maximumDistance
+        );
+
+        if (size <= focusRadius)
+            CameraService::Get().focusEnabled = true;
+        else
+            CameraService::Get().focusEnabled = false;
+
+        const float64 distance = CameraService::Get().distance;
+
+        if (CameraService::Get().lockOrientation)
+        {
+            Math::Quatd targetRot = targetTransform.rotation.GetQuaternion();
+
+            Math::Vec3d targetRight = glm::normalize(targetRot * Math::Vec3d(1.0, 0.0, 0.0));
+            Math::Vec3d targetUp = glm::normalize(targetRot * Math::Vec3d(0.0, 1.0, 0.0));
+            Math::Vec3d targetForward = glm::normalize(targetRot * Math::Vec3d(0.0, 0.0, 1.0));
+
+            float64 yaw = CameraService::Get().yaw;
+            float64 pitch = CameraService::Get().pitch;
+            float64 distance = CameraService::Get().distance;
+
+            Math::Vec3d localDirection;
+            localDirection.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+            localDirection.y = sin(glm::radians(pitch));
+            localDirection.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+            localDirection = glm::normalize(localDirection);
+
+            Math::Vec3d worldDirection =
+                targetRight * localDirection.x +
+                targetUp * localDirection.y +
+                targetForward * localDirection.z;
+
+            worldDirection = glm::normalize(worldDirection);
+
+            Math::Vec3d cameraPos = targetPos - worldDirection * distance;
+            cameraTransform.position.SetWorld(cameraPos);
+
+            Math::Vec3d front = glm::normalize(targetPos - cameraPos);
+            Math::Vec3d right = glm::cross(front, targetUp);
+
+            if (glm::length2(right) < 1e-12)
+            {
+                right = glm::cross(front, targetRight);
+            }
+
+            right = glm::normalize(right);
+            Math::Vec3d up = glm::normalize(glm::cross(right, front));
+
+            camera.SetFront(front);
+            camera.SetRight(right);
+            camera.SetUp(up);
+        }
+        else
+        {
+            float64 yaw = CameraService::Get().yaw;
+            float64 pitch = CameraService::Get().pitch;
+
+            Math::Vec3d direction;
+            direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+            direction.y = sin(glm::radians(pitch));
+            direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+            direction = glm::normalize(direction);
+
+            Math::Vec3d cameraPos = targetPos - direction * distance;
+            cameraTransform.position.SetWorld(cameraPos);
+
+            camera.SetFront(glm::normalize(targetPos - cameraPos));
+            camera.SetRight(glm::normalize(glm::cross(camera.GetFront(), camera.GetWorldUp())));
+            camera.SetUp(glm::normalize(glm::cross(camera.GetRight(), camera.GetFront())));
+        }
+    }
 }

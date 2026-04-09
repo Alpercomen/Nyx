@@ -50,8 +50,18 @@ ImVec2 ImGUIUtils::DrawGameWindow(Engine* engine)
 {
     GLuint sceneTextureID = engine->GetSceneColorTex();
 
+    ImGuiWindowFlags flags =
+        ImGuiWindowFlags_NoDecoration |
+        ImGuiWindowFlags_NoDocking |
+        ImGuiWindowFlags_AlwaysAutoResize |
+        ImGuiWindowFlags_NoSavedSettings |
+        ImGuiWindowFlags_NoFocusOnAppearing |
+        ImGuiWindowFlags_NoNav;
+
     ImGui::Begin("Game View");
-    ImVec2 textureSize = ImGui::GetContentRegionAvail(); // available ImGui space
+    ImVec2 textureSize = ImGui::GetContentRegionAvail();
+    ImVec2 gameViewPos = ImGui::GetWindowPos();
+    ImVec2 gameViewSize = ImGui::GetWindowSize();
     ImGui::Image(
         (ImTextureID)(intptr_t)sceneTextureID,
         textureSize,
@@ -60,6 +70,23 @@ ImVec2 ImGUIUtils::DrawGameWindow(Engine* engine)
         ImVec4(1, 1, 1, 1),  // tint (white)
         ImVec4(0, 0, 0, 0)   // border (none)
     );
+    ImGui::End();
+
+    float padding = 50.0f;
+    float checkboxWidth = 140.0f;
+
+    ImVec2 overlayPos(
+        gameViewPos.x + gameViewSize.x - 140.0f - padding,
+        gameViewPos.y + padding
+    );
+
+    ImGui::SetNextWindowPos(overlayPos, ImGuiCond_Always);
+    ImGui::SetNextWindowBgAlpha(0.35f);
+
+    ImGui::Begin("GameViewOverlay", nullptr, flags);
+    ImGui::Checkbox("Lock Orientation", &CameraService::Get().lockOrientation);
+    ImGui::Checkbox("Follow Target", &CameraService::Get().enabled);
+    ImGui::Checkbox("Show Grid", &engine->GetRenderer().m_gridEnabled);
     ImGui::End();
 
     return textureSize;
@@ -91,7 +118,6 @@ void ImGUIUtils::DrawSimulationControl(Engine* engine)
 
     ImGui::Text("Playing: %s", SimulationControls::Get().GetIsPlaying() ? "Yes" : "No");
     ImGui::Text("Desired Speed: %i", desiredTime);
-    ImGui::Checkbox("Show Grid", &engine->GetRenderer().m_gridEnabled);
     ImGui::End();
 }
 
@@ -131,32 +157,6 @@ void ImGUIUtils::DrawTransform(EntityID& id)
         const auto& sca = transform.scale.get();
 
         bool hasCamera = ECS::Get().HasComponent<Camera>(id);
-
-        if (hasCamera == false)
-        {
-            if (CameraService::Get().enabled && CameraService::Get().targetEntity == id && ImGui::Button("Stop Following"))
-            {
-                CameraService::Get().enabled = false;
-                CameraService::Get().focusEnabled = false;
-            }
-
-            if (CameraService::Get().enabled == false && ImGui::Button("Track"))
-            {
-                CameraService::Get().enabled = true;
-                CameraService::Get().targetEntity = id;
-
-                const double targetSize = glm::length(sca) / METERS_PER_UNIT;
-                const double visualSize = glm::max(targetSize, 1.0);
-
-                if (visualSize <= CameraService::Get().focusRadius)
-                    CameraService::Get().focusEnabled = true;
-                else
-                    CameraService::Get().focusEnabled = false;
-
-                CameraService::Get().yaw = 0.0;
-                CameraService::Get().pitch = 0.0;
-            }
-        }
 
         ImGui::Text("Pos: (%.2f, %.2f, %.2f)", pos.x, pos.y, pos.z);
         if (hasCamera)
@@ -272,13 +272,15 @@ void ImGUIUtils::DrawInspector()
         DrawRigidbody(id);
         DrawOrbitalParameters(id);
         DrawAtmosphereComponent(id);
-        
+
     }
     ImGui::End();
 }
 
 void ImGUIUtils::DrawWindow(Engine* enginePtr, Scene* scenePtr)
 {
+    Optional<EntityID>& selectedEntity = Editor::Get().selectedEntity;
+
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
@@ -291,6 +293,15 @@ void ImGUIUtils::DrawWindow(Engine* enginePtr, Scene* scenePtr)
 
     Math::Vec2f textureSizeVec = { (int)textureSize.x, (int)textureSize.y };
     enginePtr->ResizeFBO(textureSizeVec, scenePtr);
+
+    if (selectedEntity.has_value())
+    {
+        EntityID id = selectedEntity.value();
+        if (CameraService::Get().enabled)
+            CameraService::Get().LockOn(id);
+        else
+            CameraService::Get().focusEnabled = false;
+    }
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
