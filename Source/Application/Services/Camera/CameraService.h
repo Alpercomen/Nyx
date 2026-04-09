@@ -19,7 +19,6 @@ namespace Nyx
 		bool focusEnabled = false;
 		bool enabled = false;
 		bool lockOrientation = false;
-		bool previousLockOrientation = false;
 
 		Math::Vec3d lockedFront = Math::Vec3d(0.0, 0.0, -1.0);
 		Math::Vec3d lockedRight = Math::Vec3d(1.0, 0.0, 0.0);
@@ -42,6 +41,12 @@ namespace Nyx
 				focusEnabled = true;
 			else
 				focusEnabled = false;
+		}
+
+		void Reset()
+		{
+			focusEnabled = false;
+			targetEntity = NO_ID;
 		}
 
 		~CameraService() = default;

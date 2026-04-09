@@ -300,7 +300,7 @@ void ImGUIUtils::DrawWindow(Engine* enginePtr, Scene* scenePtr)
         if (CameraService::Get().enabled)
             CameraService::Get().LockOn(id);
         else
-            CameraService::Get().focusEnabled = false;
+            CameraService::Get().Reset();
     }
 
     ImGui::Render();

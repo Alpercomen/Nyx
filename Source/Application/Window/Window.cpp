@@ -9,6 +9,7 @@
 #include <Application/Utils/ImGUIUtils/ImGUIUtils.h>
 #include <Application/Resource/Components/Components.h>
 #include <Application/Services/Managers/EntityManager/EntityManager.h>
+#include <Application/Services/Editor/Editor.h>
 #include <Application/Services/Camera/CameraService.h>
 
 namespace Nyx
@@ -96,7 +97,7 @@ namespace Nyx
             float64 xoffset = (float64)xPos - lastX;
             float64 yoffset = lastY - (float64)yPos;
 
-            if (CameraService::Get().enabled)
+            if (CameraService::Get().enabled && Editor::Get().selectedEntity.has_value())
             {
                 if (firstMouse)
                 {
@@ -143,7 +144,7 @@ namespace Nyx
 
             float64 scroll = event.m_eventList.scrollDelta;
 
-            if (CameraService::Get().enabled)
+            if (CameraService::Get().enabled && Editor::Get().selectedEntity.has_value())
             {
                 CameraService::Get().distance *= (1.0f - scroll * 0.1f);
                 return;
@@ -325,10 +326,16 @@ namespace Nyx
 
     void BasicWindow::ProcessKeyboard()
     {
-        if (InputHelper::GetMouseMode() != MouseMode::HIDDEN)
+        if (gWindow == nullptr)
             return;
 
-        if (gWindow == nullptr)
+        if (glfwGetKey(gWindow, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        {
+            Editor::Get().selectedEntity.reset();
+            CameraService::Get().Reset();
+        }
+
+        if (InputHelper::GetMouseMode() != MouseMode::HIDDEN)
             return;
 
         auto& cameraIDs = ECS::Get().GetAllComponentIDs<Camera>();
