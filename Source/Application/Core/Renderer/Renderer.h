@@ -10,7 +10,6 @@
 #include <Application/Services/Managers/SceneManager/SceneManager.h>
 #include <Application/Resource/Components/Material/Shader/Shader.h>
 #include <Application/Services/Lighting/LightingSystem.h>
-#include <Application/Resource/Components/Components.h>
 #include <Application/Services/Atmosphere/AtmosphereSystem.h>
 
 
