@@ -63,7 +63,7 @@ namespace Nyx {
         glDeleteTextures(1, &m_sceneColorTex);
         glDeleteRenderbuffers(1, &m_sceneDepthRBO);
     
-        InitFBO(); // Recreate with new size
+        InitFBO();
     }
 
     void Engine::Present(Scene& scene)

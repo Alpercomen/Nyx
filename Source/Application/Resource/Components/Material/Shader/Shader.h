@@ -5,6 +5,7 @@
 
 #include <Application/Core/Core.h>
 #include <Application/Utils/ShaderUtils/ShaderUtils.h>
+#include <Application/Constants/Constants.h>
 
 namespace Nyx
 {

@@ -14,6 +14,9 @@ namespace Nyx
 
 		void Bind(uint32 slot = 0) const;
 		uint32 GetID() const { return m_textureID; }
+		int32 GetWidth() const { return m_width; }
+		int32 GetHeight() const { return m_height; }
+		int32 GetChannels() const { return m_channels; }
 
 	private:
 		uint32 m_textureID = 0;

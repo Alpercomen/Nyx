@@ -3,6 +3,7 @@
 #include "Texture.h"
 
 #include <stb_image.h>
+#include <spdlog/spdlog.h>
 
 namespace Nyx
 {
@@ -42,6 +43,7 @@ namespace Nyx
         m_channels = img.channels;
 
         UploadTextureToGPU(m_textureID, m_width, m_height, m_channels, img.pixels);
+        spdlog::info("Loaded Texture from {} -> ID={}", path, m_textureID);
         TextureLoader::Free(img);
     }
 

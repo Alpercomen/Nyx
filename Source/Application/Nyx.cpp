@@ -29,6 +29,7 @@ int main(int argc, char** argv)
     SceneID sceneID = sceneManager.CreateScene();
     Scene& scene = *sceneManager.GetActiveScene();
 
+    sceneManager.LoadSkybox(sceneID);
     sceneManager.GenerateEntities(sceneID);
 
     window.Show();

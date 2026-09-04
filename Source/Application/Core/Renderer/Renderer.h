@@ -10,6 +10,7 @@
 #include <Application/Services/Managers/SceneManager/SceneManager.h>
 #include <Application/Resource/Components/Material/Shader/Shader.h>
 #include <Application/Services/Lighting/LightingSystem.h>
+#include <Application/Services/Skybox/SkyboxSystem.h>
 #include <Application/Services/Atmosphere/AtmosphereSystem.h>
 
 
@@ -29,6 +30,9 @@ namespace Nyx
         {
             const Camera& camera = *ECS::Get().GetComponent<Camera>(scene.GetActiveCameraID());
             const Transform& transform = *ECS::Get().GetComponent<Transform>(scene.GetActiveCameraID());
+
+            SkyboxSystem::Get().SetSkybox(scene.GetSkybox());
+            SkyboxSystem::Get().Draw(camera);
 
             if (m_gridEnabled)
             {

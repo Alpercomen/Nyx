@@ -9,6 +9,7 @@
 #include <Application/Utils/MathUtils/MathUtils.h>
 #include <Application/Constants/Constants.h>
 #include <Application/Services/ModelImporter/ModelImporter.h>
+#include <Application/Core/Renderer/Skybox/Skybox.h>
 
 namespace Nyx 
 {
@@ -146,6 +147,16 @@ namespace Nyx
 			return obj->GetEntityID();
 		}
 
+		void SetSkybox(SharedPtr<Skybox> skybox)
+		{
+			m_skyboxPtr = std::move(skybox);
+		}
+
+		const SharedPtr<Skybox>& GetSkybox() const
+		{
+			return m_skyboxPtr;
+		}
+
 		SharedPtr<SceneObject> GetSceneObject(const EntityID& entityID)
 		{
 			if (m_sceneObjectPtrs.find(entityID) != m_sceneObjectPtrs.end())
@@ -158,6 +169,7 @@ namespace Nyx
 		uint32 GetSceneObjectSize() { return m_sceneObjectPtrs.size(); }
 
 	private:
+		SharedPtr<Skybox> m_skyboxPtr;
 		CameraID m_activeCameraID = NO_ID;
 		HashMap<EntityID, SharedPtr<SceneObject>> m_sceneObjectPtrs;
 	};
@@ -178,7 +190,7 @@ namespace Nyx
 			}
 
 			Scene newScene;
-			m_scenes[sceneID] = newScene;
+			m_scenes[sceneID] = std::move(newScene);
 			m_activeSceneID = sceneID;
 
 			return sceneID;
@@ -220,6 +232,26 @@ namespace Nyx
 			if (m_scenes.find(m_activeSceneID) != m_scenes.end())
 				return &m_scenes[m_activeSceneID];
 			return nullptr;
+		}
+
+		void LoadSkybox(SceneID& sceneID)
+		{
+			Scene* scenePtr = GetScene(sceneID);
+
+			if (scenePtr == nullptr)
+				return;
+
+			// Right, Left, Top, Bottom, Front, Back
+			const Vector<String> faces = {
+				R"(Nyx\Source\Assets\Textures\Skybox\26-09-05-00-05-02_Right.png)",
+				R"(Nyx\Source\Assets\Textures\Skybox\26-09-05-00-05-02_Left.png)",
+				R"(Nyx\Source\Assets\Textures\Skybox\26-09-05-00-05-02_Top.png)",
+				R"(Nyx\Source\Assets\Textures\Skybox\26-09-05-00-05-02_Bottom.png)",
+				R"(Nyx\Source\Assets\Textures\Skybox\26-09-05-00-05-02_Front.png)",
+				R"(Nyx\Source\Assets\Textures\Skybox\26-09-05-00-05-02_Back.png)",
+			};
+
+			scenePtr->SetSkybox(MakeShared<Skybox>(faces));
 		}
 
 		void GenerateEntities(SceneID& sceneID)

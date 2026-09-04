@@ -32,7 +32,6 @@ namespace Nyx
 			}
 			else
 			{
-				// Bind fallback white texture
 				static GLuint fallbackTexture = 0;
 
 				uint8_t whitePixel[3] = { 255, 255, 255 };
@@ -44,23 +43,19 @@ namespace Nyx
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			}
 
-			// Set texture uniform
 			GLuint texLoc = glGetUniformLocation(m_shader.GetID(), "uTexture");
 			glUniform1i(texLoc, 0);
-
-			// Send hasTexture flag
 			GLuint hasTexLoc = glGetUniformLocation(m_shader.GetID(), "uHasTexture");
 			glUniform1i(hasTexLoc, hasTexture);
 
-			// Send base color tint
+			spdlog::debug("Material.Bind: shaderID={} texLoc={} hasTexLoc={} hasTexture={} texID={}", m_shader.GetID(), texLoc, hasTexLoc, hasTexture, hasTexture ? m_texture->GetID() : 0);
+
 			GLuint colorLoc = glGetUniformLocation(m_shader.GetID(), "uBaseColor");
 			glUniform3fv(colorLoc, 1, glm::value_ptr(m_baseColor));
 
-			// Send emissive color tint
 			GLuint emissiveLoc = glGetUniformLocation(m_shader.GetID(), "uEmissiveColor");
 			glUniform3fv(emissiveLoc, 1, glm::value_ptr(m_emissiveColor));
 
-			// Send emissive color tint
 			GLuint emissiveStrengthLoc = glGetUniformLocation(m_shader.GetID(), "uEmissiveStrength");
 			glUniform1f(emissiveStrengthLoc, m_emissiveStrength);
 		}

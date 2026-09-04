@@ -12,6 +12,7 @@ namespace Nyx
 		bool8 m_blend;
 		bool8 m_cullFace;
 		bool8 m_depthClamp;
+		bool8 m_depthMask;
 
 		int32 m_depthFunc;
 		int32 m_blendSrc, m_blendDst;
@@ -25,6 +26,7 @@ namespace Nyx
 			m_depthClamp = glIsEnabled(GL_DEPTH_CLAMP);
 
 			glGetIntegerv(GL_DEPTH_FUNC, &m_depthFunc);
+			glGetBooleanv(GL_DEPTH_WRITEMASK, (GLboolean*)&m_depthMask);
 			glGetIntegerv(GL_BLEND_SRC_ALPHA, &m_blendSrc);
 			glGetIntegerv(GL_BLEND_DST_ALPHA, &m_blendDst);
 			glGetIntegerv(GL_CULL_FACE_MODE, &m_cullMode);
@@ -38,6 +40,7 @@ namespace Nyx
 			SetState(GL_DEPTH_CLAMP, m_depthClamp);
 
 			glDepthFunc(m_depthFunc);
+			glDepthMask(m_depthMask);
 			glBlendFunc(m_blendSrc, m_blendDst);
 			glCullFace(m_cullMode);
 
@@ -105,6 +108,16 @@ namespace Nyx
 			glDisable(GL_CULL_FACE);
 
 			glEnable(GL_DEPTH_CLAMP);
+		}
+
+		void UseSkybox()
+		{
+			glDisable(GL_CULL_FACE);
+			glEnable(GL_DEPTH_TEST);
+			glEnable(GL_BLEND);
+
+			glDepthFunc(GL_LEQUAL);
+			glDepthMask(GL_FALSE);
 		}
 
 	private:
