@@ -53,7 +53,7 @@ void main()
     vec3 worldPos = nearPoint + t * (farPoint - nearPoint);
 
     // Evaluate the grid pattern relative to where camera is. Modulus by a number so it doesn't get distorted.
-    vec3 rel = worldPos + mod(uCameraPos, 1000);
+    vec3 rel = worldPos + mod(uCameraPos, 10);
 
     gl_FragDepth = computeDepth(worldPos);
     float linearDepth = computeLinearDepth(worldPos);

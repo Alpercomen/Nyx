@@ -4,6 +4,7 @@
 
 #include <stb_image.h>
 #include <spdlog/spdlog.h>
+#include <algorithm>
 
 namespace Nyx
 {
@@ -42,9 +43,59 @@ namespace Nyx
         m_height = img.height;
         m_channels = img.channels;
 
-        UploadTextureToGPU(m_textureID, m_width, m_height, m_channels, img.pixels);
-        spdlog::info("Loaded Texture from {} -> ID={}", path, m_textureID);
-        TextureLoader::Free(img);
+        // Query GPU max texture size and downscale if image is larger than supported
+        GLint maxTexSize = 0;
+        glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTexSize);
+
+        stbi_uc* uploadPixels = img.pixels;
+        int uploadW = m_width;
+        int uploadH = m_height;
+
+        if ((m_width > maxTexSize) || (m_height > maxTexSize))
+        {
+            // Compute new size preserving aspect ratio
+            float scale = std::min((float)maxTexSize / (float)m_width, (float)maxTexSize / (float)m_height);
+            int newW = std::max(1, static_cast<int>(m_width * scale));
+            int newH = std::max(1, static_cast<int>(m_height * scale));
+
+            spdlog::warn("Texture '{}' is larger than GL_MAX_TEXTURE_SIZE ({}). Resizing {}x{} -> {}x{}.", path, maxTexSize, m_width, m_height, newW, newH);
+
+            // Nearest-neighbor downscale
+            size_t newSize = static_cast<size_t>(newW) * static_cast<size_t>(newH) * static_cast<size_t>(m_channels);
+            stbi_uc* resized = new stbi_uc[newSize];
+
+            for (int y = 0; y < newH; ++y)
+            {
+                int srcY = std::min(m_height - 1, static_cast<int>(y / (float)newH * m_height));
+                for (int x = 0; x < newW; ++x)
+                {
+                    int srcX = std::min(m_width - 1, static_cast<int>(x / (float)newW * m_width));
+                    for (int c = 0; c < m_channels; ++c)
+                    {
+                        resized[(y * newW + x) * m_channels + c] = img.pixels[(srcY * m_width + srcX) * m_channels + c];
+                    }
+                }
+            }
+
+            uploadPixels = resized;
+            uploadW = newW;
+            uploadH = newH;
+
+            UploadTextureToGPU(m_textureID, uploadW, uploadH, m_channels, uploadPixels);
+            spdlog::info("Loaded Texture from {} -> ID={} | w={} h={} ch={} (resized)", path, m_textureID, uploadW, uploadH, m_channels);
+
+            TextureLoader::Free(img);
+            delete[] resized;
+
+            m_width = uploadW;
+            m_height = uploadH;
+        }
+        else
+        {
+            UploadTextureToGPU(m_textureID, m_width, m_height, m_channels, img.pixels);
+            spdlog::info("Loaded Texture from {} -> ID={} | w={} h={} ch={}", path, m_textureID, m_width, m_height, m_channels);
+            TextureLoader::Free(img);
+        }
     }
 
     Texture::Texture(const uint8* bytes, uint32 size, bool flipVertically)
@@ -66,6 +117,7 @@ namespace Nyx
         m_channels = channels;
 
         UploadTextureToGPU(m_textureID, m_width, m_height, m_channels, pixels);
+        spdlog::info("Loaded Texture from memory -> ID={} | w={} h={} ch={}", m_textureID, m_width, m_height, m_channels);
         stbi_image_free(pixels);
     }
 
@@ -93,6 +145,8 @@ namespace Nyx
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        spdlog::info("Loaded Texture from raw pixels -> ID={} | w={} h={} ch={}", m_textureID, m_width, m_height, m_channels);
     }
 
     Texture::~Texture()
