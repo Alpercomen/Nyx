@@ -1,5 +1,4 @@
 #include <Application/Core/Core.h>
-#include <Application/Utils/TextureUtils/TextureLoader.h>
 #include "Texture.h"
 
 #include <stb_image.h>
@@ -43,52 +42,14 @@ namespace Nyx
         m_height = img.height;
         m_channels = img.channels;
 
-        // Query GPU max texture size and downscale if image is larger than supported
         GLint maxTexSize = 0;
         glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTexSize);
 
         stbi_uc* uploadPixels = img.pixels;
-        int uploadW = m_width;
-        int uploadH = m_height;
 
         if ((m_width > maxTexSize) || (m_height > maxTexSize))
         {
-            // Compute new size preserving aspect ratio
-            float scale = std::min((float)maxTexSize / (float)m_width, (float)maxTexSize / (float)m_height);
-            int newW = std::max(1, static_cast<int>(m_width * scale));
-            int newH = std::max(1, static_cast<int>(m_height * scale));
-
-            spdlog::warn("Texture '{}' is larger than GL_MAX_TEXTURE_SIZE ({}). Resizing {}x{} -> {}x{}.", path, maxTexSize, m_width, m_height, newW, newH);
-
-            // Nearest-neighbor downscale
-            size_t newSize = static_cast<size_t>(newW) * static_cast<size_t>(newH) * static_cast<size_t>(m_channels);
-            stbi_uc* resized = new stbi_uc[newSize];
-
-            for (int y = 0; y < newH; ++y)
-            {
-                int srcY = std::min(m_height - 1, static_cast<int>(y / (float)newH * m_height));
-                for (int x = 0; x < newW; ++x)
-                {
-                    int srcX = std::min(m_width - 1, static_cast<int>(x / (float)newW * m_width));
-                    for (int c = 0; c < m_channels; ++c)
-                    {
-                        resized[(y * newW + x) * m_channels + c] = img.pixels[(srcY * m_width + srcX) * m_channels + c];
-                    }
-                }
-            }
-
-            uploadPixels = resized;
-            uploadW = newW;
-            uploadH = newH;
-
-            UploadTextureToGPU(m_textureID, uploadW, uploadH, m_channels, uploadPixels);
-            spdlog::info("Loaded Texture from {} -> ID={} | w={} h={} ch={} (resized)", path, m_textureID, uploadW, uploadH, m_channels);
-
-            TextureLoader::Free(img);
-            delete[] resized;
-
-            m_width = uploadW;
-            m_height = uploadH;
+            DownscaleAndUploadTexture(path, img, maxTexSize);
         }
         else
         {
@@ -161,5 +122,39 @@ namespace Nyx
     {
         glActiveTexture(GL_TEXTURE0 + slot);
         glBindTexture(GL_TEXTURE_2D, m_textureID);
+    }
+
+    void Texture::DownscaleAndUploadTexture(const String& path, TextureData& img, GLint maxTexSize)
+    {
+        float scale = std::min((float)maxTexSize / (float)m_width, (float)maxTexSize / (float)m_height);
+        int newW = std::max(1, static_cast<int>(m_width * scale));
+        int newH = std::max(1, static_cast<int>(m_height * scale));
+
+        spdlog::warn("Texture '{}' is larger than GL_MAX_TEXTURE_SIZE ({}). Resizing {}x{} -> {}x{}.", path, maxTexSize, m_width, m_height, newW, newH);
+
+        size_t newSize = static_cast<size_t>(newW) * static_cast<size_t>(newH) * static_cast<size_t>(m_channels);
+        stbi_uc* resized = new stbi_uc[newSize];
+
+        for (int y = 0; y < newH; ++y)
+        {
+            int srcY = std::min(m_height - 1, static_cast<int>(y / (float)newH * m_height));
+            for (int x = 0; x < newW; ++x)
+            {
+                int srcX = std::min(m_width - 1, static_cast<int>(x / (float)newW * m_width));
+                for (int c = 0; c < m_channels; ++c)
+                {
+                    resized[(y * newW + x) * m_channels + c] = img.pixels[(srcY * m_width + srcX) * m_channels + c];
+                }
+            }
+        }
+
+        UploadTextureToGPU(m_textureID, newW, newH, m_channels, resized);
+        spdlog::info("Loaded Texture from {} -> ID={} | w={} h={} ch={} (resized)", path, m_textureID, newW, newH, m_channels);
+
+        TextureLoader::Free(img);
+        delete[] resized;
+
+        m_width = newW;
+        m_height = newH;
     }
 }

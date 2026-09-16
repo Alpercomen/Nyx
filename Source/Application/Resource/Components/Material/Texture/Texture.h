@@ -1,4 +1,5 @@
 #pragma once
+#include <Application/Utils/TextureUtils/TextureLoader.h>
 
 #include <gl/glew.h>
 
@@ -13,6 +14,8 @@ namespace Nyx
 		~Texture();
 
 		void Bind(uint32 slot = 0) const;
+		void DownscaleAndUploadTexture(const String& path, TextureData& data, GLint maxTexSize);
+
 		uint32 GetID() const { return m_textureID; }
 		int32 GetWidth() const { return m_width; }
 		int32 GetHeight() const { return m_height; }
