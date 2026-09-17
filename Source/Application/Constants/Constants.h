@@ -52,7 +52,8 @@
 #define MERCURY_MEAN_RADIUS            2439700.0
 #define MERCURY_INCLINATION            0.034
 #define MERCURY_MASS                   3.3011e23
-#define MERCURY_SUN_DISTANCE           70e9
+#define MERCURY_APHELION               70e9
+#define MERCURY_PERIHELION             46e9
 #define MERCURY_ANGULAR_VELOCITY_RADIANS 1.24e-6
 
 /*===========================================================

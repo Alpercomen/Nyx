@@ -14,6 +14,10 @@ double RotationDegreeToLinearVelocity(float degreesPerSecond, float radiusMeters
 
 void InitializeCircularOrbit(EntityID satelliteID, EntityID attractorID, float32 inclination);
 
+void InitializeOrbitFromApsides(EntityID satelliteID, EntityID attractorID, float64 periapsis, float64 apoapsis, float64 inclination = 0.0, float64 longitudeAscendingNode = 0.0, float64 argumentOfPeriapsis = 0.0, bool startAtPeriapsis = true);
+
+void InitializeOrbit(EntityID satelliteID, EntityID attractorID, const OrbitalElements& elements);
+
 void Attract(const EntityID& objID);
 
 void ApplyTidalLock(Transform& Ta, Transform& Tb, Rigidbody& Ra, Rigidbody& Rb);

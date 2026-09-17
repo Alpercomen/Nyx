@@ -94,6 +94,162 @@ void InitializeCircularOrbit(EntityID satelliteID, EntityID attractorID, float32
     spdlog::info(" - Satellite world velocity: ({:.6f}, {:.6f}, {:.6f})", satelliteVel.x, satelliteVel.y, satelliteVel.z);
 }
 
+void InitializeOrbitFromApsides(
+    EntityID satelliteID, 
+    EntityID attractorID, 
+    float64 periapsis, 
+    float64 apoapsis, 
+    float64 inclination, 
+    float64 longitudeAscendingNode, 
+    float64 argumentOfPeriapsis, 
+    bool startAtPeriapsis)
+{
+    if (periapsis <= 0.0 || apoapsis <= 0.0 || apoapsis < periapsis)
+    {
+        spdlog::error("Invalid orbit apsides: " "periapsis must be > 0 and apoapsis >= periapsis.");
+
+        return;
+    }
+
+    const float64 semiMajorAxis = (periapsis + apoapsis) * 0.5;
+    const float64 eccentricity = (apoapsis - periapsis) / (apoapsis + periapsis);
+
+    OrbitalElements elements;
+
+    elements.semiMajorAxis = semiMajorAxis;
+    elements.eccentricity = eccentricity;
+    elements.inclination = inclination;
+    elements.longitudeAscendingNode = longitudeAscendingNode;
+    elements.argumentOfPeriapsis = argumentOfPeriapsis;
+    elements.trueAnomaly = startAtPeriapsis ? 0.0 : 180.0;
+
+    InitializeOrbit(satelliteID, attractorID, elements);
+}
+
+void InitializeOrbit(EntityID satelliteID, EntityID attractorID, const OrbitalElements& elements)
+{
+    auto& ecs = ECS::Get();
+
+    if (!ecs.HasComponent<Transform>(satelliteID) || !ecs.HasComponent<Rigidbody>(satelliteID) ||
+        !ecs.HasComponent<Transform>(attractorID) || !ecs.HasComponent<Rigidbody>(attractorID))
+    {
+        spdlog::error("Cannot initialize orbit: missing required components.");
+
+        return;
+    }
+
+    auto* satelliteTransform = ecs.GetComponent<Transform>(satelliteID);
+    auto* attractorTransform = ecs.GetComponent<Transform>(attractorID);
+    auto* satelliteRigidbody = ecs.GetComponent<Rigidbody>(satelliteID);
+    auto* attractorRigidbody = ecs.GetComponent<Rigidbody>(attractorID);
+
+    if (elements.semiMajorAxis <= 0.0)
+    {
+        spdlog::error("Cannot initialize orbit: semi-major axis must be > 0.");
+        return;
+    }
+
+    if (elements.eccentricity < 0.0 || elements.eccentricity >= 1.0)
+    {
+        spdlog::error("Cannot initialize orbit: eccentricity must satisfy ""0 <= e < 1 for an elliptical orbit.");
+        return;
+    }
+
+    const float64 mu = G * static_cast<float64>(attractorRigidbody->mass);
+
+    if (mu <= 0.0)
+    {
+        spdlog::error("Cannot initialize orbit: attractor has invalid mass.");
+        return;
+    }
+
+    const float64 a = elements.semiMajorAxis;
+    const float64 e = elements.eccentricity;
+    const float64 nu = glm::radians(elements.trueAnomaly);
+
+    const float64 p = a * (1.0 - e * e); // Semi-latus rectum
+
+    if (p <= 0.0)
+    {
+        spdlog::error("Cannot initialize orbit: invalid semi-latus rectum.");
+        return;
+    }
+
+    const float64 cosNu = std::cos(nu);
+    const float64 sinNu = std::sin(nu);
+
+    const float64 denominator = 1.0 + e * cosNu;
+
+    if (std::abs(denominator) < 1e-12)
+    {
+        spdlog::error("Cannot initialize orbit: invalid true anomaly.");
+        return;
+    }
+
+    const float64 radius = p / denominator;
+    Math::Vec3d positionPQW(radius * cosNu, 0.0, radius * sinNu);
+
+    const float64 velocityScale = std::sqrt(mu / p);
+    Math::Vec3d velocityPQW(-velocityScale * sinNu, 0.0, velocityScale * (e + cosNu));
+
+    const float64 inclination = glm::radians(elements.inclination);
+    const float64 ascendingNode = glm::radians(elements.longitudeAscendingNode);
+    const float64 argumentPeriapsis = glm::radians(elements.argumentOfPeriapsis);
+
+    const float64 Omega = glm::radians(elements.longitudeAscendingNode);
+    const float64 inc = glm::radians(elements.inclination);
+    const float64 omega = glm::radians(elements.argumentOfPeriapsis);
+
+    const float64 cosOmega = std::cos(Omega);
+    const float64 sinOmega = std::sin(Omega);
+
+    const float64 cosInc = std::cos(inc);
+    const float64 sinInc = std::sin(inc);
+
+    const float64 cosOmegaArg = std::cos(omega);
+    const float64 sinOmegaArg = std::sin(omega);
+
+    // Periapsis direction (P)
+    Math::Vec3d P(cosOmega * cosOmegaArg - sinOmega * sinOmegaArg * cosInc, sinOmegaArg * sinInc, sinOmega * cosOmegaArg + cosOmega * sinOmegaArg * cosInc);
+
+    // In-plane direction 90 degrees from periapsis (Q)
+    Math::Vec3d Q(cosOmega * sinOmegaArg + sinOmega * cosOmegaArg * cosInc, -cosOmegaArg * sinInc, sinOmega * sinOmegaArg - cosOmega * cosOmegaArg * cosInc);
+
+    // Orbital normal
+    Math::Vec3d W = glm::normalize(glm::cross(P, Q));
+
+    Math::Vec3d relativePosition = P * positionPQW.x + Q * positionPQW.z;
+    Math::Vec3d relativeVelocity = P * velocityPQW.x + Q * velocityPQW.z;
+
+    Math::Vec3d attractorPosition = attractorTransform->position.GetWorld();
+    Math::Vec3d attractorVelocity = attractorRigidbody->velocity.GetWorld();
+
+    Math::Vec3d satellitePosition = attractorPosition + relativePosition;
+    Math::Vec3d satelliteVelocity = attractorVelocity + relativeVelocity;
+
+    satelliteTransform->position.SetWorld(satellitePosition);
+    satelliteRigidbody->velocity.SetWorld(satelliteVelocity);
+
+    const float64 periapsis = a * (1.0 - e);
+    const float64 apoapsis = a * (1.0 + e);
+
+    const float64 orbitalPeriod = 2.0 * glm::pi<float64>() * std::sqrt((a * a * a) / mu);
+
+    spdlog::info("Initialized Keplerian orbit:");
+    spdlog::info(" - Semi-major axis: {:.3f} m", a);
+    spdlog::info(" - Eccentricity: {:.6f}", e);
+    spdlog::info(" - Periapsis: {:.3f} m", periapsis);
+    spdlog::info(" - Apoapsis: {:.3f} m", apoapsis);
+    spdlog::info(" - Inclination: {:.3f} deg", elements.inclination);
+    spdlog::info(" - Longitude of ascending node: {:.3f} deg", elements.longitudeAscendingNode);
+    spdlog::info(" - Argument of periapsis: {:.3f} deg", elements.argumentOfPeriapsis);
+    spdlog::info(" - True anomaly: {:.3f} deg", elements.trueAnomaly);
+    spdlog::info(" - Current radius: {:.3f} m", radius);
+    spdlog::info(" - Orbital period: {:.3f} s", orbitalPeriod);
+    spdlog::info(" - Relative position: ({:.3f}, {:.3f}, {:.3f})", relativePosition.x, relativePosition.y, relativePosition.z);
+    spdlog::info(" - Relative velocity: ({:.6f}, {:.6f}, {:.6f})", relativeVelocity.x, relativeVelocity.y, relativeVelocity.z);
+}
+
 void Attract(const EntityID& objID)
 {
 	if (!ECS::Get().HasComponent<Rigidbody>(objID) || !ECS::Get().HasComponent<Transform>(objID))

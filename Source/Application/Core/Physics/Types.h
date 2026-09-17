@@ -32,4 +32,14 @@ namespace Nyx
         float64 baseTimeStep = 1.0;
         float64 currentTime = 0.0;
     };
+
+    struct OrbitalElements
+    {
+		float64 semiMajorAxis = 0.0;
+		float64 eccentricity = 0.0;
+		float64 inclination = 0.0;
+		float64 longitudeAscendingNode = 0.0;
+		float64 argumentOfPeriapsis = 0.0;
+		float64 trueAnomaly = 0.0;
+    };
 }

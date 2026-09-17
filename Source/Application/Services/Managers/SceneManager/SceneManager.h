@@ -326,7 +326,7 @@ namespace Nyx
 			Position sunPosition(Math::Vec3f(0.0, 0.0, 0.0));
 			Position earthPosition(Math::Vec3f(AU, 0.0, 0.0));
 			Position moonPosition(Math::Vec3f(AU + EARTH_MOON_DISTANCE, 0.0, 0.0));
-			Position mercuryPosition(Math::Vec3f(MERCURY_SUN_DISTANCE, 0.0, 0.0));
+			Position mercuryPosition(Math::Vec3f(MERCURY_APHELION, 0.0, 0.0));
 			Position venusPosition(Math::Vec3f(VENUS_SUN_DISTANCE, 0.0, 0.0));
 			Position marsPosition(Math::Vec3f(MARS_SUN_DISTANCE, 0.0, 0.0));
 			Position jupiterPosition(Math::Vec3f(JUPITER_SUN_DISTANCE, 0.0, 0.0));
@@ -408,12 +408,13 @@ namespace Nyx
 			AtmosphereComponent marsAtmosphere;
 			marsAtmosphere.color = { 0.901f, 0.674f, 0.674f };
 			ECS::Get().AddComponent(marsID, marsAtmosphere);
-
+				
 			TidallyLocked issLock;
 			issLock.lockedEntity = earthID;
 			ECS::Get().AddComponent(issID, issLock);
 
-			InitializeCircularOrbit(mercuryID, sunID, 0.0);
+			//InitializeCircularOrbit(mercuryID, sunID, 0.0);
+			InitializeOrbitFromApsides(mercuryID, sunID, MERCURY_PERIHELION, MERCURY_APHELION, 0.0);
 			InitializeCircularOrbit(venusID, sunID, 0.0);
 			InitializeCircularOrbit(earthID, sunID, 0.0);
 			InitializeCircularOrbit(moonID, earthID, 0.0);
