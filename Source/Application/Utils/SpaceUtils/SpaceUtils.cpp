@@ -268,17 +268,17 @@ void Attract(const EntityID& objID)
 		auto& obj2Transform  = *ECS::Get().GetComponent<Transform>(id);
 		auto& obj2Rigidbody  = *ECS::Get().GetComponent<Rigidbody>(id);
 
-		double dx = objTransform.position.GetWorld().x - obj2Transform.position.GetWorld().x;
-		double dy = objTransform.position.GetWorld().y - obj2Transform.position.GetWorld().y;
-		double dz = objTransform.position.GetWorld().z - obj2Transform.position.GetWorld().z;
+		float64 dx = objTransform.position.GetWorld().x - obj2Transform.position.GetWorld().x;
+		float64 dy = objTransform.position.GetWorld().y - obj2Transform.position.GetWorld().y;
+		float64 dz = objTransform.position.GetWorld().z - obj2Transform.position.GetWorld().z;
 
 		Math::Vec3d diff = Math::Vec3d(dx, dy, dz);
-		float distance = glm::length(diff);
+        float32 distance = glm::length(diff);
 		Math::Vec3d unitVector = glm::normalize(diff);
 
         // F = ( G * m1 * m2 ) / d^2
-		float Gforce = (G * objRigidbody.mass * obj2Rigidbody.mass) / (distance * distance);
-		float acc = Gforce / obj2Rigidbody.mass;
+		float32 Gforce = (G * objRigidbody.mass * obj2Rigidbody.mass) / (distance * distance);
+		float32 acc = Gforce / obj2Rigidbody.mass;
 
         Math::Vec3d accVec(acc * unitVector.x, acc * unitVector.y, acc * unitVector.z);
 		Acceleration attraction(accVec);
