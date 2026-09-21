@@ -8,10 +8,10 @@
 #include <Application/Core/Physics/Meter.h>
 #include <Application/Services/Managers/EntityManager/EntityManager.h>
 #include <Application/Services/Managers/SceneManager/SceneManager.h>
+#include <Application/Services/SkyboxSystem/SkyboxSystem.h>
 #include <Application/Resource/Components/Material/Shader/Shader.h>
-#include <Application/Services/Lighting/LightingSystem.h>
-#include <Application/Services/Skybox/SkyboxSystem.h>
-#include <Application/Services/Atmosphere/AtmosphereSystem.h>
+#include <Application/Graphics/Lighting/LightingSystem.h>
+#include <Application/Graphics/Atmosphere/AtmosphereSystem.h>
 
 
 namespace Nyx

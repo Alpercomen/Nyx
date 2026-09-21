@@ -2,7 +2,7 @@
 #include <Application/Core/Core.h>
 #include <Application/Services/Managers/EntityManager/EntityManager.h>
 #include <Application/Resource/Components/Components.h>
-#include <Application/Core/Renderer/Skybox/Skybox.h>
+#include <Application/Graphics/Skybox/Skybox.h>
 
 namespace Nyx
 {

@@ -12,7 +12,7 @@
 #include <Application/Services/Managers/ResourceManager/ResourceManager.h>
 #include <Application/Services/Pipeline/Immediate/Immediate.h>
 #include <Application/Services/ResourceLocator/ResourceLocator.h>
-#include <Application/Services/Lighting/LightingSystem.h>
+#include <Application/Graphics/Lighting/LightingSystem.h>
 
 #include <Application/Resource/Components/Transform/Position.h>
 #include <Application/Resource/Components/Rigidbody/Velocity.h>

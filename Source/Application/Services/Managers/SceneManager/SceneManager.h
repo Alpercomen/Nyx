@@ -3,13 +3,13 @@
 #include <Application/Core/Core.h>
 #include <Application/Services/Managers/EntityManager/EntityManager.h>
 #include <Application/Resource/Components/Components.h>
-#include <Application/Services/Lighting/LightingSystem.h>
+#include <Application/Graphics/Lighting/LightingSystem.h>
 #include <Application/Resource/Components/Mesh/GridMesh/GridMesh.h>
 #include <Application/Utils/SpaceUtils/SpaceUtils.h>
 #include <Application/Utils/MathUtils/MathUtils.h>
 #include <Application/Constants/Constants.h>
 #include <Application/Services/ModelImporter/ModelImporter.h>
-#include <Application/Core/Renderer/Skybox/Skybox.h>
+#include <Application/Graphics/Skybox/Skybox.h>
 
 namespace Nyx 
 {
