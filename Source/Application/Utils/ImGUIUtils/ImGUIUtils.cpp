@@ -265,11 +265,11 @@ void ImGUIUtils::DrawOrbitTrail(EntityID& id)
         OrbitTrail& trail = *ECS::Get().GetComponent<OrbitTrail>(id);
 
         ImGui::Separator();
-        ImGui::Checkbox("Show Orbit: ", &trail.enabled);
-        ImGui::DragScalar("Max Length: ", ImGuiDataType_Double, &trail.maxLength);
+        ImGui::Checkbox("Show Orbit", &trail.enabled);
+        ImGui::DragScalar("Max Length", ImGuiDataType_Double, &trail.maxLength);
 
-        ImGui::DragFloat("Fade Power: ", &trail.fadePower);
-        ImGui::DragFloat("Opacity:", &trail.opacity);
+        ImGui::DragFloat("Fade Power", &trail.fadePower);
+        ImGui::DragFloat("Opacity", &trail.opacity);
 
         ImGui::PushID(&trail);
 

@@ -423,7 +423,6 @@ namespace Nyx
 			float64 saturnOrbitalPeriod = CalculateOrbitalPeriod(SATURN_SEMI_MAJOR_AXIS) / METERS_PER_UNIT * 10;
 			float64 uranusOrbitalPeriod = CalculateOrbitalPeriod(URANUS_SEMI_MAJOR_AXIS) / METERS_PER_UNIT * 10;
 			float64 neptuneOrbitalPeriod = CalculateOrbitalPeriod(NEPTUNE_SEMI_MAJOR_AXIS) / METERS_PER_UNIT * 10;
-			float64 issOrbitalPeriod = CalculateOrbitalPeriod(ISS_PERIGEE_DISTANCE + ISS_APOGEE_DISTANCE) / METERS_PER_UNIT * 10;
 
 			ECS::Get().AddComponent(mercuryID, OrbitTrail{true, mercuryOrbitalPeriod });
 			ECS::Get().AddComponent(venusID, OrbitTrail{true, venusOrbitalPeriod });
@@ -434,7 +433,7 @@ namespace Nyx
 			ECS::Get().AddComponent(saturnID, OrbitTrail{true, saturnOrbitalPeriod});
 			ECS::Get().AddComponent(uranusID, OrbitTrail{true, uranusOrbitalPeriod});
 			ECS::Get().AddComponent(neptuneID, OrbitTrail{true, neptuneOrbitalPeriod});
-			ECS::Get().AddComponent(issID, OrbitTrail{true, issOrbitalPeriod, 1.0e-40});
+			ECS::Get().AddComponent(issID, OrbitTrail{true, 0.041, 1.0e-40, 2048, 1.0f});
 
 			InitializeOrbitFromApsides(mercuryID, sunID, MERCURY_PERIHELION, MERCURY_APHELION, MERCURY_ORBITAL_INCLINATION, MERCURY_LONGITUDE_ASCENDING_NODE, MERCURY_ARGUMENT_OF_PERIAPSIS);
 			InitializeOrbitFromApsides(venusID, sunID, VENUS_PERIHELION, VENUS_APHELION, VENUS_ORBITAL_INCLINATION, VENUS_LONGITUDE_ASCENDING_NODE, VENUS_ARGUMENT_OF_PERIAPSIS);

@@ -180,7 +180,7 @@
 #define MOON_MASS                      7.342e22
 #define EARTH_PERIGEE                  363300000.0
 #define EARTH_APOGEE                   405504000.0
-#define MOON_ANGULAR_VELOCITY_RADIANS  2.6617e-6
+#define MOON_ANGULAR_VELOCITY_RADIANS  2.659e-6
 
 #define MOON_SEMI_MAJOR_AXIS           384400000.0
 #define MOON_ECCENTRICITY              0.0554
