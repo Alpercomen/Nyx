@@ -10,6 +10,7 @@
 #include <Application/Constants/Constants.h>
 #include <Application/Services/ModelImporter/ModelImporter.h>
 #include <Application/Graphics/Skybox/Skybox.h>
+#include <Application/Graphics/OrbitTrailSystem/OrbitTrailSystem.h>
 
 namespace Nyx 
 {
@@ -325,14 +326,14 @@ namespace Nyx
 
 			Position sunPosition(Math::Vec3f(0.0, 0.0, 0.0));
 			Position earthPosition(Math::Vec3f(AU, 0.0, 0.0));
-			Position moonPosition(Math::Vec3f(AU + EARTH_MOON_DISTANCE, 0.0, 0.0));
+			Position moonPosition(Math::Vec3f(AU + EARTH_PERIGEE, 0.0, 0.0));
 			Position mercuryPosition(Math::Vec3f(MERCURY_APHELION, 0.0, 0.0));
-			Position venusPosition(Math::Vec3f(VENUS_SUN_DISTANCE, 0.0, 0.0));
-			Position marsPosition(Math::Vec3f(MARS_SUN_DISTANCE, 0.0, 0.0));
-			Position jupiterPosition(Math::Vec3f(JUPITER_SUN_DISTANCE, 0.0, 0.0));
-			Position saturnPosition(Math::Vec3f(SATURN_SUN_DISTANCE, 0.0, 0.0));
-			Position uranusPosition(Math::Vec3f(URANUS_SUN_DISTANCE, 0.0, 0.0));
-			Position neptunePosition(Math::Vec3f(NEPTUNE_SUN_DISTANCE, 0.0, 0.0));
+			Position venusPosition(Math::Vec3f(VENUS_APHELION, 0.0, 0.0));
+			Position marsPosition(Math::Vec3f(MARS_APHELION, 0.0, 0.0));
+			Position jupiterPosition(Math::Vec3f(JUPITER_APHELION, 0.0, 0.0));
+			Position saturnPosition(Math::Vec3f(SATURN_APHELION, 0.0, 0.0));
+			Position uranusPosition(Math::Vec3f(URANUS_APHELION, 0.0, 0.0));
+			Position neptunePosition(Math::Vec3f(NEPTUNE_APHELION, 0.0, 0.0));
 			Position issPosition(Math::Vec3f(AU - ISS_PERIGEE_DISTANCE, 0.0, 0.0));
 
 			Rotation sunRotation(0.0, 0.0, 0.0);
@@ -413,17 +414,38 @@ namespace Nyx
 			issLock.lockedEntity = earthID;
 			ECS::Get().AddComponent(issID, issLock);
 
-			//InitializeCircularOrbit(mercuryID, sunID, 0.0);
-			InitializeOrbitFromApsides(mercuryID, sunID, MERCURY_PERIHELION, MERCURY_APHELION, 0.0);
-			InitializeCircularOrbit(venusID, sunID, 0.0);
-			InitializeCircularOrbit(earthID, sunID, 0.0);
-			InitializeCircularOrbit(moonID, earthID, 0.0);
-			InitializeCircularOrbit(issID, earthID, ISS_INCLINATION);
-			InitializeCircularOrbit(marsID, sunID, 0.0);
-			InitializeCircularOrbit(jupiterID, sunID, 0.0);
-			InitializeCircularOrbit(saturnID, sunID, 0.0);
-			InitializeCircularOrbit(uranusID, sunID, 0.0);
-			InitializeCircularOrbit(neptuneID, sunID, 0.0);
+			float64 mercuryOrbitalPeriod = CalculateOrbitalPeriod(MERCURY_SEMI_MAJOR_AXIS) / METERS_PER_UNIT * 10;
+			float64 venusOrbitalPeriod = CalculateOrbitalPeriod(VENUS_SEMI_MAJOR_AXIS) / METERS_PER_UNIT * 10;
+			float64 earthOrbitalPeriod = CalculateOrbitalPeriod(EARTH_SEMI_MAJOR_AXIS) / METERS_PER_UNIT * 10;
+			float64 moonOrbitalPeriod = CalculateOrbitalPeriod(MOON_SEMI_MAJOR_AXIS) / METERS_PER_UNIT * 10;
+			float64 marsOrbitalPeriod = CalculateOrbitalPeriod(MARS_SEMI_MAJOR_AXIS) / METERS_PER_UNIT * 10;
+			float64 jupiterOrbitalPeriod = CalculateOrbitalPeriod(JUPITER_SEMI_MAJOR_AXIS) / METERS_PER_UNIT * 10;
+			float64 saturnOrbitalPeriod = CalculateOrbitalPeriod(SATURN_SEMI_MAJOR_AXIS) / METERS_PER_UNIT * 10;
+			float64 uranusOrbitalPeriod = CalculateOrbitalPeriod(URANUS_SEMI_MAJOR_AXIS) / METERS_PER_UNIT * 10;
+			float64 neptuneOrbitalPeriod = CalculateOrbitalPeriod(NEPTUNE_SEMI_MAJOR_AXIS) / METERS_PER_UNIT * 10;
+			float64 issOrbitalPeriod = CalculateOrbitalPeriod(ISS_PERIGEE_DISTANCE + ISS_APOGEE_DISTANCE) / METERS_PER_UNIT * 10;
+
+			ECS::Get().AddComponent(mercuryID, OrbitTrail{true, mercuryOrbitalPeriod });
+			ECS::Get().AddComponent(venusID, OrbitTrail{true, venusOrbitalPeriod });
+			ECS::Get().AddComponent(earthID, OrbitTrail{true, earthOrbitalPeriod });
+			ECS::Get().AddComponent(moonID, OrbitTrail{true, moonOrbitalPeriod });
+			ECS::Get().AddComponent(marsID, OrbitTrail{true, marsOrbitalPeriod});
+			ECS::Get().AddComponent(jupiterID, OrbitTrail{true, jupiterOrbitalPeriod});
+			ECS::Get().AddComponent(saturnID, OrbitTrail{true, saturnOrbitalPeriod});
+			ECS::Get().AddComponent(uranusID, OrbitTrail{true, uranusOrbitalPeriod});
+			ECS::Get().AddComponent(neptuneID, OrbitTrail{true, neptuneOrbitalPeriod});
+			ECS::Get().AddComponent(issID, OrbitTrail{true, issOrbitalPeriod, 1.0e-40});
+
+			InitializeOrbitFromApsides(mercuryID, sunID, MERCURY_PERIHELION, MERCURY_APHELION, MERCURY_ORBITAL_INCLINATION, MERCURY_LONGITUDE_ASCENDING_NODE, MERCURY_ARGUMENT_OF_PERIAPSIS);
+			InitializeOrbitFromApsides(venusID, sunID, VENUS_PERIHELION, VENUS_APHELION, VENUS_ORBITAL_INCLINATION, VENUS_LONGITUDE_ASCENDING_NODE, VENUS_ARGUMENT_OF_PERIAPSIS);
+			InitializeOrbitFromApsides(earthID, sunID, EARTH_PERIHELION, EARTH_APHELION, EARTH_ORBITAL_INCLINATION, EARTH_LONGITUDE_ASCENDING_NODE, EARTH_ARGUMENT_OF_PERIAPSIS);
+			InitializeOrbitFromApsides(moonID, earthID, MOON_PERIAPSIS_DISTANCE, MOON_APOAPSIS_DISTANCE, MOON_ORBITAL_INCLINATION, MOON_LONGITUDE_ASCENDING_NODE, MOON_ARGUMENT_OF_PERIAPSIS);
+			InitializeOrbitFromApsides(issID, earthID, ISS_PERIGEE_DISTANCE, ISS_APOGEE_DISTANCE, ISS_INCLINATION);
+			InitializeOrbitFromApsides(marsID, sunID, MARS_PERIHELION, MARS_APHELION, MARS_ORBITAL_INCLINATION, MARS_LONGITUDE_ASCENDING_NODE, MARS_ARGUMENT_OF_PERIAPSIS);
+			InitializeOrbitFromApsides(jupiterID, sunID, JUPITER_PERIHElION, JUPITER_APHELION, JUPITER_ORBITAL_INCLINATION, JUPITER_LONGITUDE_ASCENDING_NODE, JUPITER_ARGUMENT_OF_PERIAPSIS);
+			InitializeOrbitFromApsides(saturnID, sunID, SATURN_PERIHELION, SATURN_APHELION, SATURN_ORBITAL_INCLINATION, SATURN_LONGITUDE_ASCENDING_NODE, SATURN_ARGUMENT_OF_PERIAPSIS);
+			InitializeOrbitFromApsides(uranusID, sunID, URANUS_PERIHELION, URANUS_APHELION, URANUS_ORBITAL_INCLINATION, URANUS_LONGITUDE_ASCENDING_NODE, URANUS_ARGUMENT_OF_PERIAPSIS);
+			InitializeOrbitFromApsides(neptuneID, sunID, NEPTUNE_PERIHELION, NEPTUNE_APHELION, NEPTUNE_ORBITAL_INCLINATION, NEPTUNE_LONGITUDE_ASCENDING_NODE, NEPTUNE_ARGUMENT_OF_PERIAPSIS);
 		}
 
 	private:

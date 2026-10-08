@@ -258,6 +258,37 @@ void ImGUIUtils::DrawOrbitalParameters(EntityID& id)
     }
 }
 
+void ImGUIUtils::DrawOrbitTrail(EntityID& id)
+{
+    if (ECS::Get().HasComponent<OrbitTrail>(id))
+    {
+        OrbitTrail& trail = *ECS::Get().GetComponent<OrbitTrail>(id);
+
+        ImGui::Separator();
+        ImGui::Checkbox("Show Orbit: ", &trail.enabled);
+        ImGui::DragScalar("Max Length: ", ImGuiDataType_Double, &trail.maxLength);
+
+        ImGui::DragFloat("Fade Power: ", &trail.fadePower);
+        ImGui::DragFloat("Opacity:", &trail.opacity);
+
+        ImGui::PushID(&trail);
+
+        float32 color[3] = { trail.color.x, trail.color.y, trail.color.z };
+
+        if (ImGui::ColorPicker3("Color", color,
+            ImGuiColorEditFlags_DisplayRGB |
+            ImGuiColorEditFlags_Float |
+            ImGuiColorEditFlags_HDR))
+        {
+            trail.color.x = color[0];
+            trail.color.y = color[1];
+            trail.color.z = color[2];
+        }
+
+        ImGui::PopID();
+    }
+}
+
 void ImGUIUtils::DrawInspector()
 {
     Optional<EntityID>& selectedEntity = Editor::Get().selectedEntity;
@@ -272,7 +303,7 @@ void ImGUIUtils::DrawInspector()
         DrawRigidbody(id);
         DrawOrbitalParameters(id);
         DrawAtmosphereComponent(id);
-
+        DrawOrbitTrail(id);
     }
     ImGui::End();
 }

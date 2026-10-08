@@ -6,6 +6,7 @@
 #include <Application/Resource/Components/Mesh/Mesh.h>
 #include <Application/Resource/Components/Mesh/GridMesh/GridMesh.h>
 #include <Application/Resource/Components/Atmosphere/Atmosphere.h>
+#include <Application/Resource/Components/OrbitTrail/OrbitTrail.h>
 
 namespace Nyx
 {

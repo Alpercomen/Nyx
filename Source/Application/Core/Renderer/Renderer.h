@@ -12,7 +12,7 @@
 #include <Application/Resource/Components/Material/Shader/Shader.h>
 #include <Application/Graphics/Lighting/LightingSystem.h>
 #include <Application/Graphics/Atmosphere/AtmosphereSystem.h>
-
+#include <Application/Graphics/OrbitTrailSystem/OrbitTrailSystem.h>
 
 namespace Nyx
 {
@@ -24,6 +24,7 @@ namespace Nyx
         Renderer()
         {
             AtmosphereSystem::Get().Initialize();
+            OrbitTrailSystem::Get().Initialize();
         }
 
         void DrawScene(Scene& scene)
@@ -35,11 +36,12 @@ namespace Nyx
             SkyboxSystem::Get().Draw(camera);
 
             if (m_gridEnabled)
-            {
                 m_grid.DrawGrid(camera, transform);
-            }
 
             LightingSystem::Get().GatherLights(transform);
+
+            
+            OrbitTrailSystem::Get().DrawTrail(camera, transform);
 
             for (size_t i = 0; i < scene.GetSceneObjectSize(); ++i)
             {

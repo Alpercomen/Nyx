@@ -36,5 +36,7 @@ namespace Physics
         Nyx::ComputeOrbitalParents(world);
         ComputeTimeStepParents(world.bodies);
         Nyx::SyncBodiesToECS(world, frameDt);
+
+        OrbitTrailSystem::Get().Update();
     }
 }

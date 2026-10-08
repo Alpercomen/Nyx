@@ -11,6 +11,10 @@ using StringView = std::string_view;
 template<typename T>
 using Queue = std::queue<T>;
 
+#include <deque>
+template<typename T>
+using Deque = std::deque<T>;
+
 #include <span>
 template<typename T>
 using Span = std::span<T>;

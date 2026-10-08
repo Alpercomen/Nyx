@@ -34,6 +34,8 @@ namespace ImGUIUtils
 
 	void DrawOrbitalParameters(EntityID& id);
 
+	void DrawOrbitTrail(EntityID& id);
+
 	void DrawInspector();
 
 	void DrawWindow(Engine* enginePtr, Scene* scenePtr);

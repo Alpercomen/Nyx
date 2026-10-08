@@ -6,6 +6,8 @@
 #include <Application/Core/Core.h>
 #include <Application/Core/Physics/Types.h>
 
+double CalculateOrbitalPeriod(double semiMajorAxis);
+
 double GravitationalForce(double mu, double r);
 
 double CalculateOrbitalVelocity(double otherMass, double r);
