@@ -1,4 +1,7 @@
 #pragma once
+#include <algorithm>
+#include <cmath>
+
 #include <Application/Core/Core.h>
 #include <Application/Services/Managers/ResourceManager/ResourceManager.h>
 #include <Application/Resource/Components/Camera/Camera.h>
@@ -18,161 +21,207 @@ namespace Nyx
 	{
 	public:
 		void Initialize()
-        {
-            m_shader = ResourceManager::GetShader(
-                "OrbitTrail",
-                R"(Nyx\Source\Application\Shaders\Trail\trail.vert)",
-                R"(Nyx\Source\Application\Shaders\Trail\trail.frag)"
-            );
+		{
+			m_shader = ResourceManager::GetShader(
+				"OrbitTrail",
+				R"(Nyx\Source\Application\Shaders\Trail\trail.vert)",
+				R"(Nyx\Source\Application\Shaders\Trail\trail.frag)"
+			);
 
-            glGenVertexArrays(1, &m_vao.m_data);
-            glGenBuffers(1, &m_vbo.m_data);
+			glGenVertexArrays(1, &m_vao.m_data);
+			glGenBuffers(1, &m_vbo.m_data);
 
-            glBindVertexArray(m_vao.m_data);
-            glBindBuffer(GL_ARRAY_BUFFER, m_vbo.m_data);
-            glBufferData(GL_ARRAY_BUFFER, 0, nullptr, GL_DYNAMIC_DRAW);
+			glBindVertexArray(m_vao.m_data);
+			glBindBuffer(GL_ARRAY_BUFFER, m_vbo.m_data);
+			glBufferData(GL_ARRAY_BUFFER, 0, nullptr, GL_DYNAMIC_DRAW);
 
-            // Position
-            glEnableVertexAttribArray(0);
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(TrailVertex), reinterpret_cast<void*>(offsetof(TrailVertex, position)));
+			// Position
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(TrailVertex), reinterpret_cast<void*>(offsetof(TrailVertex, position)));
 
-            // Color
-            glEnableVertexAttribArray(1);
-            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(TrailVertex), reinterpret_cast<void*>(offsetof(TrailVertex, color)));
+			// Color
+			glEnableVertexAttribArray(1);
+			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(TrailVertex), reinterpret_cast<void*>(offsetof(TrailVertex, color)));
 
-            // Alpha
-            glEnableVertexAttribArray(2);
-            glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(TrailVertex), reinterpret_cast<void*>(offsetof(TrailVertex, alpha)));
+			// Alpha
+			glEnableVertexAttribArray(2);
+			glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(TrailVertex), reinterpret_cast<void*>(offsetof(TrailVertex, alpha)));
 
-            glBindVertexArray(0);
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
-        }
+			glBindVertexArray(0);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+		}
 
+		// Derives each body's osculating (instantaneous Keplerian) orbit around its orbital parent
+		// from its current state vectors.
 		void Update()
-        {
-            for (EntityID entityId : ECS::Get().View<Transform, OrbitTrail, Rigidbody>())
-            {
-                Transform& transform = *ECS::Get().GetComponent<Transform>(entityId);
-                OrbitTrail& trail = *ECS::Get().GetComponent<OrbitTrail>(entityId);
-                Rigidbody& rigidbody = *ECS::Get().GetComponent<Rigidbody>(entityId);
+		{
+			auto& ecs = ECS::Get();
 
-                if (!trail.enabled)
-                    continue;
+			for (EntityID entityId : ecs.View<Transform, OrbitTrail, Rigidbody>())
+			{
+				Transform& transform = *ecs.GetComponent<Transform>(entityId);
+				OrbitTrail& trail = *ecs.GetComponent<OrbitTrail>(entityId);
+				Rigidbody& rigidbody = *ecs.GetComponent<Rigidbody>(entityId);
 
-                Position position = transform.position;
+				OrbitTrail::Orbit& orbit = trail.orbit;
+				orbit.valid = false;
 
-                if (rigidbody.orbitalParentID != NO_ID && ECS::Get().HasComponent<Transform>(rigidbody.orbitalParentID))
-                {
-                    Transform& parentTransform = *ECS::Get().GetComponent<Transform>(rigidbody.orbitalParentID);
-                    Position parentPosition = parentTransform.position;
+				if (!trail.enabled)
+					continue;
 
-                    position.SetWorld(position.GetWorld() - parentPosition.GetWorld());
-                }
+				const EntityID parentID = rigidbody.orbitalParentID;
 
-                // After all the precise calculations, reduce it for rendering.
-                position.SetWorld(position.GetWorld() / METERS_PER_UNIT);
+				if (parentID == NO_ID || parentID == entityId ||
+					!ecs.HasComponent<Transform>(parentID) || !ecs.HasComponent<Rigidbody>(parentID))
+					continue;
 
-                if (trail.points.empty())
-                {
-                    trail.points.push_back({ position, 0.0 });
-                    continue;
-                }
+				const Transform& parentTransform = *ecs.GetComponent<Transform>(parentID);
+				const Rigidbody& parentBody = *ecs.GetComponent<Rigidbody>(parentID);
 
-                const auto& newest = trail.points.front();
+				const float64 mu = G * parentBody.mass;
 
-                float64 distance = glm::length(position.GetWorld() - newest.position.GetWorld());
+				if (mu <= 0.0)
+					continue;
 
-                if (distance < trail.sampleDistance)
-                    continue;
+				// State relative to the parent (meters, meters/second).
+				const Math::Vec3d r = transform.position.GetWorld() - parentTransform.position.GetWorld();
+				const Math::Vec3d v = rigidbody.velocity.GetWorld() - parentBody.velocity.GetWorld();
 
-                trail.points.push_front({ position, 0.0 });
+				const float64 rLen = glm::length(r);
 
-                // Update distances.
-                float64 accumulated = 0.0;
+				if (rLen < 1e-6)
+					continue;
 
-                for (size_t i = 1; i < trail.points.size(); ++i)
-                {
-                    accumulated += glm::length(trail.points[i - 1].position.GetWorld() - trail.points[i].position.GetWorld());
+				// Specific angular momentum. Zero means a purely radial path, which has no ellipse.
+				const Math::Vec3d h = glm::cross(r, v);
+				const float64 hLen = glm::length(h);
 
-                    trail.points[i].distance = accumulated;
-                }
+				if (hLen < 1e-9)
+					continue;
 
-                // Remove old points.
-                while (!trail.points.empty() && trail.points.back().distance > trail.maxLength)
-                    trail.points.pop_back();
+				// Eccentricity vector: points from the parent to periapsis.
+				const Math::Vec3d eVec = glm::cross(v, h) / mu - r / rLen;
+				const float64 e = glm::length(eVec);
 
-                while (trail.points.size() > trail.maxPoints)
-                    trail.points.pop_back();
-            }
-        }
+				// Specific orbital energy. >= 0 means unbound (parabolic/hyperbolic), which is not drawn.
+				const float64 energy = 0.5 * glm::dot(v, v) - mu / rLen;
 
+				if (energy >= 0.0 || e >= 1.0)
+					continue;
+
+				const float64 a = -mu / (2.0 * energy);
+				const float64 b = a * std::sqrt(1.0 - e * e);
+
+				// Perifocal basis. For (near) circular orbits periapsis is undefined, so use the current position.
+				const Math::Vec3d W = h / hLen;
+				const Math::Vec3d P = (e > 1e-9) ? (eVec / e) : (r / rLen);
+				const Math::Vec3d Q = glm::cross(W, P);
+
+				// Where the body currently sits on the ellipse (eccentric anomaly).
+				const float64 x0 = glm::dot(r, P);
+				const float64 y0 = glm::dot(r, Q);
+				const float64 E0 = std::atan2(y0 / b, x0 / a + e);
+
+				orbit.valid = true;
+				orbit.parentID = parentID;
+				orbit.semiMajor = a;
+				orbit.semiMinor = b;
+				orbit.eccentricity = e;
+				orbit.currentAnomaly = E0;
+				orbit.P = P;
+				orbit.Q = Q;
+			}
+		}
+
+		// Draws every body's orbit as a line strip that starts at the body and runs backwards
+		// along its path, fading out with distance. Visually this reads as a trail of visited positions.
 		void DrawTrail(const Camera& camera, const Transform& cameraTransform)
-        {
-            m_vertices.clear();
-            m_shader.Use();
+		{
+			auto& ecs = ECS::Get();
 
-            const uint32 shaderID = m_shader.GetID();
+			m_vertices.clear();
 
-            const Math::Mat4f view = camera.GetViewMatrix();
-            const Math::Mat4f proj = camera.GetProjectionMatrix();
+			const Math::Vec3d cameraPosition = cameraTransform.position.GetWorld();
 
-            for (EntityID entityId : ECS::Get().View<Transform, OrbitTrail, Rigidbody>())
-            {
-                Transform& transform = *ECS::Get().GetComponent<Transform>(entityId);
-                OrbitTrail& trail = *ECS::Get().GetComponent<OrbitTrail>(entityId);
-                Rigidbody& rigidbody = *ECS::Get().GetComponent<Rigidbody>(entityId);
+			for (EntityID entityId : ecs.View<Transform, OrbitTrail>())
+			{
+				const OrbitTrail& trail = *ecs.GetComponent<OrbitTrail>(entityId);
+				const OrbitTrail::Orbit& orbit = trail.orbit;
 
-                if (!trail.enabled)
-                    continue;
+				if (!trail.enabled || !orbit.valid)
+					continue;
 
-                if (trail.points.size() < 2)
-                    continue;
+				const Transform& parentTransform = *ecs.GetComponent<Transform>(orbit.parentID);
 
-                for (size_t i = 0; i + 1 < trail.points.size(); ++i)
-                {
-                    auto p0 = trail.points[i];
-                    auto p1 = trail.points[i + 1];
+				// Parent position in render units, already camera-relative (double precision).
+				const Math::Vec3d parentOrigin = parentTransform.position.GetWorld() / METERS_PER_UNIT - cameraPosition;
 
-                    if (rigidbody.orbitalParentID != NO_ID && ECS::Get().HasComponent<Transform>(rigidbody.orbitalParentID))
-                    {
-                        Transform& parentTransform = *ECS::Get().GetComponent<Transform>(rigidbody.orbitalParentID);
-                        Position parentPosition = parentTransform.position;
+				const uint32 segments = std::max<uint32>(trail.segments, 2u);
+				const float64 sweep = 2.0 * glm::pi<float64>() * glm::clamp(static_cast<float64>(trail.trailFraction), 0.0, 1.0);
 
-                        parentPosition.SetWorld(parentPosition.GetWorld() / METERS_PER_UNIT);
+				// t = 0 is the body, t = 1 is the far end of the visible arc.
+				// Going backwards along the path means decreasing eccentric anomaly.
+				auto SamplePoint = [&](float64 t) -> Math::Vec3f
+					{
+						const float64 E = orbit.currentAnomaly - sweep * t;
 
-                        p0.position.SetWorld(p0.position.GetWorld() + parentPosition.GetWorld());
-                        p1.position.SetWorld(p1.position.GetWorld() + parentPosition.GetWorld());
-                    }
+						const float64 x = orbit.semiMajor * (std::cos(E) - orbit.eccentricity);
+						const float64 y = orbit.semiMinor * std::sin(E);
 
-                    Math::Vec3d relative0 = p0.position.GetWorld() - cameraTransform.position.GetWorld();
-                    Math::Vec3d relative1 = p1.position.GetWorld() - cameraTransform.position.GetWorld();
+						const Math::Vec3d local = (orbit.P * x + orbit.Q * y) / METERS_PER_UNIT;
 
-                    float alpha0 = std::pow(1.0f - static_cast<float>(p0.distance / trail.maxLength), trail.fadePower);
-                    float alpha1 = std::pow(1.0f - static_cast<float>(p1.distance / trail.maxLength), trail.fadePower);
+						// Only cast to float after everything large has cancelled out.
+						return Math::Vec3f(parentOrigin + local);
+					};
 
-                    m_vertices.push_back(TrailVertex{ Math::Vec3f(relative0), trail.color, alpha0 * trail.opacity });
-                    m_vertices.push_back(TrailVertex{ Math::Vec3f(relative1), trail.color, alpha1 * trail.opacity });
-                }
+				auto SampleAlpha = [&](float64 t) -> float32
+					{
+						const float32 fade = std::pow(1.0f - static_cast<float32>(t), trail.fadePower);
+						return (trail.minAlpha + (1.0f - trail.minAlpha) * fade) * trail.opacity;
+					};
 
-                if (m_vertices.empty())
-                    return;
+				Math::Vec3f prevPosition = SamplePoint(0.0);
+				float32 prevAlpha = SampleAlpha(0.0);
 
-                glBindBuffer(GL_ARRAY_BUFFER, m_vbo.m_data);
-                glBufferData(GL_ARRAY_BUFFER, m_vertices.size() * sizeof(TrailVertex), m_vertices.data(), GL_DYNAMIC_DRAW);
+				for (uint32 i = 1; i <= segments; ++i)
+				{
+					const float64 t = static_cast<float64>(i) / static_cast<float64>(segments);
 
-                glUniformMatrix4fv(glGetUniformLocation(shaderID, "uView"), 1, GL_FALSE, glm::value_ptr(view));
-                glUniformMatrix4fv(glGetUniformLocation(shaderID, "uProj"), 1, GL_FALSE, glm::value_ptr(proj));
+					const Math::Vec3f position = SamplePoint(t);
+					const float32 alpha = SampleAlpha(t);
 
-                glBindVertexArray(m_vao.m_data);
+					m_vertices.push_back(TrailVertex{ prevPosition, trail.color, prevAlpha });
+					m_vertices.push_back(TrailVertex{ position, trail.color, alpha });
 
-                ImmediatePipeline::Get().Begin();
-                ImmediatePipeline::Get().UseTrail();
-                glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(m_vertices.size()));
-                ImmediatePipeline::Get().End();
+					prevPosition = position;
+					prevAlpha = alpha;
+				}
+			}
 
-                glBindVertexArray(0);
-            }
-        }
+			if (m_vertices.empty())
+				return;
+
+			m_shader.Use();
+
+			const uint32 shaderID = m_shader.GetID();
+
+			const Math::Mat4f view = camera.GetViewMatrix();
+			const Math::Mat4f proj = camera.GetProjectionMatrix();
+
+			glUniformMatrix4fv(glGetUniformLocation(shaderID, "uView"), 1, GL_FALSE, glm::value_ptr(view));
+			glUniformMatrix4fv(glGetUniformLocation(shaderID, "uProj"), 1, GL_FALSE, glm::value_ptr(proj));
+
+			glBindVertexArray(m_vao.m_data);
+			glBindBuffer(GL_ARRAY_BUFFER, m_vbo.m_data);
+			glBufferData(GL_ARRAY_BUFFER, m_vertices.size() * sizeof(TrailVertex), m_vertices.data(), GL_DYNAMIC_DRAW);
+
+			ImmediatePipeline::Get().Begin();
+			ImmediatePipeline::Get().UseTrail();
+			glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(m_vertices.size()));
+			ImmediatePipeline::Get().End();
+
+			glBindVertexArray(0);
+		}
 
 	private:
 		Shader m_shader;

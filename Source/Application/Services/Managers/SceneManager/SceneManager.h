@@ -414,26 +414,26 @@ namespace Nyx
 			issLock.lockedEntity = earthID;
 			ECS::Get().AddComponent(issID, issLock);
 
-			float64 mercuryOrbitalPeriod = CalculateOrbitalPeriod(MERCURY_SEMI_MAJOR_AXIS) / METERS_PER_UNIT * 10;
-			float64 venusOrbitalPeriod = CalculateOrbitalPeriod(VENUS_SEMI_MAJOR_AXIS) / METERS_PER_UNIT * 10;
-			float64 earthOrbitalPeriod = CalculateOrbitalPeriod(EARTH_SEMI_MAJOR_AXIS) / METERS_PER_UNIT * 10;
-			float64 moonOrbitalPeriod = CalculateOrbitalPeriod(MOON_SEMI_MAJOR_AXIS) / METERS_PER_UNIT * 10;
-			float64 marsOrbitalPeriod = CalculateOrbitalPeriod(MARS_SEMI_MAJOR_AXIS) / METERS_PER_UNIT * 10;
-			float64 jupiterOrbitalPeriod = CalculateOrbitalPeriod(JUPITER_SEMI_MAJOR_AXIS) / METERS_PER_UNIT * 10;
-			float64 saturnOrbitalPeriod = CalculateOrbitalPeriod(SATURN_SEMI_MAJOR_AXIS) / METERS_PER_UNIT * 10;
-			float64 uranusOrbitalPeriod = CalculateOrbitalPeriod(URANUS_SEMI_MAJOR_AXIS) / METERS_PER_UNIT * 10;
-			float64 neptuneOrbitalPeriod = CalculateOrbitalPeriod(NEPTUNE_SEMI_MAJOR_AXIS) / METERS_PER_UNIT * 10;
+			float32 mercuryOrbitalPeriod = CalculateOrbitalPeriod(MERCURY_SEMI_MAJOR_AXIS) / METERS_PER_UNIT * 10;
+			float32 venusOrbitalPeriod = CalculateOrbitalPeriod(VENUS_SEMI_MAJOR_AXIS) / METERS_PER_UNIT * 10;
+			float32 earthOrbitalPeriod = CalculateOrbitalPeriod(EARTH_SEMI_MAJOR_AXIS) / METERS_PER_UNIT * 10;
+			float32 moonOrbitalPeriod = CalculateOrbitalPeriod(MOON_SEMI_MAJOR_AXIS) / METERS_PER_UNIT * 10;
+			float32 marsOrbitalPeriod = CalculateOrbitalPeriod(MARS_SEMI_MAJOR_AXIS) / METERS_PER_UNIT * 10;
+			float32 jupiterOrbitalPeriod = CalculateOrbitalPeriod(JUPITER_SEMI_MAJOR_AXIS) / METERS_PER_UNIT * 10;
+			float32 saturnOrbitalPeriod = CalculateOrbitalPeriod(SATURN_SEMI_MAJOR_AXIS) / METERS_PER_UNIT * 10;
+			float32 uranusOrbitalPeriod = CalculateOrbitalPeriod(URANUS_SEMI_MAJOR_AXIS) / METERS_PER_UNIT * 10;
+			float32 neptuneOrbitalPeriod = CalculateOrbitalPeriod(NEPTUNE_SEMI_MAJOR_AXIS) / METERS_PER_UNIT * 10;
 
-			ECS::Get().AddComponent(mercuryID, OrbitTrail{true, mercuryOrbitalPeriod });
-			ECS::Get().AddComponent(venusID, OrbitTrail{true, venusOrbitalPeriod });
-			ECS::Get().AddComponent(earthID, OrbitTrail{true, earthOrbitalPeriod });
-			ECS::Get().AddComponent(moonID, OrbitTrail{true, moonOrbitalPeriod });
-			ECS::Get().AddComponent(marsID, OrbitTrail{true, marsOrbitalPeriod});
-			ECS::Get().AddComponent(jupiterID, OrbitTrail{true, jupiterOrbitalPeriod});
-			ECS::Get().AddComponent(saturnID, OrbitTrail{true, saturnOrbitalPeriod});
-			ECS::Get().AddComponent(uranusID, OrbitTrail{true, uranusOrbitalPeriod});
-			ECS::Get().AddComponent(neptuneID, OrbitTrail{true, neptuneOrbitalPeriod});
-			ECS::Get().AddComponent(issID, OrbitTrail{true, 0.041, 1.0e-40, 2048, 1.0f});
+			ECS::Get().AddComponent(mercuryID, OrbitTrail{});
+			ECS::Get().AddComponent(venusID, OrbitTrail{});
+			ECS::Get().AddComponent(earthID, OrbitTrail{});
+			ECS::Get().AddComponent(moonID, OrbitTrail{});
+			ECS::Get().AddComponent(marsID, OrbitTrail{});
+			ECS::Get().AddComponent(jupiterID, OrbitTrail{});
+			ECS::Get().AddComponent(saturnID, OrbitTrail{});
+			ECS::Get().AddComponent(uranusID, OrbitTrail{});
+			ECS::Get().AddComponent(neptuneID, OrbitTrail{});
+			ECS::Get().AddComponent(issID, OrbitTrail{});
 
 			InitializeOrbitFromApsides(mercuryID, sunID, MERCURY_PERIHELION, MERCURY_APHELION, MERCURY_ORBITAL_INCLINATION, MERCURY_LONGITUDE_ASCENDING_NODE, MERCURY_ARGUMENT_OF_PERIAPSIS);
 			InitializeOrbitFromApsides(venusID, sunID, VENUS_PERIHELION, VENUS_APHELION, VENUS_ORBITAL_INCLINATION, VENUS_LONGITUDE_ASCENDING_NODE, VENUS_ARGUMENT_OF_PERIAPSIS);
