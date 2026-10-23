@@ -35,11 +35,17 @@ namespace Nyx
 
     struct OrbitalElements
     {
+        bool8 valid = false;
+
 		float64 semiMajorAxis = 0.0;
+        float64 semiMinorAxis = 0.0;
 		float64 eccentricity = 0.0;
 		float64 inclination = 0.0;
 		float64 longitudeAscendingNode = 0.0;
 		float64 argumentOfPeriapsis = 0.0;
 		float64 trueAnomaly = 0.0;
+
+        Math::Vec3d P = Math::Vec3d(1.0, 0.0, 0.0);
+        Math::Vec3d Q = Math::Vec3d(0.0, 0.0, 1.0);
     };
 }

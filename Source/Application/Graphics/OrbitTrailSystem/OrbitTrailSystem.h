@@ -7,6 +7,7 @@
 #include <Application/Resource/Components/Camera/Camera.h>
 #include <Application/Resource/Components/Components.h>
 #include <Application/Resource/Components/Material/Material.h>
+#include <Application/Core/Physics/Types.h>
 
 namespace Nyx
 {
@@ -63,7 +64,7 @@ namespace Nyx
 				OrbitTrail& trail = *ecs.GetComponent<OrbitTrail>(entityId);
 				Rigidbody& rigidbody = *ecs.GetComponent<Rigidbody>(entityId);
 
-				OrbitTrail::Orbit& orbit = trail.orbit;
+				OrbitalElements& orbit = trail.orbit;
 				orbit.valid = false;
 
 				if (!trail.enabled)
@@ -123,11 +124,10 @@ namespace Nyx
 				const float64 E0 = std::atan2(y0 / b, x0 / a + e);
 
 				orbit.valid = true;
-				orbit.parentID = parentID;
-				orbit.semiMajor = a;
-				orbit.semiMinor = b;
+				orbit.semiMajorAxis = a;
+				orbit.semiMinorAxis = b;
 				orbit.eccentricity = e;
-				orbit.currentAnomaly = E0;
+				orbit.trueAnomaly = E0;
 				orbit.P = P;
 				orbit.Q = Q;
 			}
@@ -143,15 +143,16 @@ namespace Nyx
 
 			const Math::Vec3d cameraPosition = cameraTransform.position.GetWorld();
 
-			for (EntityID entityId : ecs.View<Transform, OrbitTrail>())
+			for (EntityID entityId : ecs.View<Transform, OrbitTrail, Rigidbody>())
 			{
 				const OrbitTrail& trail = *ecs.GetComponent<OrbitTrail>(entityId);
-				const OrbitTrail::Orbit& orbit = trail.orbit;
+				const OrbitalElements& orbit = trail.orbit;
+				const Rigidbody& rigidbody = *ecs.GetComponent<Rigidbody>(entityId);
 
 				if (!trail.enabled || !orbit.valid)
 					continue;
 
-				const Transform& parentTransform = *ecs.GetComponent<Transform>(orbit.parentID);
+				const Transform& parentTransform = *ecs.GetComponent<Transform>(rigidbody.orbitalParentID);
 
 				// Parent position in render units, already camera-relative (double precision).
 				const Math::Vec3d parentOrigin = parentTransform.position.GetWorld() / METERS_PER_UNIT - cameraPosition;
@@ -163,10 +164,10 @@ namespace Nyx
 				// Going backwards along the path means decreasing eccentric anomaly.
 				auto SamplePoint = [&](float64 t) -> Math::Vec3f
 					{
-						const float64 E = orbit.currentAnomaly - sweep * t;
+						const float64 E = orbit.trueAnomaly - sweep * t;
 
-						const float64 x = orbit.semiMajor * (std::cos(E) - orbit.eccentricity);
-						const float64 y = orbit.semiMinor * std::sin(E);
+						const float64 x = orbit.semiMajorAxis * (std::cos(E) - orbit.eccentricity);
+						const float64 y = orbit.semiMinorAxis * std::sin(E);
 
 						const Math::Vec3d local = (orbit.P * x + orbit.Q * y) / METERS_PER_UNIT;
 
