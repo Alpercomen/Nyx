@@ -156,20 +156,60 @@ void ImGUIUtils::DrawTransform(EntityID& id)
         const auto& rot = transform.rotation.GetEulerAngles();
         const auto& sca = transform.scale.get();
 
+        static double posVec[3];
+
+        posVec[0] = pos.x;
+        posVec[1] = pos.y;
+        posVec[2] = pos.z;
+
+        static double rotVec[3];
+
+        rotVec[0] = rot.x;
+        rotVec[1] = rot.y;
+        rotVec[2] = rot.z;
+
+        static double scaVec[3];
+
+        scaVec[0] = sca.x;
+        scaVec[1] = sca.y;
+        scaVec[2] = sca.z;
+
         bool hasCamera = ECS::Get().HasComponent<Camera>(id);
 
-        ImGui::Text("Pos: (%.2f, %.2f, %.2f)", pos.x, pos.y, pos.z);
         if (hasCamera)
         {
             const auto& camera = *ECS::Get().GetComponent<Camera>(id);
+            ImGui::Text("Position: (%.2f, %.2f, %.2f)", pos.x, pos.y, pos.z);
             ImGui::Text("Yaw: %.2f", camera.GetYaw());
             ImGui::Text("Pitch: %.2f", camera.GetPitch());
         }
         else
         {
-            ImGui::Text("Rot: (%.2f, %.2f, %.2f)", glm::degrees(rot.x), glm::degrees(rot.y), glm::degrees(rot.z));
-            ImGui::Text("Sca: (%.2f, %.2f, %.2f)", sca.x, sca.y, sca.z);
+            ImGui::PushID(&pos);
+            ImGui::Text("Position:");
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(-1.0f);
+            ImGui::DragScalarN("##PositionXYZ", ImGuiDataType_Double, posVec, 3, 100000000.0, NULL, NULL, "%.3f");
+            ImGui::PopID();
+
+            ImGui::PushID(&rot);
+            ImGui::Text("Rotation:");
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(-1.0f);
+            ImGui::DragScalarN("##RotationXYZ", ImGuiDataType_Double, rotVec, 3, 0.1, NULL, NULL, "%.10f");
+            ImGui::PopID();
+
+            ImGui::PushID(&sca);
+            ImGui::Text("Scale:");
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(-1.0f);
+            ImGui::DragScalarN("##ScaleXYZ", ImGuiDataType_Double, scaVec, 3, 10000.0, NULL, NULL, "%.3f");
+            ImGui::PopID();
         }
+
+        transform.position.SetWorld(Math::Vec3d{ posVec[0], posVec[1], posVec[2] });
+        transform.rotation.SetFromEuler(rotVec[0], rotVec[1], rotVec[2]);
+        transform.scale.set(scaVec[0], scaVec[1], scaVec[2]);
     }
 }
 
@@ -178,15 +218,57 @@ void ImGUIUtils::DrawRigidbody(EntityID& id)
     if (ECS::Get().HasComponent<Rigidbody>(id))
     {
         ImGui::Separator();
-        const auto& rigidbody = *ECS::Get().GetComponent<Rigidbody>(id);
+        auto& rigidbody = *ECS::Get().GetComponent<Rigidbody>(id);
 
-        const auto& velVec = rigidbody.velocity.GetWorld();
-        const auto& accVec = rigidbody.acceleration.GetWorld();
+        const auto& vel = rigidbody.velocity.GetWorld();
+        const auto& acc = rigidbody.acceleration.GetWorld();
         const auto& angularVel = rigidbody.angularVelocity.GetWorld();
 
-        ImGui::Text("Vel: %.2f km/s", glm::length(velVec));
-        ImGui::Text("Acc: %.2f km/s2", glm::length(accVec));
-        ImGui::Text("Angular Vel: %.10f km/s", glm::length(angularVel));
+        static double velVec[3];
+
+        velVec[0] = vel.x;
+        velVec[1] = vel.y;
+        velVec[2] = vel.z;
+
+        static double accVec[3];
+
+        accVec[0] = acc.x;
+        accVec[1] = acc.y;
+        accVec[2] = acc.z;
+
+        static double angVec[3];
+
+        angVec[0] = angularVel.x;
+        angVec[1] = angularVel.y;
+        angVec[2] = angularVel.z;
+
+        ImGui::PushID(&vel);
+        ImGui::Text("Velocity:");
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth(-1.0f);
+        ImGui::DragScalarN("##VelocityXYZ", ImGuiDataType_Double, velVec, 3, 100.0, NULL, NULL, "%.10f");
+        ImGui::Text("%.2f km/s", glm::length(vel));
+        ImGui::PopID();
+
+        ImGui::PushID(&acc);
+        ImGui::Text("Acceleration:");
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth(-1.0f);
+        ImGui::DragScalarN("##AccelerationXYZ", ImGuiDataType_Double, accVec, 3, 1000.0, NULL, NULL, "%.10f");
+        ImGui::Text("%.2f km/s2", glm::length(acc));
+        ImGui::PopID();
+
+        ImGui::PushID(&angularVel);
+        ImGui::Text("Angular Velocity:");
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth(-1.0f);
+        ImGui::DragScalarN("##AngularVelocity", ImGuiDataType_Double, angVec, 3, 0.000001, NULL, NULL, "%.10f");
+        ImGui::Text("%.10f km/s", glm::length(angularVel));
+        ImGui::PopID();
+
+        rigidbody.velocity.SetWorld(Math::Vec3d{ velVec[0], velVec[1], velVec[2] });
+        rigidbody.acceleration.SetWorld(Math::Vec3d{ accVec[0], accVec[1], accVec[2] });
+        rigidbody.angularVelocity.SetWorld(Math::Vec3d{ angVec[0], angVec[1], angVec[2] });
     }
 }
 
