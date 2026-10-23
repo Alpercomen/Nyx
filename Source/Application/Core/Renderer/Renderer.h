@@ -40,15 +40,13 @@ namespace Nyx
 
             LightingSystem::Get().GatherLights(transform);
 
-            
-            OrbitTrailSystem::Get().DrawTrail(camera, transform);
-
             for (size_t i = 0; i < scene.GetSceneObjectSize(); ++i)
             {
                 const auto& object = scene.GetSceneObject(i);
                 object->Draw(camera, transform);
             }
 
+            OrbitTrailSystem::Get().DrawTrail(camera, transform);
             AtmosphereSystem::Get().DrawAtmosphere(camera, transform);
         }
 

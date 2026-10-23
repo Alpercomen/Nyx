@@ -126,8 +126,11 @@ namespace Nyx
 			glEnable(GL_DEPTH_TEST);
 			glEnable(GL_BLEND);
 
+			glBlendEquation(GL_MAX);
+			glBlendEquation(GL_FUNC_ADD);
+
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			glDepthMask(GL_TRUE);
+			glDepthMask(GL_FALSE);
 		}
 
 	private:
