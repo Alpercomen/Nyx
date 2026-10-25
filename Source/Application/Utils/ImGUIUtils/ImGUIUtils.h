@@ -7,6 +7,8 @@
 #include <GLFW/glfw3.h>
 
 #include <imgui.h>
+#include <imgui_internal.h>
+
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
 
@@ -35,6 +37,10 @@ namespace ImGUIUtils
 	void DrawOrbitalParameters(EntityID& id);
 
 	void DrawOrbitTrail(EntityID& id);
+
+	void DragVec3WithMagnitude(const char* label, const char* id, float64* v, float32 speed, const char* unit, float64 magnitude, const char* fmt = "%.10f");
+
+	void DragVec3Colored(const char* label, const char* id, float64* v, float32 speed, const char* unit, float64 magnitude, const char* fmt = "%.10f");
 
 	void DrawInspector();
 

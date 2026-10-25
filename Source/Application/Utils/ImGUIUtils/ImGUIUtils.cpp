@@ -150,6 +150,8 @@ void ImGUIUtils::DrawTransform(EntityID& id)
 {
     if (ECS::Get().HasComponent<Transform>(id))
     {
+        ImGui::Separator();
+        ImGui::Text("[Transform]");
         auto& transform = *ECS::Get().GetComponent<Transform>(id);
 
         const auto& pos = transform.position.GetWorld();
@@ -185,29 +187,12 @@ void ImGUIUtils::DrawTransform(EntityID& id)
         }
         else
         {
-            ImGui::PushID(&pos);
-            ImGui::Text("Position:");
-            ImGui::SameLine();
-            ImGui::SetNextItemWidth(-1.0f);
-            ImGui::DragScalarN("##PositionXYZ", ImGuiDataType_Double, posVec, 3, 100000000.0, NULL, NULL, "%.3f");
-            ImGui::PopID();
-
-            ImGui::PushID(&rot);
-            ImGui::Text("Rotation:");
-            ImGui::SameLine();
-            ImGui::SetNextItemWidth(-1.0f);
-            ImGui::DragScalarN("##RotationXYZ", ImGuiDataType_Double, rotVec, 3, 0.1, NULL, NULL, "%.10f");
-            ImGui::PopID();
-
-            ImGui::PushID(&sca);
-            ImGui::Text("Scale:");
-            ImGui::SameLine();
-            ImGui::SetNextItemWidth(-1.0f);
-            ImGui::DragScalarN("##ScaleXYZ", ImGuiDataType_Double, scaVec, 3, 10000.0, NULL, NULL, "%.3f");
-            ImGui::PopID();
+            DragVec3Colored("Position:", "pos", posVec, 10000000.0f, "km", glm::length(pos));
+            DragVec3Colored("Rotation:", "rot", rotVec, 10.0f, "rad", glm::length(rot));
+            DragVec3Colored("Scale:", "sca", scaVec, 10000.0f, "km", glm::length(sca), "%.10f");
         }
 
-        transform.position.SetWorld(Math::Vec3d{ posVec[0], posVec[1], posVec[2] });
+        transform.position.SetWorld(Math::Vec3d{ posVec[0], posVec[1], posVec[2]});
         transform.rotation.SetFromEuler(rotVec[0], rotVec[1], rotVec[2]);
         transform.scale.set(scaVec[0], scaVec[1], scaVec[2]);
     }
@@ -218,6 +203,7 @@ void ImGUIUtils::DrawRigidbody(EntityID& id)
     if (ECS::Get().HasComponent<Rigidbody>(id))
     {
         ImGui::Separator();
+        ImGui::Text("[Rigidbody]");
         auto& rigidbody = *ECS::Get().GetComponent<Rigidbody>(id);
 
         const auto& vel = rigidbody.velocity.GetWorld();
@@ -242,29 +228,9 @@ void ImGUIUtils::DrawRigidbody(EntityID& id)
         angVec[1] = angularVel.y;
         angVec[2] = angularVel.z;
 
-        ImGui::PushID(&vel);
-        ImGui::Text("Velocity:");
-        ImGui::SameLine();
-        ImGui::SetNextItemWidth(-1.0f);
-        ImGui::DragScalarN("##VelocityXYZ", ImGuiDataType_Double, velVec, 3, 100.0, NULL, NULL, "%.10f");
-        ImGui::Text("%.2f km/s", glm::length(vel));
-        ImGui::PopID();
-
-        ImGui::PushID(&acc);
-        ImGui::Text("Acceleration:");
-        ImGui::SameLine();
-        ImGui::SetNextItemWidth(-1.0f);
-        ImGui::DragScalarN("##AccelerationXYZ", ImGuiDataType_Double, accVec, 3, 1000.0, NULL, NULL, "%.10f");
-        ImGui::Text("%.2f km/s2", glm::length(acc));
-        ImGui::PopID();
-
-        ImGui::PushID(&angularVel);
-        ImGui::Text("Angular Velocity:");
-        ImGui::SameLine();
-        ImGui::SetNextItemWidth(-1.0f);
-        ImGui::DragScalarN("##AngularVelocity", ImGuiDataType_Double, angVec, 3, 0.000001, NULL, NULL, "%.10f");
-        ImGui::Text("%.10f km/s", glm::length(angularVel));
-        ImGui::PopID();
+        DragVec3WithMagnitude("Velocity:", "vel", velVec, 1000.0f, "km/s", glm::length(vel));
+        DragVec3WithMagnitude("Acceleration:", "acc", accVec, 100.0f, "km/s2", glm::length(acc));
+        DragVec3WithMagnitude("Angular Velocity:", "angvel", angVec, 0.000001f, "km/s", glm::length(angularVel), "%.10f");
 
         rigidbody.velocity.SetWorld(Math::Vec3d{ velVec[0], velVec[1], velVec[2] });
         rigidbody.acceleration.SetWorld(Math::Vec3d{ accVec[0], accVec[1], accVec[2] });
@@ -277,6 +243,7 @@ void ImGUIUtils::DrawAtmosphereComponent(EntityID& id)
     if (ECS::Get().HasComponent<AtmosphereComponent>(id))
     {
         ImGui::Separator();
+        ImGui::Text("[Atmosphere]");
         auto& atmosphere = *ECS::Get().GetComponent<AtmosphereComponent>(id);
 
         ImGui::PushID(&atmosphere);
@@ -309,6 +276,7 @@ void ImGUIUtils::DrawOrbitalParameters(EntityID& id)
     if (ECS::Get().HasComponent<Rigidbody>(id) && ECS::Get().HasComponent<Transform>(id))
     {
         ImGui::Separator();
+        ImGui::Text("[Orbital Parameters]");
         const auto& rigidbody = *ECS::Get().GetComponent<Rigidbody>(id);
         const auto& transform = *ECS::Get().GetComponent<Transform>(id);
 
@@ -344,9 +312,10 @@ void ImGUIUtils::DrawOrbitTrail(EntityID& id)
 {
     if (ECS::Get().HasComponent<OrbitTrail>(id))
     {
-        OrbitTrail& trail = *ECS::Get().GetComponent<OrbitTrail>(id);
-
         ImGui::Separator();
+        ImGui::Text("[Orbit]");
+
+        OrbitTrail& trail = *ECS::Get().GetComponent<OrbitTrail>(id);
         ImGui::Checkbox("Show Orbit", &trail.enabled);
 
         ImGui::DragFloat("Fade Power", &trail.fadePower);
@@ -368,6 +337,68 @@ void ImGUIUtils::DrawOrbitTrail(EntityID& id)
 
         ImGui::PopID();
     }
+}
+
+void ImGUIUtils::DragVec3WithMagnitude(const char* label, const char* id, float64* v, float32 speed, const char* unit, float64 magnitude, const char* fmt)
+{
+    ImGui::PushID(id);
+    ImGui::TextUnformatted(label);
+    ImGui::SameLine();
+
+    char buf[64];
+    snprintf(buf, sizeof(buf), "%.2f %s", magnitude, unit);
+    float reserve = ImGui::CalcTextSize(buf).x + ImGui::GetStyle().ItemSpacing.x;
+
+    ImGui::SetNextItemWidth(-reserve);
+    ImGui::DragScalarN("##v", ImGuiDataType_Double, v, 3, speed, NULL, NULL, fmt);
+    ImGui::SameLine();
+    ImGui::TextUnformatted(buf);
+    ImGui::PopID();
+}
+
+void ImGUIUtils::DragVec3Colored(const char* label, const char* id, float64* v, float32 speed, const char* unit, float64 magnitude, const char* fmt)
+{
+    static const ImU32 axisColors[3] = {
+        IM_COL32(224, 82, 82, 255),   // X - red
+        IM_COL32(94, 190, 94, 255),   // Y - green
+        IM_COL32(82, 136, 224, 255),  // Z - blue
+    };
+    const float barWidth = 3.0f;
+
+    ImGui::PushID(id);
+    ImGui::TextUnformatted(label);
+    ImGui::SameLine();
+
+    char buf[64];
+    snprintf(buf, sizeof(buf), "%.2f %s", magnitude, unit);
+    float reserve = ImGui::CalcTextSize(buf).x + ImGui::GetStyle().ItemSpacing.x;
+    ImGui::SetNextItemWidth(-reserve);
+
+    ImGui::BeginGroup();
+    ImGui::PushMultiItemsWidths(3, ImGui::CalcItemWidth());
+
+    ImDrawList* dl = ImGui::GetWindowDrawList();
+    for (int i = 0; i < 3; i++)
+    {
+        ImGui::PushID(i);
+        if (i > 0)
+            ImGui::SameLine(0, ImGui::GetStyle().ItemInnerSpacing.x);
+
+        ImGui::DragScalar("##c", ImGuiDataType_Double, &v[i], speed, NULL, NULL, fmt);
+
+        ImVec2 mn = ImGui::GetItemRectMin();
+        ImVec2 mx = ImGui::GetItemRectMax();
+        float rounding = ImGui::GetStyle().FrameRounding;
+        dl->AddRectFilled(mn, ImVec2(mn.x + barWidth, mx.y), axisColors[i], rounding, ImDrawFlags_RoundCornersLeft);
+
+        ImGui::PopID();
+        ImGui::PopItemWidth();
+    }
+    ImGui::EndGroup();
+
+    ImGui::SameLine();
+    ImGui::TextUnformatted(buf);
+    ImGui::PopID();
 }
 
 void ImGUIUtils::DrawInspector()
