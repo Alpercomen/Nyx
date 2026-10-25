@@ -21,12 +21,12 @@ namespace Nyx {
         }
 
         // Set new scale
-        void set(double x, double y, double z) {
+        void Set(double x, double y, double z) {
             m_scale = Math::Vec3d(x, y, z);
         }
 
         // Set uniform scale
-        void setUniform(double value) {
+        void SetUniform(double value) {
             m_scale = Math::Vec3d(value);
         }
 
@@ -36,7 +36,7 @@ namespace Nyx {
         }
 
         // Return current scale vector
-        Math::Vec3d get() const {
+        Math::Vec3d Get() const {
             return m_scale;
         }
 

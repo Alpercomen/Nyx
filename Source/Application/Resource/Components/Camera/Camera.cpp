@@ -155,7 +155,7 @@ void Camera::LockCamera(Camera& camera, const EntityID& id) const
         const Position& pos = targetTransform.position / METERS_PER_UNIT;
         Math::Vec3d targetPos = pos.GetWorld();
 
-        const float64 size = glm::length(targetTransform.scale.get()) / METERS_PER_UNIT;
+        const float64 size = glm::length(targetTransform.scale.Get()) / METERS_PER_UNIT;
         const float64 focusRadius = CameraService::Get().focusRadius / METERS_PER_UNIT;
 
         CameraService::Get().minimumDistance = size * CAMERA_MINIMUM_ZOOM_MULTIPLIER;

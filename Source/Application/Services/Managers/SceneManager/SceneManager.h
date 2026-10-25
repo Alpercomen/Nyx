@@ -414,16 +414,6 @@ namespace Nyx
 			issLock.lockedEntity = earthID;
 			ECS::Get().AddComponent(issID, issLock);
 
-			float32 mercuryOrbitalPeriod = CalculateOrbitalPeriod(MERCURY_SEMI_MAJOR_AXIS) / METERS_PER_UNIT * 10;
-			float32 venusOrbitalPeriod = CalculateOrbitalPeriod(VENUS_SEMI_MAJOR_AXIS) / METERS_PER_UNIT * 10;
-			float32 earthOrbitalPeriod = CalculateOrbitalPeriod(EARTH_SEMI_MAJOR_AXIS) / METERS_PER_UNIT * 10;
-			float32 moonOrbitalPeriod = CalculateOrbitalPeriod(MOON_SEMI_MAJOR_AXIS) / METERS_PER_UNIT * 10;
-			float32 marsOrbitalPeriod = CalculateOrbitalPeriod(MARS_SEMI_MAJOR_AXIS) / METERS_PER_UNIT * 10;
-			float32 jupiterOrbitalPeriod = CalculateOrbitalPeriod(JUPITER_SEMI_MAJOR_AXIS) / METERS_PER_UNIT * 10;
-			float32 saturnOrbitalPeriod = CalculateOrbitalPeriod(SATURN_SEMI_MAJOR_AXIS) / METERS_PER_UNIT * 10;
-			float32 uranusOrbitalPeriod = CalculateOrbitalPeriod(URANUS_SEMI_MAJOR_AXIS) / METERS_PER_UNIT * 10;
-			float32 neptuneOrbitalPeriod = CalculateOrbitalPeriod(NEPTUNE_SEMI_MAJOR_AXIS) / METERS_PER_UNIT * 10;
-
 			ECS::Get().AddComponent(mercuryID, OrbitTrail{});
 			ECS::Get().AddComponent(venusID, OrbitTrail{});
 			ECS::Get().AddComponent(earthID, OrbitTrail{});
@@ -441,7 +431,7 @@ namespace Nyx
 			InitializeOrbitFromApsides(moonID, earthID, MOON_PERIAPSIS_DISTANCE, MOON_APOAPSIS_DISTANCE, MOON_ORBITAL_INCLINATION, MOON_LONGITUDE_ASCENDING_NODE, MOON_ARGUMENT_OF_PERIAPSIS);
 			InitializeOrbitFromApsides(issID, earthID, ISS_PERIGEE_DISTANCE, ISS_APOGEE_DISTANCE, ISS_INCLINATION);
 			InitializeOrbitFromApsides(marsID, sunID, MARS_PERIHELION, MARS_APHELION, MARS_ORBITAL_INCLINATION, MARS_LONGITUDE_ASCENDING_NODE, MARS_ARGUMENT_OF_PERIAPSIS);
-			InitializeOrbitFromApsides(jupiterID, sunID, JUPITER_PERIHElION, JUPITER_APHELION, JUPITER_ORBITAL_INCLINATION, JUPITER_LONGITUDE_ASCENDING_NODE, JUPITER_ARGUMENT_OF_PERIAPSIS);
+			InitializeOrbitFromApsides(jupiterID, sunID, JUPITER_PERIHELION, JUPITER_APHELION, JUPITER_ORBITAL_INCLINATION, JUPITER_LONGITUDE_ASCENDING_NODE, JUPITER_ARGUMENT_OF_PERIAPSIS);
 			InitializeOrbitFromApsides(saturnID, sunID, SATURN_PERIHELION, SATURN_APHELION, SATURN_ORBITAL_INCLINATION, SATURN_LONGITUDE_ASCENDING_NODE, SATURN_ARGUMENT_OF_PERIAPSIS);
 			InitializeOrbitFromApsides(uranusID, sunID, URANUS_PERIHELION, URANUS_APHELION, URANUS_ORBITAL_INCLINATION, URANUS_LONGITUDE_ASCENDING_NODE, URANUS_ARGUMENT_OF_PERIAPSIS);
 			InitializeOrbitFromApsides(neptuneID, sunID, NEPTUNE_PERIHELION, NEPTUNE_APHELION, NEPTUNE_ORBITAL_INCLINATION, NEPTUNE_LONGITUDE_ASCENDING_NODE, NEPTUNE_ARGUMENT_OF_PERIAPSIS);

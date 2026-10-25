@@ -230,7 +230,7 @@
 #define JUPITER_AXIAL_TILT                 3.13
 #define JUPITER_INCLINATION                JUPITER_AXIAL_TILT
 #define JUPITER_MASS                   1.898e27
-#define JUPITER_PERIHElION             740.6e9
+#define JUPITER_PERIHELION             740.6e9
 #define JUPITER_APHELION              816.4e9
 #define JUPITER_ANGULAR_VELOCITY_RADIANS 1.7585e-4
 

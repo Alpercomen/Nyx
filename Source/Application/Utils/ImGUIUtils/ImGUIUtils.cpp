@@ -156,7 +156,7 @@ void ImGUIUtils::DrawTransform(EntityID& id)
 
         const auto& pos = transform.position.GetWorld();
         const auto& rot = transform.rotation.GetEulerAngles();
-        const auto& sca = transform.scale.get();
+        const auto& sca = transform.scale.Get();
 
         static double posVec[3];
 
@@ -194,7 +194,7 @@ void ImGUIUtils::DrawTransform(EntityID& id)
 
         transform.position.SetWorld(Math::Vec3d{ posVec[0], posVec[1], posVec[2]});
         transform.rotation.SetFromEuler(rotVec[0], rotVec[1], rotVec[2]);
-        transform.scale.set(scaVec[0], scaVec[1], scaVec[2]);
+        transform.scale.Set(scaVec[0], scaVec[1], scaVec[2]);
     }
 }
 
@@ -302,7 +302,7 @@ void ImGUIUtils::DrawOrbitalParameters(EntityID& id)
 
         ImGui::Text("Relative Pos: (%.2f, %.2f, %.2f)", relPos.x, relPos.y, relPos.z);
         ImGui::Text("Relative Dist: %.2f km", glm::length(relPos) / METER_PER_KILOMETER);
-        ImGui::Text("Distance to surface: %.2f km", (glm::length(relPos) - attractorTransform.scale.get().x) / METER_PER_KILOMETER);
+        ImGui::Text("Distance to surface: %.2f km", (glm::length(relPos) - attractorTransform.scale.Get().x) / METER_PER_KILOMETER);
         ImGui::Text("Relative Vel: %.2f km/s", glm::length(relVel));
         ImGui::Text("Relative Acc: %.2f km/s2", glm::length(relAcc));
     }

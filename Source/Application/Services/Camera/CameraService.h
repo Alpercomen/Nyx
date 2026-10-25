@@ -30,7 +30,7 @@ namespace Nyx
 
 			const auto& pos = transform.position.GetWorld();
 			const auto& rot = transform.rotation.GetEulerAngles();
-			const auto& sca = transform.scale.get();
+			const auto& sca = transform.scale.Get();
 
 			targetEntity = id;
 
