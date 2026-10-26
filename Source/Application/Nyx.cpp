@@ -30,7 +30,7 @@ int main(int argc, char** argv)
     Scene& scene = *sceneManager.GetActiveScene();
 
     sceneManager.LoadSkybox(sceneID);
-    sceneManager.LoadEntities(sceneID, ResourceLocator::Get(R"(Nyx\Source\Levels\SolarSystem.json)"));
+    sceneManager.LoadEntities(sceneID, ResourceLocator::Get(R"(Nyx\Source\Levels\SolarSystemDetailed.json)"));
 
     window.Show();
     while(window.IsActive())
