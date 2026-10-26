@@ -1,0 +1,369 @@
+{
+  "entities": [
+    {
+      "name": "Sun",
+      "components": {
+        "Transform": {
+          "scale": 1391000000.0
+        },
+        "Rigidbody": {
+          "mass": 1.989e+30
+        },
+        "Sphere": {
+          "texture": "Nyx/Source/Assets/Textures/SunTexture.jpg",
+          "emissiveColor": [
+            1.0,
+            0.95,
+            0.8
+          ],
+          "emissiveStrength": 1.0
+        },
+        "Light": {
+          "type": "point",
+          "color": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "intensity": 1.0,
+          "range": 29920000000000.0,
+          "decay": 3.342245989304813e-14
+        }
+      }
+    },
+    {
+      "name": "Mercury",
+      "components": {
+        "Transform": {
+          "scale": 2439700.0,
+          "rotationDeg": [
+            0.0,
+            0.0,
+            0.034
+          ]
+        },
+        "Rigidbody": {
+          "mass": 3.3011e+23,
+          "angularVelocity": [
+            0.0,
+            1.24e-06,
+            0.0
+          ]
+        },
+        "Sphere": {
+          "texture": "Nyx/Source/Assets/Textures/MercuryTexture.jpg"
+        },
+        "OrbitTrail": {},
+        "Orbit": {
+          "parent": "Sun",
+          "periapsis": 46000000000.0,
+          "apoapsis": 70000000000.0,
+          "inclination": 7.00497902,
+          "longitudeAscendingNode": 48.33076593,
+          "argumentOfPeriapsis": 29.12703035
+        }
+      }
+    },
+    {
+      "name": "Venus",
+      "components": {
+        "Transform": {
+          "scale": 6051800.0,
+          "rotationDeg": [
+            0.0,
+            0.0,
+            177.36
+          ]
+        },
+        "Rigidbody": {
+          "mass": 4.8675e+24,
+          "angularVelocity": [
+            0.0,
+            -2.99e-07,
+            0.0
+          ]
+        },
+        "Sphere": {
+          "texture": "Nyx/Source/Assets/Textures/VenusAtmosphere.jpg"
+        },
+        "OrbitTrail": {},
+        "Orbit": {
+          "parent": "Sun",
+          "periapsis": 107480000000.0,
+          "apoapsis": 108200000000.0,
+          "inclination": 3.39467605,
+          "longitudeAscendingNode": 76.67984255,
+          "argumentOfPeriapsis": 54.92262463
+        }
+      }
+    },
+    {
+      "name": "Earth",
+      "components": {
+        "Transform": {
+          "scale": 6378137.0,
+          "rotationDeg": [
+            0.0,
+            0.0,
+            23.4393
+          ]
+        },
+        "Rigidbody": {
+          "mass": 5.972e+24,
+          "angularVelocity": [
+            0.0,
+            7.2921159e-05,
+            0.0
+          ]
+        },
+        "Sphere": {
+          "texture": "Nyx/Source/Assets/Textures/EarthTexture.jpg"
+        },
+        "OrbitTrail": {},
+        "Orbit": {
+          "parent": "Sun",
+          "periapsis": 147090000000.0,
+          "apoapsis": 152090000000.0,
+          "inclination": -1.531e-05,
+          "longitudeAscendingNode": 0.0,
+          "argumentOfPeriapsis": 102.93768193
+        },
+        "Atmosphere": {}
+      }
+    },
+    {
+      "name": "Moon",
+      "components": {
+        "Transform": {
+          "scale": 1738100.0,
+          "rotationDeg": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "Rigidbody": {
+          "mass": 7.342e+22,
+          "angularVelocity": [
+            0.0,
+            2.73e-06,
+            0.0
+          ]
+        },
+        "Sphere": {
+          "texture": "Nyx/Source/Assets/Textures/MoonTexture.jpg"
+        },
+        "OrbitTrail": {},
+        "Orbit": {
+          "parent": "Earth",
+          "periapsis": 363104240.0,
+          "apoapsis": 405695759.99999994,
+          "inclination": 5.16,
+          "longitudeAscendingNode": 125.08,
+          "argumentOfPeriapsis": 318.15
+        }
+      }
+    },
+    {
+      "name": "Mars",
+      "components": {
+        "Transform": {
+          "scale": 3396200.0,
+          "rotationDeg": [
+            0.0,
+            0.0,
+            25.19
+          ]
+        },
+        "Rigidbody": {
+          "mass": 6.4171e+23,
+          "angularVelocity": [
+            0.0,
+            7.088e-05,
+            0.0
+          ]
+        },
+        "Sphere": {
+          "texture": "Nyx/Source/Assets/Textures/MarsTexture.jpg"
+        },
+        "OrbitTrail": {},
+        "Orbit": {
+          "parent": "Sun",
+          "periapsis": 206600000000.0,
+          "apoapsis": 249200000000.0,
+          "inclination": 1.84969142,
+          "longitudeAscendingNode": 49.55953891,
+          "argumentOfPeriapsis": 286.4968315
+        },
+        "Atmosphere": {
+          "color": [
+            0.901,
+            0.674,
+            0.674
+          ]
+        }
+      }
+    },
+    {
+      "name": "Jupiter",
+      "components": {
+        "Transform": {
+          "scale": 71492000.0,
+          "rotationDeg": [
+            0.0,
+            0.0,
+            3.13
+          ]
+        },
+        "Rigidbody": {
+          "mass": 1.898e+27,
+          "angularVelocity": [
+            0.0,
+            0.00017585,
+            0.0
+          ]
+        },
+        "Sphere": {
+          "texture": "Nyx/Source/Assets/Textures/JupiterTexture.jpg"
+        },
+        "OrbitTrail": {},
+        "Orbit": {
+          "parent": "Sun",
+          "periapsis": 740600000000.0,
+          "apoapsis": 816400000000.0,
+          "inclination": 1.30439695,
+          "longitudeAscendingNode": 100.47390909,
+          "argumentOfPeriapsis": 274.25457074
+        }
+      }
+    },
+    {
+      "name": "Saturn",
+      "components": {
+        "Transform": {
+          "scale": 60268000.0,
+          "rotationDeg": [
+            0.0,
+            0.0,
+            26.73
+          ]
+        },
+        "Rigidbody": {
+          "mass": 5.683e+26,
+          "angularVelocity": [
+            0.0,
+            0.0001637,
+            0.0
+          ]
+        },
+        "Sphere": {
+          "texture": "Nyx/Source/Assets/Textures/SaturnTexture.jpg"
+        },
+        "OrbitTrail": {},
+        "Orbit": {
+          "parent": "Sun",
+          "periapsis": 1352550000000.0,
+          "apoapsis": 1514500000000.0,
+          "inclination": 2.48599187,
+          "longitudeAscendingNode": 113.66242448,
+          "argumentOfPeriapsis": 338.93645383
+        }
+      }
+    },
+    {
+      "name": "Uranus",
+      "components": {
+        "Transform": {
+          "scale": 25559000.0,
+          "rotationDeg": [
+            0.0,
+            0.0,
+            97.77
+          ]
+        },
+        "Rigidbody": {
+          "mass": 8.681e+25,
+          "angularVelocity": [
+            0.0,
+            -0.0001012,
+            0.0
+          ]
+        },
+        "Sphere": {
+          "texture": "Nyx/Source/Assets/Textures/UranusTexture.jpg"
+        },
+        "OrbitTrail": {},
+        "Orbit": {
+          "parent": "Sun",
+          "periapsis": 2732696000000.0,
+          "apoapsis": 3001390000000.0,
+          "inclination": 0.77263783,
+          "longitudeAscendingNode": 74.01692503,
+          "argumentOfPeriapsis": 96.93735127
+        }
+      }
+    },
+    {
+      "name": "Neptune",
+      "components": {
+        "Transform": {
+          "scale": 24764000.0,
+          "rotationDeg": [
+            0.0,
+            0.0,
+            28.32
+          ]
+        },
+        "Rigidbody": {
+          "mass": 1.0239999999999999e+26,
+          "angularVelocity": [
+            0.0,
+            0.0001083,
+            0.0
+          ]
+        },
+        "Sphere": {
+          "texture": "Nyx/Source/Assets/Textures/NeptuneTexture.jpg"
+        },
+        "OrbitTrail": {},
+        "Orbit": {
+          "parent": "Sun",
+          "periapsis": 4444450000000.0,
+          "apoapsis": 4545670000000.0,
+          "inclination": 1.77004347,
+          "longitudeAscendingNode": 131.78422574,
+          "argumentOfPeriapsis": 273.18053653
+        }
+      }
+    },
+    {
+      "name": "ISS",
+      "components": {
+        "Transform": {
+          "scale": 73,
+          "rotationDeg": [
+            0.0,
+            -51.6,
+            90.0
+          ]
+        },
+        "Rigidbody": {
+          "mass": 419725
+        },
+        "Model": {
+          "path": "Nyx/Source/Assets/Models/ISS_stationary.glb"
+        },
+        "TidallyLocked": {
+          "target": "Earth"
+        },
+        "OrbitTrail": {},
+        "Orbit": {
+          "parent": "Earth",
+          "periapsis": 6741000,
+          "apoapsis": 6831000,
+          "inclination": 51.6
+        }
+      }
+    }
+  ]
+}

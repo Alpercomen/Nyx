@@ -12,6 +12,8 @@
 #include <Application/Graphics/Skybox/Skybox.h>
 #include <Application/Graphics/OrbitTrailSystem/OrbitTrailSystem.h>
 
+#include <Application/Services/SceneLoader/SceneLoader.h>
+
 namespace Nyx 
 {
 	using SceneID = uint32;
@@ -255,186 +257,14 @@ namespace Nyx
 			scenePtr->SetSkybox(MakeShared<Skybox>(faces));
 		}
 
-		void GenerateEntities(SceneID& sceneID)
+		void LoadEntities(SceneID& sceneID, const String& levelPath)
 		{
 			Scene* scenePtr = GetScene(sceneID);
-
 			if (scenePtr == nullptr)
 				return;
 
-			SphereDesc earthDesc;
-			earthDesc.texture = &ResourceManager::GetMipmappedTexture(
-				"EarthTexture",
-				R"(Nyx\Source\Assets\Textures\EarthTexture.jpg)"
-			);
-
-			SphereDesc moonDesc;
-			moonDesc.texture = &ResourceManager::GetMipmappedTexture(
-				"MoonTexture",
-				R"(Nyx\Source\Assets\Textures\MoonTexture.jpg)"
-			);
-
-			SphereDesc mercuryDesc;
-			mercuryDesc.texture = &ResourceManager::GetMipmappedTexture(
-				"MercuryTexture",
-				R"(Nyx\Source\Assets\Textures\MercuryTexture.jpg)"
-			);
-
-			SphereDesc venusDesc;
-			venusDesc.texture = &ResourceManager::GetMipmappedTexture(
-				"VenusTexture",
-				R"(Nyx\Source\Assets\Textures\VenusAtmosphere.jpg)"
-			);
-
-			SphereDesc marsDesc;
-			marsDesc.texture = &ResourceManager::GetMipmappedTexture(
-				"MarsTexture",
-				R"(Nyx\Source\Assets\Textures\MarsTexture.jpg)"
-			);
-
-			SphereDesc jupiterDesc;
-			jupiterDesc.texture = &ResourceManager::GetMipmappedTexture(
-				"JupiterTexture",
-				R"(Nyx\Source\Assets\Textures\JupiterTexture.jpg)"
-			);
-
-			SphereDesc saturnDesc;
-			saturnDesc.texture = &ResourceManager::GetMipmappedTexture(
-				"SaturnTexture",
-				R"(Nyx\Source\Assets\Textures\SaturnTexture.jpg)"
-			);
-
-			SphereDesc uranusDesc;
-			uranusDesc.texture = &ResourceManager::GetMipmappedTexture(
-				"UranusTexture",
-				R"(Nyx\Source\Assets\Textures\UranusTexture.jpg)"
-			);
-
-			SphereDesc neptuneDesc;
-			neptuneDesc.texture = &ResourceManager::GetMipmappedTexture(
-				"NeptuneTexture",
-				R"(Nyx\Source\Assets\Textures\NeptuneTexture.jpg)"
-			);
-
-			SphereDesc sunDesc;
-			sunDesc.emissiveColor = Math::Vec3f(1.0, 0.95, 0.8);
-			sunDesc.emissiveStrength = 1.0;
-			sunDesc.texture = &ResourceManager::GetMipmappedTexture(
-				"SunTexture",
-				R"(Nyx\Source\Assets\Textures\SunTexture.jpg)"
-			);
-
-			Position sunPosition(Math::Vec3f(0.0, 0.0, 0.0));
-			Position earthPosition(Math::Vec3f(AU, 0.0, 0.0));
-			Position moonPosition(Math::Vec3f(AU + EARTH_PERIGEE, 0.0, 0.0));
-			Position mercuryPosition(Math::Vec3f(MERCURY_APHELION, 0.0, 0.0));
-			Position venusPosition(Math::Vec3f(VENUS_APHELION, 0.0, 0.0));
-			Position marsPosition(Math::Vec3f(MARS_APHELION, 0.0, 0.0));
-			Position jupiterPosition(Math::Vec3f(JUPITER_APHELION, 0.0, 0.0));
-			Position saturnPosition(Math::Vec3f(SATURN_APHELION, 0.0, 0.0));
-			Position uranusPosition(Math::Vec3f(URANUS_APHELION, 0.0, 0.0));
-			Position neptunePosition(Math::Vec3f(NEPTUNE_APHELION, 0.0, 0.0));
-			Position issPosition(Math::Vec3f(AU - ISS_PERIGEE_DISTANCE, 0.0, 0.0));
-
-			Rotation sunRotation(0.0, 0.0, 0.0);
-			Rotation earthRotation(0.0, 0.0, glm::radians(EARTH_INCLINATION));
-			Rotation moonRotation(0.0, 0.0, 0.0);
-			Rotation mercuryRotation(0.0, 0.0, glm::radians(MERCURY_INCLINATION));
-			Rotation venusRotation(0.0, 0.0, glm::radians(VENUS_INCLINATION));
-			Rotation marsRotation(0.0, 0.0, glm::radians(MARS_INCLINATION));
-			Rotation jupiterRotation(0.0, 0.0, glm::radians(JUPITER_INCLINATION));
-			Rotation saturnRotation(0.0, 0.0, glm::radians(SATURN_INCLINATION));
-			Rotation uranusRotation(0.0, 0.0, glm::radians(URANUS_INCLINATION));
-			Rotation neptuneRotation(0.0, 0.0, glm::radians(NEPTUNE_INCLINATION));
-			Rotation issRotation(0.0, glm::radians(-ISS_INCLINATION), glm::radians(90.0));
-
-			Scale earthSize(EARTH_EQUATORAL_RADIUS);
-			Scale moonSize(MOON_EQUATORAL_RADIUS);
-			Scale sunSize(SUN_RADIUS);
-			Scale mercurySize(MERCURY_EQUATORAL_RADIUS);
-			Scale venusSize(VENUS_EQUATORAL_RADIUS);
-			Scale marsSize(MARS_EQUATORAL_RADIUS);
-			Scale jupiterSize(JUPITER_EQUATORAL_RADIUS);
-			Scale saturnSize(SATURN_EQUATORAL_RADIUS);
-			Scale uranusSize(URANUS_EQUATORAL_RADIUS);
-			Scale neptuneSize(NEPTUNE_EQUATORAL_RADIUS);
-			Scale issSize(ISS_LONGITUDE_SOLAR_ARRAY);
-
-			Transform earthTransform = Transform{ earthPosition, earthRotation, earthSize };
-			Transform moonTransform = Transform{ moonPosition, moonRotation, moonSize };
-			Transform sunTransform = Transform{ sunPosition, sunRotation, sunSize };
-			Transform mercuryTransform = Transform{ mercuryPosition, mercuryRotation, mercurySize };
-			Transform venusTransform = Transform{ venusPosition, venusRotation, venusSize };
-			Transform marsTransform = Transform{ marsPosition, marsRotation, marsSize };
-			Transform jupiterTransform = Transform{ jupiterPosition, jupiterRotation, jupiterSize };
-			Transform saturnTransform = Transform{ saturnPosition, saturnRotation, saturnSize };
-			Transform uranusTransform = Transform{ uranusPosition, uranusRotation, uranusSize };
-			Transform neptuneTransform = Transform{ neptunePosition, neptuneRotation, neptuneSize };
-			Transform issTransform = Transform{ issPosition , issRotation, issSize };
-
-			Velocity earthAngularVelocity = LocalToWorld(Math::Vec3d(0.0, EARTH_ANGULAR_VELOCITY_RADIANS, 0.0), earthTransform);
-			Velocity moonAngularVelocity = LocalToWorld(Math::Vec3d(0.0, MOON_ANGULAR_VELOCITY_RADIANS, 0.0), moonTransform);
-			Velocity mercuryAngularVelocity = LocalToWorld(Math::Vec3d(0.0, MERCURY_ANGULAR_VELOCITY_RADIANS, 0.0), mercuryTransform);
-			Velocity venusAngularVelocity = LocalToWorld(Math::Vec3d(0.0, VENUS_ANGULAR_VELOCITY_RADIANS, 0.0), venusTransform);
-			Velocity marsAngularVelocity = LocalToWorld(Math::Vec3d(0.0, MARS_ANGULAR_VELOCITY_RADIANS, 0.0), marsTransform);
-			Velocity jupiterAngularVelocity = LocalToWorld(Math::Vec3d(0.0, JUPITER_ANGULAR_VELOCITY_RADIANS, 0.0), jupiterTransform);
-			Velocity saturnAngularVelocity = LocalToWorld(Math::Vec3d(0.0, SATURN_ANGULAR_VELOCITY_RADIANS, 0.0), saturnTransform);
-			Velocity uranusAngularVelocity = LocalToWorld(Math::Vec3d(0.0, URANUS_ANGULAR_VELOCITY_RADIANS, 0.0), uranusTransform);
-			Velocity neptuneAngularVelocity = LocalToWorld(Math::Vec3d(0.0, NEPTUNE_ANGULAR_VELOCITY_RADIANS, 0.0), neptuneTransform);
-
-			EntityID cameraID = scenePtr->CreateCamera("Camera", Transform{ Math::Vec3d(AU / METERS_PER_UNIT, 0.0f, 0.1f) });
-			EntityID sunID = scenePtr->CreatePlanet("Sun", sunTransform, Rigidbody{ SUN_MASS }, sunDesc);
-			EntityID mercuryID = scenePtr->CreatePlanet("Mercury", mercuryTransform, Rigidbody{ MERCURY_MASS , mercuryAngularVelocity }, mercuryDesc);
-			EntityID venusID = scenePtr->CreatePlanet("Venus", venusTransform, Rigidbody{ VENUS_MASS, venusAngularVelocity }, venusDesc);
-			EntityID earthID = scenePtr->CreatePlanet("Earth", earthTransform, Rigidbody{ EARTH_MASS , earthAngularVelocity }, earthDesc);
-			EntityID moonID = scenePtr->CreatePlanet("Moon", moonTransform, Rigidbody{ MOON_MASS , moonAngularVelocity }, moonDesc);
-			EntityID marsID = scenePtr->CreatePlanet("Mars", marsTransform, Rigidbody{ MARS_MASS, marsAngularVelocity }, marsDesc);
-			EntityID jupiterID = scenePtr->CreatePlanet("Jupiter", jupiterTransform, Rigidbody{ JUPITER_MASS, jupiterAngularVelocity }, jupiterDesc);
-			EntityID saturnID = scenePtr->CreatePlanet("Saturn", saturnTransform, Rigidbody{ SATURN_MASS, saturnAngularVelocity }, saturnDesc);
-			EntityID uranusID = scenePtr->CreatePlanet("Uranus", uranusTransform, Rigidbody{ URANUS_MASS, uranusAngularVelocity }, uranusDesc);
-			EntityID neptuneID = scenePtr->CreatePlanet("Neptune", neptuneTransform, Rigidbody{ NEPTUNE_MASS, neptuneAngularVelocity }, neptuneDesc);
-			EntityID issID = scenePtr->CreateModel("ISS", issTransform, Rigidbody{ ISS_MASS }, "Nyx/Source/Assets/Models/ISS_stationary.glb");
-
-			LightComponent pointLight;
-			pointLight.type = LightType::POINT;
-			pointLight.color = Math::Vec3f(1.0, 1.0, 1.0);
-			pointLight.intensity = 1.0;
-			pointLight.range = SOL_SYSTEM_RADIUS;
-			pointLight.decay = 1 / SOL_SYSTEM_RADIUS;
-			ECS::Get().AddComponent(sunID, pointLight);
-
-			AtmosphereComponent earthAtmosphere;
-			ECS::Get().AddComponent(earthID, earthAtmosphere);
-
-			AtmosphereComponent marsAtmosphere;
-			marsAtmosphere.color = { 0.901f, 0.674f, 0.674f };
-			ECS::Get().AddComponent(marsID, marsAtmosphere);
-				
-			TidallyLocked issLock;
-			issLock.lockedEntity = earthID;
-			ECS::Get().AddComponent(issID, issLock);
-
-			ECS::Get().AddComponent(mercuryID, OrbitTrail{});
-			ECS::Get().AddComponent(venusID, OrbitTrail{});
-			ECS::Get().AddComponent(earthID, OrbitTrail{});
-			ECS::Get().AddComponent(moonID, OrbitTrail{});
-			ECS::Get().AddComponent(marsID, OrbitTrail{});
-			ECS::Get().AddComponent(jupiterID, OrbitTrail{});
-			ECS::Get().AddComponent(saturnID, OrbitTrail{});
-			ECS::Get().AddComponent(uranusID, OrbitTrail{});
-			ECS::Get().AddComponent(neptuneID, OrbitTrail{});
-			ECS::Get().AddComponent(issID, OrbitTrail{});
-
-			InitializeOrbitFromApsides(mercuryID, sunID, MERCURY_PERIHELION, MERCURY_APHELION, MERCURY_ORBITAL_INCLINATION, MERCURY_LONGITUDE_ASCENDING_NODE, MERCURY_ARGUMENT_OF_PERIAPSIS);
-			InitializeOrbitFromApsides(venusID, sunID, VENUS_PERIHELION, VENUS_APHELION, VENUS_ORBITAL_INCLINATION, VENUS_LONGITUDE_ASCENDING_NODE, VENUS_ARGUMENT_OF_PERIAPSIS);
-			InitializeOrbitFromApsides(earthID, sunID, EARTH_PERIHELION, EARTH_APHELION, EARTH_ORBITAL_INCLINATION, EARTH_LONGITUDE_ASCENDING_NODE, EARTH_ARGUMENT_OF_PERIAPSIS);
-			InitializeOrbitFromApsides(moonID, earthID, MOON_PERIAPSIS_DISTANCE, MOON_APOAPSIS_DISTANCE, MOON_ORBITAL_INCLINATION, MOON_LONGITUDE_ASCENDING_NODE, MOON_ARGUMENT_OF_PERIAPSIS);
-			InitializeOrbitFromApsides(issID, earthID, ISS_PERIGEE_DISTANCE, ISS_APOGEE_DISTANCE, ISS_INCLINATION);
-			InitializeOrbitFromApsides(marsID, sunID, MARS_PERIHELION, MARS_APHELION, MARS_ORBITAL_INCLINATION, MARS_LONGITUDE_ASCENDING_NODE, MARS_ARGUMENT_OF_PERIAPSIS);
-			InitializeOrbitFromApsides(jupiterID, sunID, JUPITER_PERIHELION, JUPITER_APHELION, JUPITER_ORBITAL_INCLINATION, JUPITER_LONGITUDE_ASCENDING_NODE, JUPITER_ARGUMENT_OF_PERIAPSIS);
-			InitializeOrbitFromApsides(saturnID, sunID, SATURN_PERIHELION, SATURN_APHELION, SATURN_ORBITAL_INCLINATION, SATURN_LONGITUDE_ASCENDING_NODE, SATURN_ARGUMENT_OF_PERIAPSIS);
-			InitializeOrbitFromApsides(uranusID, sunID, URANUS_PERIHELION, URANUS_APHELION, URANUS_ORBITAL_INCLINATION, URANUS_LONGITUDE_ASCENDING_NODE, URANUS_ARGUMENT_OF_PERIAPSIS);
-			InitializeOrbitFromApsides(neptuneID, sunID, NEPTUNE_PERIHELION, NEPTUNE_APHELION, NEPTUNE_ORBITAL_INCLINATION, NEPTUNE_LONGITUDE_ASCENDING_NODE, NEPTUNE_ARGUMENT_OF_PERIAPSIS);
+			scenePtr->CreateCamera("Camera", Transform{ Math::Vec3d(AU / METERS_PER_UNIT, 0.0f, 0.1f) });
+			SceneLoader::Load(*scenePtr, levelPath);
 		}
 
 	private:
