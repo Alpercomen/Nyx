@@ -65,19 +65,6 @@
 #define SUN_MASS                       1.989e30
 
 /*===========================================================
-    ORBITAL INCLINATION vs AXIAL TILT
-
-    ORBITAL_INCLINATION = inclination of the planet's orbit
-                          relative to the reference ecliptic plane.
-
-    AXIAL_TILT           = tilt of the planet's rotation axis
-                          relative to its orbital normal.
-
-    Legacy *_INCLINATION names are retained as aliases to
-    *_AXIAL_TILT for compatibility with existing Nyx code.
-===========================================================*/
-
-/*===========================================================
     MERCURY
 ===========================================================*/
 #define MERCURY_EQUATORAL_RADIUS       2439700.0
