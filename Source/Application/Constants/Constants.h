@@ -12,9 +12,9 @@
 #define CAMERA_DEFAULT_MINIMUM_ZOOM    10.0
 #define CAMERA_DEFAULT_MAXIMUM_ZOOM    1000.0
 #define CAMERA_DEFAULT_NEAR_PLANE      0.001
-#define CAMERA_DEFAULT_FAR_PLANE       10000.0
+#define CAMERA_DEFAULT_FAR_PLANE       100000.0
 #define CAMERA_FOCUS_NEAR_PLANE        0.000001
-#define CAMERA_FOCUS_FAR_PLANE         100.0
+#define CAMERA_FOCUS_FAR_PLANE         1000.0
 #define CAMERA_FOCUS_RADIUS            10000.0
 #define CAMERA_MINIMUM_ZOOM_MULTIPLIER 1.0
 #define CAMERA_MAXIMUM_ZOOM_MULTIPLIER 500.0
@@ -40,16 +40,6 @@
     nu      = true anomaly at J2000 [deg]
     q       = periapsis distance [m]
     Q       = apoapsis distance [m]
-
-    IMPORTANT:
-    Orbital inclination is NOT the same as axial tilt.
-    The existing *_INCLINATION constants below are retained
-    as axial tilt values for backwards compatibility.
-
-    The orbital elements are the JPL approximate planetary
-    elements around J2000.0. They are intended for initializing
-    a Keplerian orbit / simulation, not replacing a high-precision
-    ephemeris.
 ===========================================================*/
 #define ORBITAL_EPOCH_J2000            2451545.0
 #define ORBITAL_EPOCH_J2000_JD         2451545.0
