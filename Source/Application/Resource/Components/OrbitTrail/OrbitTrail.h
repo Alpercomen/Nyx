@@ -8,6 +8,8 @@ namespace Nyx
 {
 	struct OrbitTrail
 	{
+		Math::Vec3f color = { 1.0f, 1.0f, 1.0f };
+
 		bool8 enabled = true;
 
 		float32 trailFraction = 1.0f;
@@ -17,8 +19,6 @@ namespace Nyx
 		float32 fadePower = 1.5f;
 		float32 minAlpha = 0.0f;
 		float32 opacity = 1.0f;
-
-		Math::Vec3f color = { 1.0f, 1.0f, 1.0f };
 
 		OrbitalElements orbit;
 	};

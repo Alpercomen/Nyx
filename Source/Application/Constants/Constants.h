@@ -4,26 +4,28 @@
 /*===========================================================
     UNIVERSAL CONSTANTS
 ===========================================================*/
-#define G                              6.67430e-11              // Gravitational constant [m^3 kg^-1 s^-2]
-#define AU                             1.495978707e11           // Astronomical Unit [m]
-#define SOL_SYSTEM_RADIUS              299.2e11                 // Simulation bounding radius [m]
-#define METERS_PER_UNIT                1.0e9
-#define METER_PER_KILOMETER            1000.0
-#define CAMERA_DEFAULT_MINIMUM_ZOOM    10.0
-#define CAMERA_DEFAULT_MAXIMUM_ZOOM    1000.0
-#define CAMERA_DEFAULT_NEAR_PLANE      0.001
-#define CAMERA_DEFAULT_FAR_PLANE       100000.0
-#define CAMERA_FOCUS_NEAR_PLANE        0.000001
-#define CAMERA_FOCUS_FAR_PLANE         1000.0
-#define CAMERA_FOCUS_RADIUS            10000.0
-#define CAMERA_MINIMUM_ZOOM_MULTIPLIER 1.0
-#define CAMERA_MAXIMUM_ZOOM_MULTIPLIER 500.0
-#define DELTA_TIME                     0.01666666666666666666666666666667
-#define TIME_LIMIT                     1000
-#define DESIRED_DT_MAX                 5.0
-#define DESIRED_DT_MIN                 0.01
-#define GLOBAL_DT_SCALE                0.5
-#define TIGHT_ORBIT_SCALE              0.5
+#define G                                       6.67430e-11              // Gravitational constant [m^3 kg^-1 s^-2]
+#define AU                                      1.495978707e11           // Astronomical Unit [m]
+#define SOL_SYSTEM_RADIUS                       299.2e11                 // Simulation bounding radius [m]
+#define METERS_PER_UNIT                         1.0e9
+#define METER_PER_KILOMETER                     1000.0
+#define CAMERA_DEFAULT_MINIMUM_ZOOM             10.0
+#define CAMERA_DEFAULT_MAXIMUM_ZOOM             1000.0
+#define CAMERA_DEFAULT_NEAR_PLANE               0.0011
+#define CAMERA_DEFAULT_FAR_PLANE                100000.0
+#define CAMERA_FOCUS_NEAR_PLANE                 0.000005
+#define CAMERA_FOCUS_FAR_PLANE                  5000.0
+#define CAMERA_FOCUS_RADIUS                     10000.0
+#define CAMERA_MINIMUM_ZOOM_MULTIPLIER          1.0
+#define CAMERA_MAXIMUM_ZOOM_MULTIPLIER          1000.0
+#define CAMERA_MINIMUM_ZOOM_MULTIPLIER_FOCUS    1000.0
+#define CAMERA_MAXIMUM_ZOOM_MULTIPLIER_FOCUS    10000.0
+#define DELTA_TIME                              0.01666666666666666666666666666667
+#define TIME_LIMIT                              1000
+#define DESIRED_DT_MAX                          5.0
+#define DESIRED_DT_MIN                          0.01
+#define GLOBAL_DT_SCALE                         0.5
+#define TIGHT_ORBIT_SCALE                       0.5
 
 /*===========================================================
     ORBITAL ELEMENT CONVENTIONS

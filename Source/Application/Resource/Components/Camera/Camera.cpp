@@ -158,8 +158,19 @@ void Camera::LockCamera(Camera& camera, const EntityID& id) const
         const float64 size = glm::length(targetTransform.scale.Get()) / METERS_PER_UNIT;
         const float64 focusRadius = CameraService::Get().focusRadius / METERS_PER_UNIT;
 
-        CameraService::Get().minimumDistance = size * CAMERA_MINIMUM_ZOOM_MULTIPLIER;
-        CameraService::Get().maximumDistance = size * CAMERA_MAXIMUM_ZOOM_MULTIPLIER;
+        if (size <= focusRadius)
+        {
+            CameraService::Get().focusEnabled = true;
+            CameraService::Get().minimumDistance = size * CAMERA_MINIMUM_ZOOM_MULTIPLIER_FOCUS;
+            CameraService::Get().maximumDistance = size * CAMERA_MAXIMUM_ZOOM_MULTIPLIER_FOCUS;
+        }
+        else
+        {
+            CameraService::Get().focusEnabled = false;
+            CameraService::Get().minimumDistance = size * CAMERA_MINIMUM_ZOOM_MULTIPLIER;
+            CameraService::Get().maximumDistance = size * CAMERA_MAXIMUM_ZOOM_MULTIPLIER;
+        }
+
 
         CameraService::Get().distance = glm::clamp(
             CameraService::Get().distance,
@@ -167,12 +178,9 @@ void Camera::LockCamera(Camera& camera, const EntityID& id) const
             CameraService::Get().maximumDistance
         );
 
-        if (size <= focusRadius)
-            CameraService::Get().focusEnabled = true;
-        else
-            CameraService::Get().focusEnabled = false;
-
-        const float64 distance = CameraService::Get().distance;
+        const float64& distance = CameraService::Get().distance;
+        const float64& yaw = CameraService::Get().yaw;
+        const float64& pitch = CameraService::Get().pitch;
 
         if (CameraService::Get().lockOrientation)
         {
@@ -181,10 +189,6 @@ void Camera::LockCamera(Camera& camera, const EntityID& id) const
             Math::Vec3d targetRight = glm::normalize(targetRot * Math::Vec3d(1.0, 0.0, 0.0));
             Math::Vec3d targetUp = glm::normalize(targetRot * Math::Vec3d(0.0, 1.0, 0.0));
             Math::Vec3d targetForward = glm::normalize(targetRot * Math::Vec3d(0.0, 0.0, 1.0));
-
-            float64 yaw = CameraService::Get().yaw;
-            float64 pitch = CameraService::Get().pitch;
-            float64 distance = CameraService::Get().distance;
 
             Math::Vec3d localDirection;
             localDirection.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
@@ -219,9 +223,6 @@ void Camera::LockCamera(Camera& camera, const EntityID& id) const
         }
         else
         {
-            float64 yaw = CameraService::Get().yaw;
-            float64 pitch = CameraService::Get().pitch;
-
             Math::Vec3d direction;
             direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
             direction.y = sin(glm::radians(pitch));

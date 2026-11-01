@@ -5,6 +5,12 @@
 
 namespace Nyx
 {
+    enum class ReferenceFrame
+    {
+        Inertial = 0,
+        AttractorEquatorial = 1
+    };
+
     struct SimBody
     {
         EntityID id = NO_ID;
@@ -47,5 +53,7 @@ namespace Nyx
 
         Math::Vec3d P = Math::Vec3d(1.0, 0.0, 0.0);
         Math::Vec3d Q = Math::Vec3d(0.0, 0.0, 1.0);
+
+        ReferenceFrame referenceFrame = ReferenceFrame::Inertial;
     };
 }

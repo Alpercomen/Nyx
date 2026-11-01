@@ -34,13 +34,19 @@ namespace Nyx
 			{
 				static GLuint fallbackTexture = 0;
 
-				uint8_t whitePixel[3] = { 255, 255, 255 };
+				if (fallbackTexture == 0)
+				{
+					uint8_t whitePixel[3] = { 255, 255, 255 };
 
-				glGenTextures(1, &fallbackTexture);
+					glGenTextures(1, &fallbackTexture);
+					glBindTexture(GL_TEXTURE_2D, fallbackTexture);
+					glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+					glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1, 1, 0, GL_RGB, GL_UNSIGNED_BYTE, whitePixel);
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				}
+
 				glBindTexture(GL_TEXTURE_2D, fallbackTexture);
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1, 1, 0, GL_RGB, GL_UNSIGNED_BYTE, whitePixel);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			}
 
 			GLuint texLoc = glGetUniformLocation(m_shader.GetID(), "uTexture");

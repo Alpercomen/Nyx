@@ -20,7 +20,7 @@ namespace Nyx
 		{ LightType::SPOT, "spot" }
 	})
 
-	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(OrbitalElements, semiMajorAxis, eccentricity, inclination, longitudeAscendingNode, argumentOfPeriapsis, trueAnomaly)
+	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(OrbitalElements, semiMajorAxis, eccentricity, inclination, longitudeAscendingNode, argumentOfPeriapsis, referenceFrame, trueAnomaly)
 	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(LightComponent, type, color, intensity, range, decay)
 	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(AtmosphereComponent, color, radius, haloIntensity, haloAlpha, rimStart, rimEnd, lightSoftness)
 }
@@ -91,6 +91,13 @@ namespace Nyx::BuiltIn
 		ECS::Get().AddComponent(id, TidallyLocked{ it->second });
 	}
 
+	inline void LoadTrail(EntityID id, const json& j, const NameMap&)
+	{
+		const Math::Vec3d color = j.value("color", Math::Vec3d(1.0));
+
+		ECS::Get().AddComponent(id, OrbitTrail{ color });
+	}
+
 	inline void LoadOrbit(EntityID id, const json& j, const NameMap& names)
 	{
 		const String parent = j.at("parent").get<String>();
@@ -110,6 +117,7 @@ namespace Nyx::BuiltIn
 				j.value("inclination", 0.0),
 				j.value("longitudeAscendingNode", 0.0),
 				j.value("argumentOfPeriapsis", 0.0),
+				j.at("frame").get<ReferenceFrame>(),
 				j.value("startAtPeriapsis", false));
 		}
 		else
@@ -124,8 +132,8 @@ namespace Nyx::BuiltIn
 	NYX_REGISTER_LOADER(Model, "Model", 0, LoadModel);
 	NYX_REGISTER_LOADER(TidallyLocked, "TidallyLocked", 0, LoadTidallyLocked);
 	NYX_REGISTER_LOADER(OrbitalElements, "Orbit", 100, LoadOrbit);
+	NYX_REGISTER_LOADER(OrbitTrail, "OrbitTrail", 200, LoadTrail);
 
 	NYX_REGISTER_COMPONENT(LightComponent, "Light");
 	NYX_REGISTER_COMPONENT(AtmosphereComponent, "Atmosphere");
-	NYX_REGISTER_TAG(OrbitTrail, "OrbitTrail");
 }

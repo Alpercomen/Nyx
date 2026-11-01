@@ -14,9 +14,9 @@ double CalculateOrbitalVelocity(double otherMass, double r);
 
 double RotationDegreeToLinearVelocity(float degreesPerSecond, float radiusMeters);
 
-void InitializeCircularOrbit(EntityID satelliteID, EntityID attractorID, float32 inclination);
+Math::Mat3d BuildEquatorialFrame(const Math::Quatd& attractorRotation);
 
-void InitializeOrbitFromApsides(EntityID satelliteID, EntityID attractorID, float64 periapsis, float64 apoapsis, float64 inclination = 0.0, float64 longitudeAscendingNode = 0.0, float64 argumentOfPeriapsis = 0.0, bool startAtPeriapsis = true);
+void InitializeOrbitFromApsides(EntityID satelliteID, EntityID attractorID, float64 periapsis, float64 apoapsis, float64 inclination = 0.0, float64 longitudeAscendingNode = 0.0, float64 argumentOfPeriapsis = 0.0, ReferenceFrame referenceFrame = ReferenceFrame::Inertial, bool startAtPeriapsis = true);
 
 void InitializeOrbit(EntityID satelliteID, EntityID attractorID, const OrbitalElements& elements);
 

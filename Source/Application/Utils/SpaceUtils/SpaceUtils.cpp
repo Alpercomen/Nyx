@@ -1,4 +1,3 @@
-#pragma once
 #include <iostream>
 
 #include <glm/glm.hpp>
@@ -30,6 +29,25 @@ double RotationDegreeToLinearVelocity(float degreesPerSecond, float radiusMeters
     return (radiansPerSecond * radiusMeters) / METERS_PER_UNIT;
 }
 
+Math::Mat3d BuildEquatorialFrame(const Math::Quatd& attractorRotation)
+{
+    const Math::Vec3d pole = glm::normalize(attractorRotation * Math::Vec3d(0.0, 1.0, 0.0));
+
+    Math::Vec3d ref(1.0, 0.0, 0.0);
+    ref -= glm::dot(ref, pole) * pole;
+
+    if (glm::length2(ref) < 1e-12)
+    {
+        ref = Math::Vec3d(0.0, 0.0, 1.0);
+        ref -= glm::dot(ref, pole) * pole;
+    }
+
+    const Math::Vec3d x = glm::normalize(ref);
+    const Math::Vec3d z = glm::cross(x, pole);
+
+    return Math::Mat3d(x, pole, z);
+}
+
 void InitializeOrbitFromApsides(
     EntityID satelliteID, 
     EntityID attractorID, 
@@ -38,6 +56,7 @@ void InitializeOrbitFromApsides(
     float64 inclination, 
     float64 longitudeAscendingNode, 
     float64 argumentOfPeriapsis, 
+    ReferenceFrame referenceFrame,
     bool startAtPeriapsis)
 {
     if (periapsis <= 0.0 || apoapsis <= 0.0 || apoapsis < periapsis)
@@ -57,6 +76,7 @@ void InitializeOrbitFromApsides(
     elements.inclination = inclination;
     elements.longitudeAscendingNode = longitudeAscendingNode;
     elements.argumentOfPeriapsis = argumentOfPeriapsis;
+    elements.referenceFrame = referenceFrame;
     elements.trueAnomaly = startAtPeriapsis ? 0.0 : 180.0;
 
     InitializeOrbit(satelliteID, attractorID, elements);
@@ -151,11 +171,17 @@ void InitializeOrbit(EntityID satelliteID, EntityID attractorID, const OrbitalEl
     // In-plane direction 90 degrees from periapsis (Q)
     Math::Vec3d Q(cosOmega * sinOmegaArg + sinOmega * cosOmegaArg * cosInc, -cosOmegaArg * sinInc, sinOmega * sinOmegaArg - cosOmega * cosOmegaArg * cosInc);
 
-    // Orbital normal
-    Math::Vec3d W = glm::normalize(glm::cross(P, Q));
-
     Math::Vec3d relativePosition = P * positionPQW.x + Q * positionPQW.z;
     Math::Vec3d relativeVelocity = P * velocityPQW.x + Q * velocityPQW.z;
+
+    if (elements.referenceFrame == ReferenceFrame::AttractorEquatorial)
+    {
+        const Math::Quatd attractorRot = Math::Quatd(attractorTransform->rotation.GetQuaternion());
+        const Math::Mat3d frame = BuildEquatorialFrame(attractorRot);
+
+        relativePosition = frame * relativePosition;
+        relativeVelocity = frame * relativeVelocity;
+    }
 
     Math::Vec3d attractorPosition = attractorTransform->position.GetWorld();
     Math::Vec3d attractorVelocity = attractorRigidbody->velocity.GetWorld();
@@ -184,6 +210,10 @@ void InitializeOrbit(EntityID satelliteID, EntityID attractorID, const OrbitalEl
     spdlog::info(" - Orbital period: {:.3f} s", orbitalPeriod);
     spdlog::info(" - Relative position: ({:.3f}, {:.3f}, {:.3f})", relativePosition.x, relativePosition.y, relativePosition.z);
     spdlog::info(" - Relative velocity: ({:.6f}, {:.6f}, {:.6f})", relativeVelocity.x, relativeVelocity.y, relativeVelocity.z);
+
+    elements.referenceFrame == ReferenceFrame::Inertial ?
+        spdlog::info(" - Reference Frame: Inertial") :
+        spdlog::info(" - Reference Frame: Attractor Equatorial");
 }
 
 void Attract(const EntityID& objID)
