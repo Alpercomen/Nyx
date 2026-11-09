@@ -28,6 +28,7 @@ namespace Nyx
         float64 softening = 0.0;
         int32 timeLevel = 0;
         bool8 active = true;
+        bool8 isSource = false;
 
         float64 desiredDt = 0.0;
     };
@@ -35,6 +36,9 @@ namespace Nyx
     struct PhysicsWorld
     {
         Vector<SimBody> bodies;
+        Vector<int32> sources; // Holds the index of large objects = Sun, Jupiter, Saturn etc.
+        Vector<int32> tests; // Holds the index of smaller objects = ISS, Hubble Space Telescope etc.
+
         float64 baseTimeStep = 1.0;
         float64 currentTime = 0.0;
     };

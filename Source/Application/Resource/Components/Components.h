@@ -17,10 +17,13 @@ namespace Nyx
 
 	struct Rigidbody
 	{
+
 		float64 mass;
 		Velocity angularVelocity;
 		Velocity velocity;
 		Acceleration acceleration;
+
+		bool8 isSource = false;
 
 		EntityID orbitalParentID;
 	};

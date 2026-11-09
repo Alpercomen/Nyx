@@ -25,6 +25,7 @@ namespace Nyx
             body.velocity = rb->velocity.GetWorld();
             body.mass = rb->mass;
             body.softening = 1.0 / METERS_PER_UNIT;
+            body.isSource = rb->isSource;
 
             world.bodies.push_back(body);
         }
@@ -60,6 +61,7 @@ namespace Nyx
             tr->position.SetWorld(body.position);
             rb->velocity.SetWorld(body.velocity);
             rb->orbitalParentID = body.orbitalParentID;
+            rb->isSource = body.isSource;
 
             IntegrateAngularVelocity(*tr, *rb, angularDt);
             IntegrateTidallyLocked(body.id);

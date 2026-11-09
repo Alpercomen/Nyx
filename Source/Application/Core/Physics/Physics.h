@@ -10,6 +10,8 @@
 #include <Application/Core/Physics/Integrator.h>
 #include <Application/Services/Solver/NBodyGravitySolver.h>
 
+#include <chrono>
+
 namespace Physics
 {
     inline void Update(float64 deltaTime)
@@ -19,24 +21,24 @@ namespace Physics
 
         PhysicsWorld world;
         world.baseTimeStep = 1.0;
-
         Nyx::GatherBodiesFromECS(world);
 
         if (world.bodies.empty())
             return;
 
         Nyx::NBodyGravitySolver solver;
-        Nyx::InitializeAccelerations(world, solver);
-        Nyx::ComputeOrbitalParents(world);
-
-        const float64 frameDt = deltaTime * static_cast<float64>(SimulationControls::Get().GetTimeDesired());
-
-        Nyx::AdvanceBlockTimesteps(world.bodies, solver, frameDt, world.baseTimeStep);
-
+        Nyx::ClassifySources(world.bodies, world.sources, world. tests, 1e20, 5e19);
         Nyx::ComputeOrbitalParents(world);
         ComputeTimeStepParents(world.bodies);
-        Nyx::SyncBodiesToECS(world, frameDt);
 
+        const float64 frameDt = deltaTime * static_cast<float64>(SimulationControls::Get().GetTimeDesired());
+        int32 limited = frameDt;
+
+        float64 simDt = Nyx::AdvanceTiered(world.bodies, world.sources, world.tests, frameDt, &limited);
+
+        Nyx::ComputeOrbitalParents(world);
+        Nyx::SyncBodiesToECS(world, simDt);
         OrbitTrailSystem::Get().Update();
+
     }
 }

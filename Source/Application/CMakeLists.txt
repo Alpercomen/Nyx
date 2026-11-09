@@ -10,5 +10,7 @@ file(
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${SUBDIRECTORIES})
 add_executable("Nyx" ${SUBDIRECTORIES})
 
-target_include_directories("Nyx" PRIVATE "${CMAKE_SOURCE_DIR}/Source" "${glew_SOURCE_DIR}")
+find_package(OpenMP REQUIRED)
+
+target_include_directories("Nyx" PRIVATE "${CMAKE_SOURCE_DIR}/Source" "${glew_SOURCE_DIR}" OpenMP::OpenMP_CXX)
 target_link_libraries("Nyx" PUBLIC glfw glm::glm spdlog libglew_static Imgui stb assimp::assimp nlohmann_json::nlohmann_json)

@@ -26,6 +26,10 @@
 #define DESIRED_DT_MIN                          0.01
 #define GLOBAL_DT_SCALE                         0.5
 #define TIGHT_ORBIT_SCALE                       0.5
+#define MAX_SOURCE_STEPS_PER_FRAME              4096
+#define MAX_PARTICLE_STEPS_PER_FRAME            20000
+#define SOURCE_DT_MAX                           3600.0
+#define PARTICLE_DT_MAX                         3600.0
 
 /*===========================================================
     ORBITAL ELEMENT CONVENTIONS
