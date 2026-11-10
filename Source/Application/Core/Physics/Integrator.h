@@ -1,6 +1,7 @@
 #pragma once
 #include <Application/Core/Core.h>
 #include <Application/Core/Physics/Types.h>
+
 #include <algorithm>
 #include <cmath>
 
@@ -31,69 +32,6 @@ namespace Nyx
 
             (b.isSource ? sources : tests).push_back(i);
         }
-    }
-
-    struct SourceState
-    {
-        Math::Vec3d pos = Math::Vec3d(0.0);
-        Math::Vec3d vel = Math::Vec3d(0.0);
-    };
-
-    struct SourceTrajectory
-    {
-        int32   sourceCount = 0;
-        int32   steps       = 0;
-        float64 dt          = 0.0;
-
-        Vector<float64>     gm;
-        Vector<float64>     eps2;
-        Vector<SourceState> states;
-
-        void Reset(int32 S, int32 N, float64 stepDt)
-        {
-            sourceCount = S;
-            steps = N;
-            dt = stepDt;
-            gm.assign(S, 0.0);
-            eps2.assign(S, 0.0);
-            states.assign(static_cast<size_t>(N + 1) * S, SourceState{});
-        }
-
-        SourceState&       At(int32 k, int32 s)       { return states[static_cast<size_t>(k) * sourceCount + s]; }
-        const SourceState& At(int32 k, int32 s) const { return states[static_cast<size_t>(k) * sourceCount + s]; }
-    };
-
-    inline Math::Vec3d HermitePosition(const SourceState& a, const SourceState& b, float64 h, float64 u)
-    {
-        const float64 u2 = u * u;
-        const float64 u3 = u2 * u;
-
-        const float64 h00 =  2.0 * u3 - 3.0 * u2 + 1.0;
-        const float64 h10 =        u3 - 2.0 * u2 + u;
-        const float64 h01 = -2.0 * u3 + 3.0 * u2;
-        const float64 h11 =        u3 -       u2;
-
-        return h00 * a.pos + (h10 * h) * a.vel + h01 * b.pos + (h11 * h) * b.vel;
-    }
-
-    inline Math::Vec3d AccelFromSources(const SourceTrajectory& traj, float64 t, const Math::Vec3d& p)
-    {
-        int32 k = static_cast<int32>(t / traj.dt);
-        k = std::clamp(k, 0, traj.steps - 1);
-        const float64 u = std::clamp((t - k * traj.dt) / traj.dt, 0.0, 1.0);
-
-        Math::Vec3d a(0.0);
-
-        for (int32 s = 0; s < traj.sourceCount; ++s)
-        {
-            const Math::Vec3d sp = HermitePosition(traj.At(k, s), traj.At(k + 1, s), traj.dt, u);
-            const Math::Vec3d r  = sp - p;
-            const float64 inv    = 1.0 / std::sqrt(glm::dot(r, r) + traj.eps2[s]);
-
-            a += r * (traj.gm[s] * inv * inv * inv);
-        }
-
-        return a;
     }
 
     inline float64 IntegrateSources(Vector<SimBody>& bodies, const Vector<int32>& sources,
